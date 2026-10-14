@@ -63,7 +63,8 @@
   #start { text-align: center; }
   #start h2 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; }
   #start p { color: var(--muted); font-size: 18px; margin: 0 auto 24px; max-width: 560px; line-height: 1.45; }
-  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 auto 24px; max-width: 720px; }
+  .levels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 0 auto 24px; max-width: 900px; }
+  @media (max-width: 860px) { .levels { grid-template-columns: repeat(2, 1fr); } }
   .level {
     border: 2px solid var(--line); background: transparent; color: var(--ink); border-radius: 18px;
     padding: 16px 12px; cursor: pointer; font: inherit; text-align: center; transition: transform .15s, border-color .15s;
@@ -126,7 +127,7 @@
     transition: opacity .35s, transform .35s, color .2s;
   }
   .lab.full { opacity: 0; transform: translate(-50%, -6px); font-size: clamp(11px, 1.9vw, 18px); }
-  .revealed .lab.full { opacity: 1; transform: translate(-50%, 0); }
+  .revealed .lab.full, .always .lab.full { opacity: 1; transform: translate(-50%, 0); }
   .lab.full.target { color: var(--accent); font-weight: 700; transform: translate(-50%, 0) scale(1.5); }
   .lab.full.guessed { color: var(--bad); }
   .lab.full.target.guessed { color: var(--good); }
@@ -211,6 +212,7 @@
     <h2>Wo wohnt der Buchstabe?</h2>
     <p>Oben erscheint ein Buchstabe. Klick auf dem Farbband dahin, wo er im Alphabet ungefähr steht – <b>A</b> ganz links, <b>Z</b> ganz rechts. Je näher du dran bist, desto mehr Punkte.</p>
     <div class="levels" id="levels">
+      <button class="level" data-level="ueben"><b>Üben</b><small>Alle Buchstaben stehen unter dem Band</small><div class="best"></div></button>
       <button class="level" data-level="leicht"><b>Leicht</b><small>26 Striche auf dem Band, A, M und Z beschriftet</small><div class="best"></div></button>
       <button class="level" data-level="mittel"><b>Mittel</b><small>Nur A und Z an den Enden</small><div class="best"></div></button>
       <button class="level" data-level="schwer"><b>Schwer</b><small>Nur das Farbband – reines Gefühl</small><div class="best"></div></button>
@@ -366,7 +368,7 @@
 
   function buildTrack() {
     let ticks = "", labels = "";
-    if (level === "leicht") {
+    if (level === "leicht" || level === "ueben") {
       for (let i = 0; i < N; i++) ticks += `<div class="tick${i === 12 ? " major" : ""}" style="left:${posOf(i) * 100}%"></div>`;
     }
     const anchors = level === "leicht" ? [0, 12, 25] : level === "mittel" ? [0, 25] : [];
@@ -374,6 +376,7 @@
     for (let i = 0; i < N; i++) labels += `<div class="lab full" data-i="${i}" style="left:${posOf(i) * 100}%">${ABC[i]}</div>`;
     $("ticks").innerHTML = ticks;
     $("labels").innerHTML = labels;
+    track.classList.toggle("always", level === "ueben");
   }
 
   function clearMarks() {
@@ -516,7 +519,8 @@
     sfx.end();
     if (starCount >= 2) confetti(starCount * 50);
   }
-  const cap = s => s[0].toUpperCase() + s.slice(1);
+  const LEVEL_NAMES = { ueben: "Üben", leicht: "Leicht", mittel: "Mittel", schwer: "Schwer" };
+  const cap = s => LEVEL_NAMES[s];
 
   // Schwächste Buchstaben + ihre Nachbarn üben
   function practicePool() {

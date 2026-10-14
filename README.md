@@ -10,7 +10,7 @@ Start: `index.html` öffnen.
 
 ## Alphabet-Gefühl
 
-- Drei Level: **Leicht** (26 Striche, A/M/Z beschriftet), **Mittel** (nur A und Z), **Schwer** (nur das Band).
+- Vier Level: **Üben** (alle 26 Buchstaben stehen unter dem Band), **Leicht** (26 Striche, A/M/Z beschriftet), **Mittel** (nur A und Z), **Schwer** (nur das Band).
 - Punkte pro Runde: 100 bei Treffer, dann linear weniger – ab 8 Buchstaben Abstand 0.
 - Nach jedem Tipp wird das ganze Alphabet unter dem Band eingeblendet, damit man sieht, wo der Buchstabe wirklich steht.
 - Am Ende: Sterne, Rekord pro Level (lokal im Browser) und „Schwächste Buchstaben üben“ (falsch geschätzte Buchstaben plus ihre Nachbarn).
