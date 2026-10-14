@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alphabet-Gefühl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf8f0;
+    --bg2: #f3ead9;
+    --card: #ffffff;
+    --ink: #2b2540;
+    --muted: #7a7290;
+    --line: #e6dccb;
+    --accent: #6c4cf1;
+    --accent-ink: #ffffff;
+    --good: #1fa463;
+    --ok: #e8a317;
+    --bad: #e2513b;
+    --shadow: 0 10px 30px rgba(60, 40, 110, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17142a;
+      --bg2: #211d3a;
+      --card: #262142;
+      --ink: #f2eefc;
+      --muted: #a69fc2;
+      --line: #3a3460;
+      --accent: #9b85ff;
+      --accent-ink: #17142a;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 60%);
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Fredoka", ui-rounded, system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+    -webkit-user-select: none; user-select: none;
+  }
+  a { color: var(--accent); }
+  .wrap { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 18px; flex: 1; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  header h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+
+  .card { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); padding: clamp(18px, 4vw, 36px); }
+
+  /* ---------- Start ---------- */
+  #start { text-align: center; }
+  #start h2 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; }
+  #start p { color: var(--muted); font-size: 18px; margin: 0 auto 24px; max-width: 560px; line-height: 1.45; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 auto 24px; max-width: 720px; }
+  .level {
+    border: 2px solid var(--line); background: transparent; color: var(--ink); border-radius: 18px;
+    padding: 16px 12px; cursor: pointer; font: inherit; text-align: center; transition: transform .15s, border-color .15s;
+  }
+  .level:hover { transform: translateY(-2px); }
+  .level.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .level b { display: block; font-size: 20px; margin-bottom: 4px; }
+  .level small { color: var(--muted); font-size: 14px; line-height: 1.3; display: block; }
+  .level .best { margin-top: 8px; font-size: 13px; color: var(--accent); font-weight: 600; }
+  .big-btn {
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 16px;
+    padding: 14px 34px; font: inherit; font-size: 20px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 60%, #000);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+  .options { margin-top: 18px; color: var(--muted); font-size: 15px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  .options label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+  /* ---------- Spiel ---------- */
+  #game { display: none; flex-direction: column; gap: 18px; }
+  .hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { background: var(--card); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow); font-weight: 600; font-size: 16px; }
+  .pill em { font-style: normal; color: var(--accent); }
+  .dots { display: flex; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); transition: background .3s; }
+  .dot.now { background: var(--accent); transform: scale(1.25); }
+  .dot.g { background: var(--good); } .dot.o { background: var(--ok); } .dot.b { background: var(--bad); }
+
+  .stage { position: relative; text-align: center; padding-top: 6px; }
+  .prompt { color: var(--muted); font-size: 18px; margin-bottom: 4px; }
+  .letter {
+    font-size: clamp(110px, 20vw, 180px); font-weight: 700; line-height: 1; margin: 0;
+    color: var(--ink); display: inline-block;
+  }
+  .letter.pop { animation: pop .45s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes pop { from { transform: scale(.3) rotate(-10deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .feedback { min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .feedback .head { font-size: 26px; font-weight: 700; }
+  .feedback .sub { color: var(--muted); font-size: 16px; }
+  .feedback .pts { color: var(--accent); }
+
+  /* Spektrum */
+  .track-zone { position: relative; padding: 52px 0 70px; touch-action: none; }
+  .track {
+    position: relative; height: 64px; border-radius: 20px; cursor: crosshair;
+    background: linear-gradient(90deg,
+      hsl(350 85% 62%), hsl(25 90% 60%), hsl(48 92% 56%), hsl(110 55% 52%),
+      hsl(170 60% 46%), hsl(205 75% 56%), hsl(255 70% 64%), hsl(300 60% 62%));
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,.12), 0 8px 22px rgba(80, 50, 140, .18);
+  }
+  .track.locked { cursor: default; }
+  .ticks { position: absolute; inset: 0; pointer-events: none; }
+  .tick { position: absolute; top: 18%; bottom: 18%; width: 2px; margin-left: -1px; background: rgba(255,255,255,.55); border-radius: 2px; }
+  .tick.major { top: 6%; bottom: 6%; background: rgba(255,255,255,.95); width: 3px; margin-left: -1.5px; }
+  .labels { position: absolute; left: 0; right: 0; top: 100%; height: 40px; pointer-events: none; }
+  .lab {
+    position: absolute; transform: translateX(-50%); top: 10px; font-size: 18px; font-weight: 600; color: var(--muted);
+    transition: opacity .35s, transform .35s, color .2s;
+  }
+  .lab.full { opacity: 0; transform: translate(-50%, -6px); font-size: clamp(11px, 1.9vw, 18px); }
+  .revealed .lab.full { opacity: 1; transform: translate(-50%, 0); }
+  .lab.full.target { color: var(--accent); font-weight: 700; transform: translate(-50%, 0) scale(1.5); }
+  .lab.full.guessed { color: var(--bad); }
+  .lab.full.target.guessed { color: var(--good); }
+  .lab.anchor { color: var(--ink); }
+  .revealed .lab.anchor { opacity: 0; }
+
+  .hover-line {
+    position: absolute; top: -10px; bottom: -10px; width: 4px; margin-left: -2px; border-radius: 4px;
+    background: var(--ink); opacity: 0; pointer-events: none; transition: opacity .15s;
+  }
+  .track:hover .hover-line { opacity: .55; }
+  .track.locked .hover-line { opacity: 0 !important; }
+
+  .pin { position: absolute; top: 0; height: 100%; pointer-events: none; transform: translateX(-50%); }
+  .pin .stem { position: absolute; left: 50%; width: 4px; margin-left: -2px; border-radius: 4px; }
+  .pin .bubble {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    min-width: 40px; height: 40px; padding: 0 8px; border-radius: 12px; display: grid; place-items: center;
+    font-weight: 700; font-size: 20px; color: #fff; white-space: nowrap;
+  }
+  .pin.guess .stem { top: -12px; bottom: -12px; background: var(--ink); }
+  .pin.guess .bubble { bottom: calc(100% + 12px); background: var(--ink); color: var(--card); font-size: 14px; height: 30px; border-radius: 10px; }
+  .pin.target .stem { top: -12px; bottom: -12px; background: #fff; box-shadow: 0 0 0 2px var(--accent); }
+  .pin.target .bubble { bottom: calc(100% + 12px); background: var(--accent); color: var(--accent-ink); animation: drop .4s cubic-bezier(.2, 1.5, .5, 1); }
+  .pin.target.side .bubble { bottom: calc(100% + 52px); }
+  @keyframes drop { from { transform: translate(-50%, -30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+  .span {
+    position: absolute; top: 50%; height: 10px; margin-top: -5px; border-radius: 6px; pointer-events: none;
+    background: repeating-linear-gradient(90deg, rgba(255,255,255,.95) 0 8px, transparent 8px 14px);
+    transform-origin: left; animation: grow .45s ease-out;
+  }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  .actions { display: flex; justify-content: center; min-height: 58px; }
+  .actions .big-btn { visibility: hidden; }
+  .actions .big-btn.show { visibility: visible; animation: pop .3s ease-out; }
+  .hint { text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* ---------- Ende ---------- */
+  #end { display: none; text-align: center; }
+  #end h2 { font-size: clamp(28px, 5vw, 42px); margin: 0; }
+  .stars { font-size: 46px; letter-spacing: 6px; margin: 6px 0; }
+  .stars .off { opacity: .2; filter: grayscale(1); }
+  .total { font-size: 22px; color: var(--muted); margin-bottom: 4px; }
+  .total b { color: var(--accent); font-size: 34px; }
+  .newbest { color: var(--good); font-weight: 700; min-height: 24px; }
+  .recap { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 22px 0; text-align: left; }
+  .rc { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+  .rc .L { font-size: 30px; font-weight: 700; width: 30px; text-align: center; }
+  .rc .d { font-size: 13px; color: var(--muted); line-height: 1.25; }
+  .rc .p { font-weight: 700; font-size: 15px; }
+  .rc.g { border-color: var(--good); } .rc.o { border-color: var(--ok); } .rc.b { border-color: var(--bad); }
+  .end-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .ghost-btn { background: transparent; color: var(--ink); border: 2px solid var(--line); border-radius: 16px; padding: 12px 24px; font: inherit; font-size: 18px; cursor: pointer; }
+  .ghost-btn:hover { border-color: var(--accent); }
+
+  /* Konfetti */
+  .confetti { position: fixed; top: -12px; width: 10px; height: 14px; border-radius: 2px; pointer-events: none; z-index: 50; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); } }
+
+  @media (max-width: 640px) {
+    .levels { grid-template-columns: 1fr; }
+    .track { height: 54px; border-radius: 16px; }
+    .pin .bubble { min-width: 32px; height: 32px; font-size: 16px; }
+    .pin.target.side .bubble { bottom: calc(100% + 46px); }
+    .rc .L { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Alphabet<span>-Gefühl</span></h1>
+    <div style="display:flex; gap:8px">
+      <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
+      <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
+    </div>
+  </header>
+
+  <!-- Start -->
+  <section id="start" class="card">
+    <h2>Wo wohnt der Buchstabe?</h2>
+    <p>Oben erscheint ein Buchstabe. Klick auf dem Farbband dahin, wo er im Alphabet ungefähr steht – <b>A</b> ganz links, <b>Z</b> ganz rechts. Je näher du dran bist, desto mehr Punkte.</p>
+    <div class="levels" id="levels">
+      <button class="level" data-level="leicht"><b>Leicht</b><small>26 Striche auf dem Band, A, M und Z beschriftet</small><div class="best"></div></button>
+      <button class="level" data-level="mittel"><b>Mittel</b><small>Nur A und Z an den Enden</small><div class="best"></div></button>
+      <button class="level" data-level="schwer"><b>Schwer</b><small>Nur das Farbband – reines Gefühl</small><div class="best"></div></button>
+    </div>
+    <button class="big-btn" id="playBtn">Los geht's!</button>
+    <div class="options">
+      <label><input type="checkbox" id="lowerOpt"> auch Kleinbuchstaben</label>
+      <label>Runden:
+        <select id="roundsOpt" class="icon-btn" style="padding:4px 8px">
+          <option>5</option><option selected>10</option><option>15</option><option value="26">26 (alle)</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- Spiel -->
+  <section id="game">
+    <div class="hud">
+      <div class="pill">Runde <em id="roundNo">1</em> / <span id="roundMax">10</span></div>
+      <div class="dots" id="dots"></div>
+      <div class="pill">Punkte <em id="scoreNo">0</em></div>
+    </div>
+
+    <div class="card">
+      <div class="stage">
+        <div class="prompt" id="prompt">Wo steht dieser Buchstabe?</div>
+        <div class="letter" id="letter">A</div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="track-zone">
+        <div class="track" id="track">
+          <div class="ticks" id="ticks"></div>
+          <div class="hover-line" id="hoverLine"></div>
+          <div class="labels" id="labels"></div>
+        </div>
+      </div>
+
+      <div class="actions"><button class="big-btn" id="nextBtn">Weiter →</button></div>
+      <div class="hint" id="hint">Tipp: Erst überlegen, dann klicken. Mit Enter geht's weiter.</div>
+    </div>
+  </section>
+
+  <!-- Ende -->
+  <section id="end" class="card">
+    <h2 id="endTitle">Geschafft!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="total"><b id="endScore">0</b> von <span id="endMax">1000</span> Punkten</div>
+    <div class="newbest" id="newBest"></div>
+    <div class="recap" id="recap"></div>
+    <div class="end-actions">
+      <button class="big-btn" id="againBtn">Nochmal</button>
+      <button class="ghost-btn" id="practiceBtn">Schwächste Buchstaben üben</button>
+      <button class="ghost-btn" id="menuBtn">Anderes Level</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const N = 26;
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Speicher (nur Komfort, darf fehlen) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("alphabet-gefuehl:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("alphabet-gefuehl:" + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---------- Ton ----------
+  let ac = null;
+  let soundOn = store.get("sound", true);
+  const soundBtn = $("soundBtn");
+  const paintSound = () => soundBtn.textContent = soundOn ? "🔊" : "🔇";
+  paintSound();
+  soundBtn.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); paintSound(); };
+  function tone(freq, start, dur, type = "triangle", vol = .18) {
+    if (!soundOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t = ac.currentTime + start;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + dur + .02);
+    } catch {}
+  }
+  const sfx = {
+    perfect() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .08, .25)); },
+    good() { tone(523, 0, .2); tone(784, .1, .3); },
+    ok() { tone(440, 0, .25); },
+    bad() { tone(220, 0, .3, "sawtooth", .08); tone(185, .12, .35, "sawtooth", .08); },
+    end() { [392, 523, 659, 784, 659, 784].forEach((f, i) => tone(f, i * .12, .3)); }
+  };
+
+  // ---------- Zustand ----------
+  let level = store.get("level", "mittel");
+  let state = null;
+
+  const levelBtns = [...document.querySelectorAll(".level")];
+  function paintLevels() {
+    levelBtns.forEach(b => {
+      b.classList.toggle("sel", b.dataset.level === level);
+      const best = store.get("best:" + b.dataset.level, null);
+      b.querySelector(".best").textContent = best ? `Rekord: ${best.pct} %` : "";
+    });
+  }
+  levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; store.set("level", level); paintLevels(); });
+  paintLevels();
+  $("roundsOpt").value = String(store.get("rounds", 10));
+  $("lowerOpt").checked = store.get("lower", false);
+
+  function show(id) {
+    ["start", "game", "end"].forEach(s => $(s).style.display = s === id ? (s === "game" ? "flex" : "block") : "none");
+  }
+
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  // Buchstaben ziehen: erst jeden einmal, bevor sich einer wiederholt
+  function drawLetters(count, pool) {
+    const out = [];
+    while (out.length < count) out.push(...shuffle([...pool]));
+    return out.slice(0, count);
+  }
+
+  function startGame(pool) {
+    const rounds = Number($("roundsOpt").value);
+    store.set("rounds", rounds);
+    store.set("lower", $("lowerOpt").checked);
+    state = {
+      rounds,
+      letters: drawLetters(rounds, pool || [...Array(N).keys()]),
+      lower: $("lowerOpt").checked,
+      round: 0,
+      score: 0,
+      results: [],
+      locked: false
+    };
+    $("roundMax").textContent = rounds;
+    $("dots").innerHTML = state.letters.map(() => '<div class="dot"></div>').join("");
+    buildTrack();
+    show("game");
+    nextRound();
+  }
+
+  // ---------- Band aufbauen ----------
+  const track = $("track");
+  const posOf = (i) => (i + 0.5) / N; // Mitte des Feldes
+
+  function buildTrack() {
+    let ticks = "", labels = "";
+    if (level === "leicht") {
+      for (let i = 0; i < N; i++) ticks += `<div class="tick${i === 12 ? " major" : ""}" style="left:${posOf(i) * 100}%"></div>`;
+    }
+    const anchors = level === "leicht" ? [0, 12, 25] : level === "mittel" ? [0, 25] : [];
+    anchors.forEach(i => labels += `<div class="lab anchor" style="left:${posOf(i) * 100}%">${ABC[i]}</div>`);
+    for (let i = 0; i < N; i++) labels += `<div class="lab full" data-i="${i}" style="left:${posOf(i) * 100}%">${ABC[i]}</div>`;
+    $("ticks").innerHTML = ticks;
+    $("labels").innerHTML = labels;
+  }
+
+  function clearMarks() {
+    track.querySelectorAll(".pin, .span").forEach(e => e.remove());
+    track.classList.remove("revealed", "locked");
+    track.querySelectorAll(".lab.full").forEach(l => l.classList.remove("target", "guessed"));
+  }
+
+  function nextRound() {
+    clearMarks();
+    state.locked = false;
+    const i = state.letters[state.round];
+    const L = $("letter");
+    const useLower = state.lower && Math.random() < .5;
+    L.textContent = useLower ? ABC[i].toLowerCase() : ABC[i];
+    L.classList.remove("pop"); void L.offsetWidth; L.classList.add("pop");
+    $("roundNo").textContent = state.round + 1;
+    $("scoreNo").textContent = state.score;
+    $("feedback").innerHTML = "";
+    $("prompt").textContent = "Wo steht dieser Buchstabe?";
+    $("nextBtn").classList.remove("show");
+    [...$("dots").children].forEach((d, k) => d.classList.toggle("now", k === state.round));
+  }
+
+  // ---------- Eingabe ----------
+  function xFromEvent(e) {
+    const r = track.getBoundingClientRect();
+    return Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+  }
+  track.addEventListener("pointermove", e => {
+    if (state && !state.locked) $("hoverLine").style.left = (xFromEvent(e) * 100) + "%";
+  });
+  track.addEventListener("pointerdown", e => {
+    if (!state || state.locked) return;
+    e.preventDefault();
+    guess(xFromEvent(e));
+  });
+
+  function pin(cls, x, html) {
+    const p = document.createElement("div");
+    p.className = "pin " + cls;
+    p.style.left = (x * 100) + "%";
+    p.innerHTML = `<div class="stem"></div><div class="bubble">${html}</div>`;
+    track.appendChild(p);
+    return p;
+  }
+
+  function verdict(err) {
+    if (err < 0.5) return { head: "Volltreffer! 🎯", cls: "g", snd: "perfect" };
+    if (err < 1.5) return { head: "Fast perfekt!", cls: "g", snd: "good" };
+    if (err < 3) return { head: "Ganz nah dran", cls: "o", snd: "ok" };
+    if (err < 5) return { head: "Ungefähr richtig", cls: "o", snd: "ok" };
+    return { head: "Daneben", cls: "b", snd: "bad" };
+  }
+
+  function guess(x) {
+    state.locked = true;
+    track.classList.add("locked");
+    const i = state.letters[state.round];
+    const tx = posOf(i);
+    // Fehler in "Buchstaben-Abständen"
+    const errSigned = x * N - (i + 0.5);
+    const err = Math.abs(errSigned);
+    const guessedIdx = Math.min(N - 1, Math.floor(x * N));
+    const points = Math.round(100 * Math.max(0, 1 - Math.max(0, err - 0.5) / 7.5));
+    state.score += points;
+
+    // Markierungen
+    pin("guess", x, "Du");
+    if (Math.abs(x - tx) > 0.0001) {
+      const s = document.createElement("div");
+      s.className = "span";
+      s.style.left = (Math.min(x, tx) * 100) + "%";
+      s.style.width = (Math.abs(x - tx) * 100) + "%";
+      track.appendChild(s);
+    }
+    const tp = pin("target", tx, ABC[i]);
+    if (Math.abs(x - tx) * track.clientWidth < 70) tp.classList.add("side");
+    track.classList.add("revealed");
+    track.querySelector(`.lab.full[data-i="${i}"]`).classList.add("target");
+    track.querySelector(`.lab.full[data-i="${guessedIdx}"]`).classList.add("guessed");
+
+    const v = verdict(err);
+    const steps = Math.abs(guessedIdx - i);
+    let sub;
+    if (steps === 0) sub = `Genau beim ${ABC[i]}.`;
+    else sub = `Du warst beim <b>${ABC[guessedIdx]}</b> – ${steps} ${steps === 1 ? "Buchstabe" : "Buchstaben"} zu ${guessedIdx < i ? "weit vorne" : "weit hinten"}.`;
+    $("feedback").innerHTML = `<div class="head">${v.head} <span class="pts">+${points}</span></div><div class="sub">${sub}</div>`;
+    $("prompt").textContent = `${ABC[i]} ist der ${i + 1}. Buchstabe im Alphabet`;
+    $("scoreNo").textContent = state.score;
+    const dot = $("dots").children[state.round];
+    dot.classList.remove("now"); dot.classList.add(v.cls);
+    sfx[v.snd]();
+    if (v.cls === "g" && err < 0.5) confetti(40);
+
+    state.results.push({ i, err, steps, dir: Math.sign(guessedIdx - i), points, cls: v.cls });
+    const nb = $("nextBtn");
+    nb.textContent = state.round + 1 >= state.rounds ? "Ergebnis ansehen" : "Weiter →";
+    nb.classList.add("show");
+    nb.focus({ preventScroll: true });
+  }
+
+  function advance() {
+    if (!state || !state.locked) return;
+    state.round++;
+    if (state.round >= state.rounds) finish(); else nextRound();
+  }
+  $("nextBtn").onclick = advance;
+  document.addEventListener("keydown", e => {
+    if ((e.key === "Enter" || e.key === " ") && $("game").style.display === "flex") {
+      e.preventDefault(); advance();
+    }
+  });
+
+  // ---------- Ende ----------
+  function finish() {
+    const max = state.rounds * 100;
+    const pct = Math.round(state.score / max * 100);
+    const starCount = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 45 ? 1 : 0;
+    $("endTitle").textContent = ["Weiter üben!", "Gut gemacht!", "Super!", "Alphabet-Profi!"][starCount];
+    $("stars").innerHTML = [0, 1, 2].map(k => `<span class="${k < starCount ? "" : "off"}">⭐</span>`).join("");
+    $("endScore").textContent = state.score;
+    $("endMax").textContent = max;
+
+    const key = "best:" + level;
+    const best = store.get(key, null);
+    if (!best || pct > best.pct) {
+      store.set(key, { pct, date: new Date().toISOString().slice(0, 10) });
+      $("newBest").textContent = best ? `Neuer Rekord auf „${cap(level)}“! (vorher ${best.pct} %)` : `Erster Rekord auf „${cap(level)}“: ${pct} %`;
+    } else {
+      $("newBest").textContent = `Rekord auf „${cap(level)}“: ${best.pct} %`;
+    }
+
+    $("recap").innerHTML = state.results.map(r => {
+      const d = r.steps === 0 ? "genau richtig" : `${r.steps} zu ${r.dir < 0 ? "weit vorne" : "weit hinten"}`;
+      return `<div class="rc ${r.cls}"><div class="L">${ABC[r.i]}</div><div><div class="p">+${r.points}</div><div class="d">${d}</div></div></div>`;
+    }).join("");
+    $("practiceBtn").style.display = state.results.some(r => r.points < 90) ? "" : "none";
+    show("end");
+    sfx.end();
+    if (starCount >= 2) confetti(starCount * 50);
+  }
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+
+  // Schwächste Buchstaben + ihre Nachbarn üben
+  function practicePool() {
+    const weak = state.results.filter(r => r.points < 90).map(r => r.i);
+    const set = new Set();
+    weak.forEach(i => { set.add(i); if (i > 0) set.add(i - 1); if (i < N - 1) set.add(i + 1); });
+    return [...set];
+  }
+
+  function confetti(n) {
+    const colors = ["#f25c54", "#f7b32b", "#4cc9f0", "#7b5cff", "#2ec27e", "#ff70a6"];
+    for (let k = 0; k < n; k++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[k % colors.length];
+      c.style.setProperty("--dx", (Math.random() * 200 - 100) + "px");
+      c.style.setProperty("--rot", (Math.random() * 900 - 450) + "deg");
+      c.style.animationDuration = (1.4 + Math.random() * 1.6) + "s";
+      c.style.animationDelay = (Math.random() * .3) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3600);
+    }
+  }
+
+  // ---------- Buttons ----------
+  $("playBtn").onclick = () => startGame();
+  $("againBtn").onclick = () => startGame();
+  $("practiceBtn").onclick = () => startGame(practicePool());
+  $("menuBtn").onclick = () => { paintLevels(); show("start"); };
+  $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
+})();
+</script>
+</body>
+</html>

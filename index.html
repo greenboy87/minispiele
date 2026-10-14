@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minispiele</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #fdf8f0; --card: #fff; --ink: #2b2540; --muted: #7a7290; --accent: #6c4cf1; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #17142a; --card: #262142; --ink: #f2eefc; --muted: #a69fc2; --accent: #9b85ff; } }
+  body { margin: 0; padding: 32px 16px; background: var(--bg); color: var(--ink); font-family: "Fredoka", system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; }
+  h1 { font-size: 40px; margin: 0 0 6px; }
+  p { color: var(--muted); margin: 0 0 28px; font-size: 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  a.game { display: block; background: var(--card); border-radius: 22px; padding: 22px; color: inherit; text-decoration: none;
+           box-shadow: 0 10px 30px rgba(60, 40, 110, .12); transition: transform .15s; }
+  a.game:hover { transform: translateY(-3px); }
+  .ic { font-size: 30px; font-weight: 700; color: var(--accent); }
+  a.game b { display: block; font-size: 22px; margin: 6px 0 4px; }
+  a.game span { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Minispiele</h1>
+  <p>Kleine Lernspiele für zwischendurch.</p>
+  <div class="grid">
+    <a class="game" href="alphabet/index.html">
+      <div class="ic">A ··· Z</div>
+      <b>Alphabet-Gefühl</b>
+      <span>Wo steht der Buchstabe im Alphabet? Schätzen auf dem Farbband.</span>
+    </a>
+  </div>
+</main>
+</body>
+</html>
