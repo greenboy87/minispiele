@@ -5,6 +5,7 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Spiel | Ordner | Worum geht's |
 |---|---|---|
 | Alphabet-Gefühl | `alphabet/` | Ein Buchstabe erscheint, man klickt auf einem Farbband (A links, Z rechts) dahin, wo er ungefähr im Alphabet steht. |
+| Nachsilben-Werkstatt | `nachsilben/` | Aus Nomen werden Adjektive: Mut → mutig, Herz → herzlich, Dank → dankbar (Deutsch, 4. Klasse). |
 | Deutsch-Fachbegriffe | `fachbegriffe/` | Wortarten im Satz bestimmen und finden, Vokale und Konsonanten erkennen (4. Klasse / Unterstufe). |
 
 Start: `index.html` öffnen.
@@ -28,3 +29,11 @@ Start: `index.html` öffnen.
 - Nach jeder Antwort steht unter jedem Wort der Fachbegriff (optional zusätzlich farbig).
 - 📒 Spickzettel mit allen Begriffen, Rekord pro Spielart (lokal im Browser), „Fehler üben“ wiederholt die falsch beantworteten Wortarten bzw. Wörter.
 - Sätze stehen oben im Skript als `Wort/kürzel` (ba, ua, ns, np, v, adj, p, x = nicht abgefragt) und lassen sich leicht ergänzen.
+
+## Nachsilben-Werkstatt
+
+- Ein Nomen mit Artikel erscheint (z. B. „der Punkt“), daraus wird ein Adjektiv mit **-ig**, **-lich** oder (optional) **-bar**.
+- Drei Level: **Leicht** (Nachsilbe wählen), **Mittel** (richtig geschriebenes Adjektiv unter vier finden – Fallen: falsche Nachsilbe, Großschreibung, Umlaut), **Schwer** (Adjektiv selbst tippen, mit ä/ö/ü/ß-Tasten).
+- 30 Wörter auf -ig, 30 auf -lich, 5 auf -bar. Umlaute (Punkt → p**ü**nktlich) werden farbig markiert.
+- Nach jeder Antwort ein Tipp: Verlängern (eisig → eisige, das g wird hörbar) und Umlaut-Hinweis.
+- Punkte: 1 beim ersten Versuch, 0,5 beim zweiten. Am Ende Sterne, Rekord pro Level (lokal im Browser) und „Fehlerwörter üben“.

@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nachsilben-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf8f0;
+    --bg2: #f3ead9;
+    --card: #ffffff;
+    --ink: #2b2540;
+    --muted: #7a7290;
+    --line: #e6dccb;
+    --accent: #6c4cf1;
+    --accent-ink: #ffffff;
+    --good: #1fa463;
+    --ok: #e8a317;
+    --bad: #e2513b;
+    --ig: #2f7fe0;
+    --lich: #e5791f;
+    --bar: #1f9e74;
+    --uml: #d6336c;
+    --shadow: 0 10px 30px rgba(60, 40, 110, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17142a;
+      --bg2: #211d3a;
+      --card: #262142;
+      --ink: #f2eefc;
+      --muted: #a69fc2;
+      --line: #3a3460;
+      --accent: #9b85ff;
+      --accent-ink: #17142a;
+      --ig: #6aa8ff;
+      --lich: #ffa95c;
+      --bar: #4fd1a5;
+      --uml: #ff7aa8;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 60%);
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Fredoka", ui-rounded, system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+    -webkit-user-select: none; user-select: none;
+  }
+  .wrap { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 18px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  header h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+
+  .card { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); padding: clamp(18px, 4vw, 36px); }
+
+  .ig { color: var(--ig); } .lich { color: var(--lich); } .bar { color: var(--bar); }
+  .uml { color: var(--uml); text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 6px; }
+
+  /* ---------- Start ---------- */
+  #start { text-align: center; }
+  #start h2 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; }
+  #start > p { color: var(--muted); font-size: 18px; margin: 0 auto 20px; max-width: 600px; line-height: 1.45; }
+  .rule { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 0 auto 24px; }
+  .rule .ex { border: 2px dashed var(--line); border-radius: 16px; padding: 10px 16px; font-size: 19px; }
+  .rule .ex b { font-weight: 700; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 auto 24px; max-width: 820px; }
+  .level {
+    border: 2px solid var(--line); background: transparent; color: var(--ink); border-radius: 18px;
+    padding: 16px 12px; cursor: pointer; font: inherit; text-align: center; transition: transform .15s, border-color .15s;
+  }
+  .level:hover { transform: translateY(-2px); }
+  .level.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .level b { display: block; font-size: 20px; margin-bottom: 4px; }
+  .level small { color: var(--muted); font-size: 14px; line-height: 1.3; display: block; }
+  .level .best { margin-top: 8px; font-size: 13px; color: var(--accent); font-weight: 600; min-height: 16px; }
+  .big-btn {
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 16px;
+    padding: 14px 34px; font: inherit; font-size: 20px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 60%, #000);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+  .options { margin-top: 18px; color: var(--muted); font-size: 15px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  .options label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+  /* ---------- Spiel ---------- */
+  #game { display: none; flex-direction: column; gap: 18px; }
+  .hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { background: var(--card); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow); font-weight: 600; font-size: 16px; }
+  .pill em { font-style: normal; color: var(--accent); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); transition: background .3s; }
+  .dot.now { background: var(--accent); transform: scale(1.25); }
+  .dot.g { background: var(--good); } .dot.o { background: var(--ok); } .dot.b { background: var(--bad); }
+
+  .stage { text-align: center; }
+  .prompt { color: var(--muted); font-size: 18px; margin-bottom: 14px; }
+  .bench { display: flex; align-items: center; justify-content: center; gap: clamp(8px, 2vw, 18px); flex-wrap: wrap; min-height: 120px; }
+  .noun {
+    font-size: clamp(44px, 9vw, 80px); font-weight: 700; line-height: 1.1;
+    background: var(--bg2); border-radius: 20px; padding: 6px 22px;
+  }
+  .noun .art { font-weight: 500; color: var(--muted); font-size: .55em; margin-right: 8px; }
+  .pop { animation: pop .45s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes pop { from { transform: scale(.3) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .plus, .arrow { font-size: clamp(30px, 6vw, 48px); color: var(--muted); font-weight: 600; }
+  .slot {
+    min-width: 2.6em; font-size: clamp(36px, 7vw, 60px); font-weight: 700; border: 3px dashed var(--line);
+    border-radius: 18px; padding: 4px 14px; color: var(--muted);
+  }
+  .slot.filled { border-style: solid; }
+  .result { font-size: clamp(44px, 9vw, 80px); font-weight: 700; line-height: 1.1; }
+  .tag { display: inline-block; font-size: 14px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; margin-top: 10px; }
+
+  .feedback { min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; margin-top: 12px; }
+  .feedback .head { font-size: 26px; font-weight: 700; }
+  .feedback .sub { color: var(--muted); font-size: 17px; line-height: 1.4; max-width: 640px; }
+  .feedback .sub b { color: var(--ink); }
+
+  .choices { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin: 22px 0 6px; }
+  .choice {
+    border: 3px solid var(--line); background: var(--card); color: var(--ink); border-radius: 20px;
+    padding: 14px 26px; font: inherit; font-size: clamp(26px, 4.5vw, 38px); font-weight: 700; cursor: pointer;
+    min-width: 150px; transition: transform .12s, border-color .12s, background .12s;
+    box-shadow: 0 5px 0 var(--line);
+  }
+  .choice:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent); }
+  .choice:disabled { cursor: default; }
+  .choice.right { border-color: var(--good); background: color-mix(in srgb, var(--good) 14%, var(--card)); }
+  .choice.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--card)); animation: shake .35s; }
+  .choice.dim { opacity: .4; }
+  .choice.word { font-size: clamp(22px, 4vw, 32px); min-width: 0; }
+  @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .typer { display: none; flex-direction: column; align-items: center; gap: 12px; margin: 22px 0 6px; }
+  .typer input {
+    font: inherit; font-size: clamp(28px, 5vw, 42px); font-weight: 600; text-align: center; width: min(100%, 460px);
+    border: 3px solid var(--line); border-radius: 18px; padding: 8px 14px; background: var(--bg); color: var(--ink);
+    -webkit-user-select: text; user-select: text;
+  }
+  .typer input:focus { outline: none; border-color: var(--accent); }
+  .typer input.right { border-color: var(--good); } .typer input.wrong { border-color: var(--bad); }
+  .keys { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .keys button { font: inherit; font-size: 22px; font-weight: 600; width: 52px; height: 48px; border-radius: 12px; border: 2px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+  .keys button.check { width: auto; padding: 0 22px; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+  .actions { display: flex; justify-content: center; min-height: 58px; margin-top: 8px; }
+  .actions .big-btn { visibility: hidden; }
+  .actions .big-btn.show { visibility: visible; animation: pop .3s ease-out; }
+  .hint { text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* ---------- Ende ---------- */
+  #end { display: none; text-align: center; }
+  #end h2 { font-size: clamp(28px, 5vw, 42px); margin: 0; }
+  .stars { font-size: 46px; letter-spacing: 6px; margin: 6px 0; }
+  .stars .off { opacity: .2; filter: grayscale(1); }
+  .total { font-size: 22px; color: var(--muted); margin-bottom: 4px; }
+  .total b { color: var(--accent); font-size: 34px; }
+  .newbest { color: var(--good); font-weight: 700; min-height: 24px; }
+  .recap { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin: 22px 0; text-align: left; }
+  .rc { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+  .rc .w { font-size: 20px; font-weight: 700; }
+  .rc .d { font-size: 13px; color: var(--muted); line-height: 1.3; }
+  .rc.g { border-color: var(--good); } .rc.o { border-color: var(--ok); } .rc.b { border-color: var(--bad); }
+  .end-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .ghost-btn { background: transparent; color: var(--ink); border: 2px solid var(--line); border-radius: 16px; padding: 12px 24px; font: inherit; font-size: 18px; cursor: pointer; }
+  .ghost-btn:hover { border-color: var(--accent); }
+
+  .confetti { position: fixed; top: -12px; width: 10px; height: 14px; border-radius: 2px; pointer-events: none; z-index: 50; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); } }
+
+  @media (max-width: 700px) {
+    .levels { grid-template-columns: 1fr; }
+    .choice { min-width: 110px; padding: 12px 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Nachsilben<span>-Werkstatt</span></h1>
+    <div style="display:flex; gap:8px">
+      <a class="icon-btn" href="../index.html" style="text-decoration:none" title="Alle Minispiele">☰</a>
+      <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
+      <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
+    </div>
+  </header>
+
+  <!-- Start -->
+  <section id="start" class="card">
+    <h2>Aus Nomen werden Adjektive</h2>
+    <p>Hänge die richtige Nachsilbe an das Nomen. Dann wird daraus ein Adjektiv – und Adjektive schreibt man <b>klein</b>!</p>
+    <div class="rule" id="rule"></div>
+    <div class="levels" id="levels">
+      <button class="level" data-level="leicht"><b>Leicht</b><small>Die richtige Nachsilbe wählen</small><div class="best"></div></button>
+      <button class="level" data-level="mittel"><b>Mittel</b><small>Das richtig geschriebene Adjektiv finden</small><div class="best"></div></button>
+      <button class="level" data-level="schwer"><b>Schwer</b><small>Das Adjektiv selbst schreiben</small><div class="best"></div></button>
+    </div>
+    <button class="big-btn" id="playBtn">Los geht's!</button>
+    <div class="options">
+      <label><input type="checkbox" id="barOpt"> auch <b class="bar">-bar</b></label>
+      <label>Runden:
+        <select id="roundsOpt" class="icon-btn" style="padding:4px 8px">
+          <option>5</option><option selected>10</option><option>15</option><option>20</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- Spiel -->
+  <section id="game">
+    <div class="hud">
+      <div class="pill">Wort <em id="roundNo">1</em> / <span id="roundMax">10</span></div>
+      <div class="dots" id="dots"></div>
+      <div class="pill">Punkte <em id="scoreNo">0</em></div>
+    </div>
+
+    <div class="card">
+      <div class="stage">
+        <div class="prompt" id="prompt"></div>
+        <div class="bench" id="bench"></div>
+        <div class="choices" id="choices"></div>
+        <div class="typer" id="typer">
+          <input id="typeIn" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Adjektiv …">
+          <div class="keys">
+            <button data-k="ä">ä</button><button data-k="ö">ö</button><button data-k="ü">ü</button><button data-k="ß">ß</button>
+            <button class="check" id="checkBtn">Prüfen ✓</button>
+          </div>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="actions"><button class="big-btn" id="nextBtn">Weiter →</button></div>
+      <div class="hint" id="hint">Mit Enter geht's weiter.</div>
+    </div>
+  </section>
+
+  <!-- Ende -->
+  <section id="end" class="card">
+    <h2 id="endTitle">Geschafft!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="total"><b id="endScore">0</b> von <span id="endMax">10</span> Punkten</div>
+    <div class="newbest" id="newBest"></div>
+    <div class="recap" id="recap"></div>
+    <div class="end-actions">
+      <button class="big-btn" id="againBtn">Nochmal</button>
+      <button class="ghost-btn" id="practiceBtn">Fehlerwörter üben</button>
+      <button class="ghost-btn" id="menuBtn">Anderes Level</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Wörter: "Artikel Nomen:adjektiv" ----------
+  const WORDS = {
+    ig: [
+      "der Fleiß:fleißig", "der Mut:mutig", "das Eis:eisig", "die Sonne:sonnig", "der Wind:windig",
+      "der Durst:durstig", "der Schmutz:schmutzig", "das Salz:salzig", "der Saft:saftig", "das Blut:blutig",
+      "das Gift:giftig", "die Lust:lustig", "die Geduld:geduldig", "der Witz:witzig", "die Ruhe:ruhig",
+      "der Schatten:schattig", "die Eile:eilig", "der Staub:staubig", "die Kraft:kräftig", "die Macht:mächtig",
+      "der Zorn:zornig", "der Stein:steinig", "der Riese:riesig", "der Spaß:spaßig", "die Wolke:wolkig",
+      "der Sand:sandig", "die Freude:freudig", "der Matsch:matschig", "die Schuld:schuldig", "der Fleck:fleckig"
+    ],
+    lich: [
+      "das Herz:herzlich", "das Glück:glücklich", "der Punkt:pünktlich", "der Freund:freundlich", "das Ende:endlich",
+      "die Gefahr:gefährlich", "die Angst:ängstlich", "das Kind:kindlich", "die Natur:natürlich", "der Sport:sportlich",
+      "der Feind:feindlich", "der Frieden:friedlich", "die Ehre:ehrlich", "der Schreck:schrecklich", "der Ärger:ärgerlich",
+      "das Jahr:jährlich", "der Tag:täglich", "die Stunde:stündlich", "der Sommer:sommerlich", "der Winter:winterlich",
+      "der Grund:gründlich", "der Mensch:menschlich", "der Schaden:schädlich", "der Mund:mündlich", "die Schrift:schriftlich",
+      "der Vater:väterlich", "die Mutter:mütterlich", "das Fest:festlich", "die Feier:feierlich", "der Herbst:herbstlich"
+    ],
+    bar: [
+      "der Dank:dankbar", "die Furcht:furchtbar", "das Wunder:wunderbar", "der Schein:scheinbar", "die Sicht:sichtbar"
+    ]
+  };
+  const ALL = [];
+  for (const suf in WORDS) WORDS[suf].forEach(s => {
+    const [noun, adj] = s.split(":");
+    const [art, word] = noun.split(" ");
+    ALL.push({ id: word, art, noun: word, adj, suf });
+  });
+
+  // Stamm des Adjektivs; Buchstaben, die sich gegenüber dem Nomen ändern (Umlaut), werden markiert
+  function stemHtml(w) {
+    const stem = w.adj.slice(0, -w.suf.length), base = w.noun.toLowerCase();
+    return [...stem].map((ch, i) => ch !== base[i] ? `<span class="uml">${ch}</span>` : ch).join("");
+  }
+  const adjHtml = (w) => `${stemHtml(w)}<span class="${w.suf}">${w.suf}</span>`;
+  const hasUmlaut = (w) => /[äöü]/.test(w.adj) && !/[äöü]/i.test(w.noun);
+  const UML = { a: "ä", o: "ö", u: "ü" };
+
+  // ---------- Speicher (nur Komfort, darf fehlen) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("nachsilben:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("nachsilben:" + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---------- Ton ----------
+  let ac = null;
+  let soundOn = store.get("sound", true);
+  const soundBtn = $("soundBtn");
+  const paintSound = () => soundBtn.textContent = soundOn ? "🔊" : "🔇";
+  paintSound();
+  soundBtn.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); paintSound(); };
+  function tone(freq, start, dur, type = "triangle", vol = .18) {
+    if (!soundOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t = ac.currentTime + start;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + dur + .02);
+    } catch {}
+  }
+  const sfx = {
+    good() { [523, 659, 784].forEach((f, i) => tone(f, i * .08, .25)); },
+    ok() { tone(440, 0, .2); tone(523, .1, .25); },
+    bad() { tone(220, 0, .3, "sawtooth", .08); tone(185, .12, .35, "sawtooth", .08); },
+    end() { [392, 523, 659, 784, 659, 784].forEach((f, i) => tone(f, i * .12, .3)); }
+  };
+
+  // ---------- Startseite ----------
+  let level = store.get("level", "leicht");
+  let state = null;
+
+  function paintRule() {
+    const ex = ["Mut", "Herz", "Punkt"];
+    if ($("barOpt").checked) ex.push("Dank");
+    $("rule").innerHTML = ex.map(n => {
+      const w = ALL.find(x => x.noun === n);
+      return `<div class="ex">${w.noun} + <b class="${w.suf}">${w.suf}</b> → <b>${adjHtml(w)}</b></div>`;
+    }).join("");
+  }
+
+  const levelBtns = [...document.querySelectorAll(".level")];
+  function paintLevels() {
+    levelBtns.forEach(b => {
+      b.classList.toggle("sel", b.dataset.level === level);
+      const best = store.get("best:" + b.dataset.level, null);
+      b.querySelector(".best").textContent = best ? `Rekord: ${best.pct} %` : "";
+    });
+  }
+  levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; store.set("level", level); paintLevels(); });
+  $("roundsOpt").value = String(store.get("rounds", 10));
+  $("barOpt").checked = store.get("bar", false);
+  $("barOpt").onchange = () => { store.set("bar", $("barOpt").checked); paintRule(); };
+  paintLevels(); paintRule();
+
+  function show(id) {
+    ["start", "game", "end"].forEach(s => $(s).style.display = s === id ? (s === "game" ? "flex" : "block") : "none");
+  }
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  // Etwa gleich viele -ig- und -lich-Wörter (und -bar, falls an), keines doppelt
+  function drawWords(count, pool) {
+    if (pool) { const out = []; while (out.length < count) out.push(...shuffle([...pool])); return out.slice(0, count); }
+    const sufs = state.sufs;
+    const bags = Object.fromEntries(sufs.map(s => [s, shuffle(ALL.filter(w => w.suf === s))]));
+    const out = [];
+    let k = 0;
+    while (out.length < count) {
+      const s = sufs[k++ % sufs.length];
+      if (!bags[s].length) bags[s] = shuffle(ALL.filter(w => w.suf === s));
+      out.push(bags[s].pop());
+    }
+    return shuffle(out);
+  }
+
+  function startGame(pool) {
+    if (pool && !pool.length) pool = null;
+    const rounds = pool ? Math.min(10, Math.max(5, pool.length * 2)) : Number($("roundsOpt").value);
+    if (!pool) store.set("rounds", rounds);
+    state = {
+      rounds, round: 0, score: 0, results: [], locked: false,
+      sufs: $("barOpt").checked ? ["ig", "lich", "bar"] : ["ig", "lich"]
+    };
+    if (pool && pool.some(w => w.suf === "bar") && !state.sufs.includes("bar")) state.sufs.push("bar");
+    state.words = drawWords(rounds, pool);
+    $("roundMax").textContent = rounds;
+    $("dots").innerHTML = state.words.map(() => '<div class="dot"></div>').join("");
+    show("game");
+    nextRound();
+  }
+
+  // ---------- Runde ----------
+  function bench(w, filled) {
+    const noun = `<div class="noun pop"><span class="art">${w.art}</span>${w.noun}</div>`;
+    if (!filled) {
+      const slot = level === "leicht" ? `<span class="plus">+</span><div class="slot">?</div>` : `<span class="arrow">→</span><div class="slot">?</div>`;
+      $("bench").innerHTML = noun + slot;
+    } else {
+      $("bench").innerHTML = `<div class="noun"><span class="art">${w.art}</span>${w.noun}</div><span class="arrow">→</span>
+        <div><div class="result pop">${adjHtml(w)}</div><div class="tag">Adjektiv – klein geschrieben</div></div>`;
+    }
+  }
+
+  function nextRound() {
+    state.locked = false;
+    state.tries = 0;
+    const w = state.words[state.round];
+    $("roundNo").textContent = state.round + 1;
+    $("scoreNo").textContent = state.score;
+    $("feedback").innerHTML = "";
+    $("nextBtn").classList.remove("show");
+    [...$("dots").children].forEach((d, k) => d.classList.toggle("now", k === state.round));
+    bench(w, false);
+    $("choices").innerHTML = "";
+    $("typer").style.display = "none";
+    $("hint").textContent = "Mit Enter geht's weiter.";
+
+    if (level === "leicht") {
+      $("prompt").textContent = "Welche Nachsilbe passt?";
+      $("choices").innerHTML = state.sufs.map(s => `<button class="choice" data-v="${s}"><span class="${s}">-${s}</span></button>`).join("");
+    } else if (level === "mittel") {
+      $("prompt").textContent = "Welches Adjektiv ist richtig geschrieben?";
+      $("choices").innerHTML = shuffle(distractors(w)).map(v => `<button class="choice word" data-v="${v}">${v}</button>`).join("");
+    } else {
+      $("prompt").textContent = "Schreib das Adjektiv:";
+      $("typer").style.display = "flex";
+      const inp = $("typeIn");
+      inp.value = ""; inp.className = ""; inp.disabled = false;
+      $("checkBtn").disabled = false;
+      $("hint").textContent = "Tipp: Ändert sich ein Selbstlaut zum Umlaut? Mit Enter prüfen.";
+      setTimeout(() => inp.focus({ preventScroll: true }), 50);
+    }
+    [...$("choices").children].forEach(b => b.onclick = () => pick(b));
+  }
+
+  // Für „Mittel“: richtig, falsche Nachsilbe, großgeschrieben, Umlaut falsch
+  function distractors(w) {
+    const stem = w.adj.slice(0, -w.suf.length);
+    const other = state.sufs.filter(s => s !== w.suf);
+    const opts = new Set([w.adj, stem + other[Math.floor(Math.random() * other.length)]]);
+    opts.add(w.adj[0].toUpperCase() + w.adj.slice(1));
+    if (hasUmlaut(w)) {
+      opts.add(stem.replace(/[äöü]/, c => ({ ä: "a", ö: "o", ü: "u" })[c]) + w.suf);
+    } else {
+      const i = stem.search(/[aou](?!u)/);
+      if (i >= 0 && stem[i - 1] !== "a" && stem[i - 1] !== "e") opts.add(stem.slice(0, i) + UML[stem[i]] + stem.slice(i + 1) + w.suf);
+      else opts.add(stem + (w.suf === "ig" ? "ich" : w.suf === "lich" ? "lig" : "bahr"));
+    }
+    return [...opts];
+  }
+
+  function tip(w) {
+    const parts = [];
+    if (hasUmlaut(w)) {
+      const m = [...w.adj].find((c, i) => c !== w.noun.toLowerCase()[i] && /[äöü]/.test(c));
+      parts.push(`Aus dem Selbstlaut wird ein Umlaut: <b>${m}</b>.`);
+    }
+    if (w.suf === "ig") parts.push(`Verlängern hilft: ${w.adj} → <b>${w.adj}e</b> – jetzt hörst du das <b>g</b>.`);
+    else if (w.suf === "lich") parts.push(`Verlängern hilft: ${w.adj} → <b>${w.adj}e</b> – das <b>ch</b> bleibt.`);
+    else parts.push(`<b>-bar</b> hört man deutlich – einfach anhängen.`);
+    return parts.join(" ");
+  }
+
+  function pick(btn) {
+    if (state.locked) return;
+    const w = state.words[state.round];
+    const v = btn.dataset.v;
+    const right = level === "leicht" ? v === w.suf : v === w.adj;
+    if (right) {
+      btn.classList.add("right");
+      solve(w, state.tries === 0 ? 1 : 0.5, state.tries === 0 ? "g" : "o");
+      return;
+    }
+    state.tries++;
+    btn.classList.add("wrong"); btn.disabled = true;
+    sfx.bad();
+    let why = "";
+    if (level === "mittel") {
+      if (v[0] !== v[0].toLowerCase()) why = "Adjektive schreibt man klein!";
+      else if (v.slice(-w.suf.length) !== w.suf) why = "Die Nachsilbe stimmt nicht.";
+      else why = "Schau genau auf die Selbstlaute und Umlaute.";
+    } else why = `<b>${w.adj.slice(0, -w.suf.length)}${v}</b> gibt es nicht. Probier's nochmal!`;
+    $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht!</div><div class="sub">${why}</div>`;
+    if (state.tries >= 2 || [...$("choices").children].filter(b => !b.disabled).length === 1) {
+      const rb = [...$("choices").children].find(b => b.dataset.v === (level === "leicht" ? w.suf : w.adj));
+      rb.classList.add("right");
+      solve(w, 0, "b");
+    }
+  }
+
+  function checkTyped() {
+    if (state.locked) return;
+    const w = state.words[state.round];
+    const inp = $("typeIn");
+    const v = inp.value.trim();
+    if (!v) return;
+    if (v === w.adj) { inp.className = "right"; solve(w, state.tries === 0 ? 1 : 0.5, state.tries === 0 ? "g" : "o"); return; }
+    state.tries++;
+    inp.className = "wrong";
+    sfx.bad();
+    let why;
+    if (v.toLowerCase() === w.adj) why = "Fast! Aber Adjektive schreibt man <b>klein</b>.";
+    else if (v.replace(/[äöü]/g, c => ({ ä: "a", ö: "o", ü: "u" })[c]) === w.adj.replace(/[äöü]/g, c => ({ ä: "a", ö: "o", ü: "u" })[c])) why = "Fast! Schau auf die <b>Umlaute</b> (ä, ö, ü).";
+    else if (!v.toLowerCase().endsWith(w.suf)) why = "Prüf die <b>Nachsilbe</b>: -ig, -lich" + (state.sufs.includes("bar") ? " oder -bar?" : "?");
+    else why = "Schau nochmal genau auf jeden Buchstaben.";
+    if (state.tries >= 2) { inp.disabled = true; $("checkBtn").disabled = true; solve(w, 0, "b", why); return; }
+    $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht!</div><div class="sub">${why} Ein Versuch noch.</div>`;
+    inp.focus({ preventScroll: true });
+  }
+
+  function solve(w, pts, cls, extra) {
+    state.locked = true;
+    state.score += pts;
+    [...$("choices").children].forEach(b => { b.disabled = true; if (!b.classList.contains("right")) b.classList.add("dim"); });
+    if (level === "schwer") { $("typeIn").disabled = true; $("checkBtn").disabled = true; }
+    bench(w, true);
+    const head = cls === "g" ? ["Richtig! 🎉", "Super!", "Genau!", "Klasse!"][Math.floor(Math.random() * 4)] : cls === "o" ? "Im zweiten Versuch!" : "So heißt es richtig:";
+    const color = cls === "g" ? "var(--good)" : cls === "o" ? "var(--ok)" : "var(--bad)";
+    $("feedback").innerHTML = `<div class="head" style="color:${color}">${head} <span style="color:var(--accent)">+${pts.toString().replace(".", ",")}</span></div>
+      <div class="sub">${extra ? extra + "<br>" : ""}${tip(w)}</div>`;
+    $("scoreNo").textContent = String(state.score).replace(".", ",");
+    const dot = $("dots").children[state.round];
+    dot.classList.remove("now"); dot.classList.add(cls);
+    (cls === "g" ? sfx.good : cls === "o" ? sfx.ok : () => {})();
+    state.results.push({ w, pts, cls });
+    const nb = $("nextBtn");
+    nb.textContent = state.round + 1 >= state.rounds ? "Ergebnis ansehen" : "Weiter →";
+    nb.classList.add("show");
+    $("hint").textContent = "Mit Enter geht's weiter.";
+    setTimeout(() => nb.focus({ preventScroll: true }), 30);
+  }
+
+  function advance() {
+    if (!state || !state.locked) return;
+    state.round++;
+    if (state.round >= state.rounds) finish(); else nextRound();
+  }
+  $("nextBtn").onclick = advance;
+  $("checkBtn").onclick = checkTyped;
+  document.querySelectorAll(".keys [data-k]").forEach(b => b.onclick = () => {
+    const inp = $("typeIn");
+    if (inp.disabled) return;
+    const s = inp.selectionStart ?? inp.value.length, e = inp.selectionEnd ?? inp.value.length;
+    inp.value = inp.value.slice(0, s) + b.dataset.k + inp.value.slice(e);
+    inp.focus(); inp.setSelectionRange(s + 1, s + 1);
+  });
+  document.addEventListener("keydown", e => {
+    if ($("game").style.display !== "flex") return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (state.locked) advance(); else if (level === "schwer") checkTyped();
+    } else if (!state.locked && level === "leicht" && /^[1-3]$/.test(e.key)) {
+      const b = $("choices").children[Number(e.key) - 1];
+      if (b && !b.disabled) pick(b);
+    }
+  });
+
+  // ---------- Ende ----------
+  const LEVEL_NAMES = { leicht: "Leicht", mittel: "Mittel", schwer: "Schwer" };
+  function finish() {
+    const pct = Math.round(state.score / state.rounds * 100);
+    const starCount = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 45 ? 1 : 0;
+    $("endTitle").textContent = ["Weiter üben!", "Gut gemacht!", "Super!", "Nachsilben-Profi!"][starCount];
+    $("stars").innerHTML = [0, 1, 2].map(k => `<span class="${k < starCount ? "" : "off"}">⭐</span>`).join("");
+    $("endScore").textContent = String(state.score).replace(".", ",");
+    $("endMax").textContent = state.rounds;
+
+    const key = "best:" + level, best = store.get(key, null), name = LEVEL_NAMES[level];
+    if (!best || pct > best.pct) {
+      store.set(key, { pct, date: new Date().toISOString().slice(0, 10) });
+      $("newBest").textContent = best ? `Neuer Rekord auf „${name}“! (vorher ${best.pct} %)` : `Erster Rekord auf „${name}“: ${pct} %`;
+    } else $("newBest").textContent = `Rekord auf „${name}“: ${best.pct} %`;
+
+    $("recap").innerHTML = state.results.map(r => {
+      const d = r.cls === "g" ? "gleich richtig" : r.cls === "o" ? "im zweiten Versuch" : "nicht geschafft";
+      return `<div class="rc ${r.cls}"><div class="w">${r.w.noun} → ${adjHtml(r.w)}</div><div class="d">${d}</div></div>`;
+    }).join("");
+    $("practiceBtn").style.display = state.results.some(r => r.cls !== "g") ? "" : "none";
+    show("end");
+    sfx.end();
+    if (starCount >= 2) confetti(starCount * 50);
+  }
+  function practicePool() {
+    const seen = new Set();
+    return state.results.filter(r => r.cls !== "g" && !seen.has(r.w.id) && seen.add(r.w.id)).map(r => r.w);
+  }
+
+  function confetti(n) {
+    const colors = ["#f25c54", "#f7b32b", "#4cc9f0", "#7b5cff", "#2ec27e", "#ff70a6"];
+    for (let k = 0; k < n; k++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[k % colors.length];
+      c.style.setProperty("--dx", (Math.random() * 200 - 100) + "px");
+      c.style.setProperty("--rot", (Math.random() * 900 - 450) + "deg");
+      c.style.animationDuration = (1.4 + Math.random() * 1.6) + "s";
+      c.style.animationDelay = (Math.random() * .3) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3600);
+    }
+  }
+
+  // ---------- Buttons ----------
+  $("playBtn").onclick = () => startGame();
+  $("againBtn").onclick = () => startGame();
+  $("practiceBtn").onclick = () => startGame(practicePool());
+  $("menuBtn").onclick = () => { paintLevels(); show("start"); };
+  $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
+})();
+</script>
+</body>
+</html>
