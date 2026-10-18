@@ -55,7 +55,7 @@
   }
   .wrap { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 18px; }
 
-  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   header h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; font-weight: 700; letter-spacing: .5px; }
   header h1 span { color: var(--accent); }
   .icon-btn {
@@ -192,8 +192,8 @@
 <div class="wrap">
   <header>
     <h1>Nachsilben<span>-Werkstatt</span></h1>
-    <div style="display:flex; gap:8px">
-      <a class="icon-btn" href="../index.html" style="text-decoration:none" title="Alle Minispiele">☰</a>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <a class="icon-btn" href="../index.html" style="text-decoration:none" title="Zurück zur Übersicht aller Minispiele">← Übersicht</a>
       <button class="icon-btn" id="hsBtn" title="Bestenliste">🏆</button>
       <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
       <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>

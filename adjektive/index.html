@@ -294,7 +294,7 @@ function home(){
   G = null;
   $app.innerHTML = `
     <div class="topbar"><span class="chip">Deutsch · 4. Klasse</span>
-      <span class="actions"><button class="btn small" data-act="hs">🏆 Bestenliste</button><button class="btn small" data-act="merk">Merkkasten</button></span></div>
+      <span class="actions"><a class="btn small" href="../index.html" style="text-decoration:none;color:inherit">← Übersicht</a><button class="btn small" data-act="hs">🏆 Bestenliste</button><button class="btn small" data-act="merk">Merkkasten</button></span></div>
     <div class="intro">
       <h1>Die Adjektiv-Treppe</h1>
       <div class="mini-stairs" aria-hidden="true"><span>groß</span><span>größer</span><span>am größten</span></div>
@@ -335,7 +335,7 @@ function header(){
   const dots = G.items.map((_,k)=>`<i class="${k<G.marks.length ? (G.marks[k]?'ok':'miss') : (k===G.i?'now':'')}"></i>`).join('');
   return `<div class="topbar">
       <span class="chip">Runde ${G.ri+1} · ${r.title} · Aufgabe ${G.i+1} von ${G.items.length}</span>
-      <span class="actions"><button class="btn small" data-act="hs">🏆</button><button class="btn small" data-act="merk">Merkkasten</button><button class="btn small" data-act="home">Beenden</button></span>
+      <span class="actions"><a class="btn small" href="../index.html" style="text-decoration:none;color:inherit">← Übersicht</a><button class="btn small" data-act="hs">🏆</button><button class="btn small" data-act="merk">Merkkasten</button><button class="btn small" data-act="home">Beenden</button></span>
     </div>
     <div class="progress" aria-hidden="true">${dots}</div>`;
 }
@@ -483,7 +483,8 @@ function result(){
       <div class="actions">
         <button class="btn primary" data-round="${ri}">Nochmal spielen</button>
         ${ri<2?`<button class="btn" data-round="${ri+1}">Weiter zu Runde ${ri+2}</button>`:''}
-        <button class="btn" data-act="home">Zur Übersicht</button>
+        <button class="btn" data-act="home">Andere Runde</button>
+        <a class="btn" href="../index.html" style="text-decoration:none;color:inherit">← Alle Spiele</a>
       </div>
       <div id="bestenliste" style="width:100%"></div>
     </div>`;
