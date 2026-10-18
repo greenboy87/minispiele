@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deutsch-Fachbegriffe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf8f0;
+    --bg2: #f3ead9;
+    --card: #ffffff;
+    --ink: #2b2540;
+    --muted: #7a7290;
+    --line: #e6dccb;
+    --accent: #6c4cf1;
+    --accent-ink: #ffffff;
+    --good: #1fa463;
+    --ok: #e8a317;
+    --bad: #e2513b;
+    --shadow: 0 10px 30px rgba(60, 40, 110, .12);
+    /* Wortarten-Farben */
+    --c-art: #e8a317;
+    --c-nomen: #2f7fe0;
+    --c-v: #e2513b;
+    --c-adj: #1fa463;
+    --c-p: #9b4dd6;
+    --c-vok: #e2513b;
+    --c-kon: #2f7fe0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17142a;
+      --bg2: #211d3a;
+      --card: #262142;
+      --ink: #f2eefc;
+      --muted: #a69fc2;
+      --line: #3a3460;
+      --accent: #9b85ff;
+      --accent-ink: #17142a;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+      --c-art: #f2b63a;
+      --c-nomen: #5aa0ff;
+      --c-v: #ff6f5c;
+      --c-adj: #3cc985;
+      --c-p: #c27dff;
+      --c-vok: #ff6f5c;
+      --c-kon: #5aa0ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 60%);
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Fredoka", ui-rounded, system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+    -webkit-user-select: none; user-select: none;
+  }
+  .wrap { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 18px; flex: 1; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+
+  .card { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); padding: clamp(18px, 4vw, 36px); }
+
+  /* ---------- Start ---------- */
+  #start { text-align: center; }
+  #start h2 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; }
+  #start p { color: var(--muted); font-size: 18px; margin: 0 auto 24px; max-width: 600px; line-height: 1.45; }
+  .levels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 0 auto 24px; max-width: 900px; }
+  @media (max-width: 860px) { .levels { grid-template-columns: repeat(2, 1fr); } }
+  .level {
+    border: 2px solid var(--line); background: transparent; color: var(--ink); border-radius: 18px;
+    padding: 16px 12px; cursor: pointer; font: inherit; text-align: center; transition: transform .15s, border-color .15s;
+  }
+  .level:hover { transform: translateY(-2px); }
+  .level.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .level .ic { font-size: 26px; display: block; margin-bottom: 4px; }
+  .level b { display: block; font-size: 19px; margin-bottom: 4px; }
+  .level small { color: var(--muted); font-size: 14px; line-height: 1.3; display: block; }
+  .level .best { margin-top: 8px; font-size: 13px; color: var(--accent); font-weight: 600; }
+  .big-btn {
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 16px;
+    padding: 14px 34px; font: inherit; font-size: 20px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 60%, #000);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+  .big-btn:disabled { opacity: .45; cursor: default; }
+  .options { margin-top: 18px; color: var(--muted); font-size: 15px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; align-items: center; }
+  .options label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+  .ghost-btn { background: transparent; color: var(--ink); border: 2px solid var(--line); border-radius: 16px; padding: 12px 24px; font: inherit; font-size: 18px; cursor: pointer; }
+  .ghost-btn:hover { border-color: var(--accent); }
+
+  /* ---------- Spiel ---------- */
+  #game { display: none; flex-direction: column; gap: 18px; }
+  .hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { background: var(--card); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow); font-weight: 600; font-size: 16px; }
+  .pill em { font-style: normal; color: var(--accent); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); transition: background .3s; }
+  .dot.now { background: var(--accent); transform: scale(1.25); }
+  .dot.g { background: var(--good); } .dot.o { background: var(--ok); } .dot.b { background: var(--bad); }
+
+  .task { text-align: center; color: var(--muted); font-size: 19px; margin-bottom: 18px; line-height: 1.4; }
+  .task b { color: var(--ink); }
+  .task .tag { display: inline-block; padding: 2px 12px; border-radius: 10px; color: #fff; font-weight: 600; }
+
+  /* Satz */
+  .sentence {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 8px;
+    font-size: clamp(24px, 4.4vw, 38px); font-weight: 600; line-height: 1.2; min-height: 90px; align-items: flex-start;
+  }
+  .w {
+    position: relative; display: inline-flex; flex-direction: column; align-items: center;
+    padding: 4px 8px 6px; border-radius: 12px; border: 3px solid transparent; transition: background .2s, border-color .2s, color .2s;
+  }
+  .w .lbl { font-size: 12px; font-weight: 600; letter-spacing: .3px; margin-top: 2px; height: 15px; opacity: 0; transition: opacity .3s; white-space: nowrap; }
+  .sentence.done .w .lbl { opacity: 1; }
+  .w.target { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); animation: pulse 1.6s ease-in-out infinite; }
+  .sentence.done .w.target { animation: none; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 18%, transparent); } }
+  .w.pick { cursor: pointer; border-color: var(--line); }
+  .w.pick:hover { border-color: var(--accent); }
+  .w.sel { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+  .sentence.done .w.pick { cursor: default; }
+  .w.hit { border-color: var(--good); background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--ink); }
+  .w.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--ink); text-decoration: line-through; text-decoration-thickness: 2px; }
+  .w.missed { border-color: var(--ok); border-style: dashed; color: var(--ink); background: transparent; }
+  .w[data-m="art"] .lbl { color: var(--c-art); }
+  .w[data-m="nomen"] .lbl { color: var(--c-nomen); }
+  .w[data-m="v"] .lbl { color: var(--c-v); }
+  .w[data-m="adj"] .lbl { color: var(--c-adj); }
+  .w[data-m="p"] .lbl { color: var(--c-p); }
+  .sentence.done.colored .w[data-m="art"] .t { color: var(--c-art); }
+  .sentence.done.colored .w[data-m="nomen"] .t { color: var(--c-nomen); }
+  .sentence.done.colored .w[data-m="v"] .t { color: var(--c-v); }
+  .sentence.done.colored .w[data-m="adj"] .t { color: var(--c-adj); }
+  .sentence.done.colored .w[data-m="p"] .t { color: var(--c-p); }
+
+  /* Buchstaben */
+  .letters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 90px; }
+  .lt {
+    width: clamp(46px, 9vw, 70px); height: clamp(58px, 11vw, 84px); border-radius: 14px; border: 3px solid var(--line);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+    font-size: clamp(28px, 5.5vw, 44px); font-weight: 700; background: var(--card); color: var(--ink); font-family: inherit;
+    transition: transform .1s, background .2s, border-color .2s;
+  }
+  .lt:hover { border-color: var(--accent); }
+  .lt:active { transform: scale(.94); }
+  .lt.sel { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .lt .lbl { font-size: 11px; font-weight: 600; height: 13px; opacity: 0; }
+  .letters.done .lt { cursor: default; }
+  .letters.done .lt .lbl { opacity: 1; }
+  .letters.done .lt.vok .lbl { color: var(--c-vok); }
+  .letters.done .lt.kon .lbl { color: var(--c-kon); }
+  .lt.hit { background: color-mix(in srgb, var(--good) 18%, transparent); border-color: var(--good); color: var(--ink); }
+  .lt.wrong { background: color-mix(in srgb, var(--bad) 14%, transparent); border-color: var(--bad); color: var(--ink); }
+  .lt.missed { border-color: var(--ok); border-style: dashed; background: var(--card); color: var(--ink); }
+
+  /* Antwort-Knöpfe */
+  .answers { margin-top: 22px; min-height: 72px; }
+  .choice-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .choice-grid.two { grid-template-columns: repeat(2, minmax(0, 260px)); justify-content: center; }
+  @media (max-width: 720px) { .choice-grid { grid-template-columns: repeat(2, 1fr); } .choice-grid.two { grid-template-columns: 1fr 1fr; } }
+  .choice {
+    --c: var(--accent);
+    border: 0; border-radius: 16px; padding: 12px 8px 10px; cursor: pointer; font: inherit; color: #fff;
+    background: var(--c); box-shadow: 0 5px 0 color-mix(in srgb, var(--c) 60%, #000);
+    transition: transform .08s, box-shadow .08s, opacity .2s;
+  }
+  .choice:active { transform: translateY(3px); box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 60%, #000); }
+  .choice b { display: block; font-size: 20px; }
+  .choice small { display: block; font-size: 13px; opacity: .9; }
+  .choice[data-m="art"] { --c: var(--c-art); }
+  .choice[data-m="nomen"] { --c: var(--c-nomen); }
+  .choice[data-m="v"] { --c: var(--c-v); }
+  .choice[data-m="adj"] { --c: var(--c-adj); }
+  .choice[data-m="p"] { --c: var(--c-p); }
+  .choice.dim { opacity: .3; }
+  .choice.right { outline: 4px solid var(--good); outline-offset: 2px; }
+  .choice.picked-wrong { outline: 4px solid var(--bad); outline-offset: 2px; }
+  .sub-head { text-align: center; font-size: 17px; color: var(--muted); margin: 0 0 10px; }
+  .sub-head b { color: var(--ink); }
+  .back-link { display: block; margin: 10px auto 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: 15px; cursor: pointer; text-decoration: underline; }
+
+  .feedback { min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-align: center; margin-top: 16px; }
+  .feedback .head { font-size: 26px; font-weight: 700; }
+  .feedback .sub { color: var(--muted); font-size: 17px; max-width: 640px; line-height: 1.4; }
+  .feedback .sub b { color: var(--ink); }
+  .feedback .pts { color: var(--accent); }
+
+  .actions { display: flex; justify-content: center; min-height: 58px; margin-top: 8px; }
+  .actions .big-btn { display: none; }
+  .actions .big-btn.show { display: inline-block; animation: pop .3s ease-out; }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  .hint { text-align: center; color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  /* ---------- Ende ---------- */
+  #end { display: none; text-align: center; }
+  #end h2 { font-size: clamp(28px, 5vw, 42px); margin: 0; }
+  .stars { font-size: 46px; letter-spacing: 6px; margin: 6px 0; }
+  .stars .off { opacity: .2; filter: grayscale(1); }
+  .total { font-size: 22px; color: var(--muted); margin-bottom: 4px; }
+  .total b { color: var(--accent); font-size: 34px; }
+  .newbest { color: var(--good); font-weight: 700; min-height: 24px; }
+  .recap { display: flex; flex-direction: column; gap: 8px; margin: 22px auto; text-align: left; max-width: 640px; }
+  .rc { border: 2px solid var(--line); border-radius: 14px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; font-size: 16px; }
+  .rc .p { font-weight: 700; min-width: 48px; text-align: right; }
+  .rc .d { flex: 1; line-height: 1.3; }
+  .rc .d small { color: var(--muted); display: block; }
+  .rc.g { border-color: var(--good); } .rc.o { border-color: var(--ok); } .rc.b { border-color: var(--bad); }
+  .end-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---------- Spickzettel ---------- */
+  dialog {
+    border: 0; border-radius: 24px; padding: 0; max-width: 820px; width: calc(100% - 32px);
+    background: var(--card); color: var(--ink); box-shadow: var(--shadow);
+  }
+  dialog::backdrop { background: rgba(20, 14, 40, .5); }
+  .sheet { padding: clamp(18px, 4vw, 30px); }
+  .sheet h2 { margin: 0 0 14px; font-size: 28px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .sheet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 640px) { .sheet-grid { grid-template-columns: 1fr; } }
+  .sc { border-radius: 16px; padding: 12px 14px; border-left: 8px solid var(--c, var(--accent)); background: color-mix(in srgb, var(--c, var(--accent)) 9%, transparent); }
+  .sc b { font-size: 19px; }
+  .sc i { color: var(--muted); font-style: normal; font-size: 14px; }
+  .sc p { margin: 4px 0 0; font-size: 15px; line-height: 1.4; }
+  .sc .ex { color: var(--muted); }
+
+  .confetti { position: fixed; top: -12px; width: 10px; height: 14px; border-radius: 2px; pointer-events: none; z-index: 50; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); } }
+
+  @media (max-width: 640px) {
+    .levels { grid-template-columns: 1fr; }
+    .sentence { gap: 6px 4px; }
+    .w { padding: 3px 5px 5px; }
+    .w .lbl { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Deutsch<span>-Fachbegriffe</span></h1>
+    <div style="display:flex; gap:8px">
+      <button class="icon-btn" id="sheetBtn" title="Spickzettel">📒 Spickzettel</button>
+      <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
+      <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
+    </div>
+  </header>
+
+  <!-- Start -->
+  <section id="start" class="card">
+    <h2>Kennst du die Fachbegriffe?</h2>
+    <p>Artikel, Nomen, Verb, Adjektiv, Pronomen – und dazu Vokale und Konsonanten. Such dir eine Spielart aus. Wenn du unsicher bist, schau in den <b>📒 Spickzettel</b>.</p>
+    <div class="levels" id="levels">
+      <button class="level" data-mode="bestimmen"><span class="ic">🔍</span><b>Wortart bestimmen</b><small>Ein Wort im Satz ist markiert. Welcher Fachbegriff passt?</small><div class="best"></div></button>
+      <button class="level" data-mode="finden"><span class="ic">👆</span><b>Wörter finden</b><small>Tippe im Satz alle Wörter an, die zum Fachbegriff passen.</small><div class="best"></div></button>
+      <button class="level" data-mode="laute"><span class="ic">🔤</span><b>Vokale &amp; Konsonanten</b><small>Tippe alle Vokale – oder alle Konsonanten – in einem Wort an.</small><div class="best"></div></button>
+      <button class="level" data-mode="mix"><span class="ic">🎲</span><b>Bunt gemischt</b><small>Alle drei Spielarten durcheinander.</small><div class="best"></div></button>
+    </div>
+    <button class="big-btn" id="playBtn">Los geht's!</button>
+    <div class="options">
+      <label>Runden:
+        <select id="roundsOpt" class="icon-btn" style="padding:4px 8px">
+          <option>5</option><option selected>10</option><option>15</option><option>20</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="colorOpt"> Wortarten nach dem Antworten farbig zeigen</label>
+    </div>
+  </section>
+
+  <!-- Spiel -->
+  <section id="game">
+    <div class="hud">
+      <div class="pill">Runde <em id="roundNo">1</em> / <span id="roundMax">10</span></div>
+      <div class="dots" id="dots"></div>
+      <div class="pill">Punkte <em id="scoreNo">0</em></div>
+    </div>
+    <div class="card">
+      <div class="task" id="task"></div>
+      <div id="area"></div>
+      <div class="answers" id="answers"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="actions">
+        <button class="big-btn" id="checkBtn">Prüfen ✓</button>
+        <button class="big-btn" id="nextBtn">Weiter →</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </section>
+
+  <!-- Ende -->
+  <section id="end" class="card">
+    <h2 id="endTitle">Geschafft!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="total"><b id="endScore">0</b> von <span id="endMax">1000</span> Punkten</div>
+    <div class="newbest" id="newBest"></div>
+    <div class="recap" id="recap"></div>
+    <div class="end-actions">
+      <button class="big-btn" id="againBtn">Nochmal</button>
+      <button class="ghost-btn" id="practiceBtn">Fehler üben</button>
+      <button class="ghost-btn" id="menuBtn">Andere Spielart</button>
+    </div>
+  </section>
+</div>
+
+<dialog id="sheet">
+  <div class="sheet">
+    <h2>📒 Spickzettel <button class="icon-btn" id="sheetClose">Schließen ✕</button></h2>
+    <div class="sheet-grid">
+      <div class="sc" style="--c: var(--c-art)"><b>Artikel</b> <i>Begleiter</i>
+        <p>Begleitet ein Nomen.</p>
+        <p>• <b>bestimmter Artikel:</b> der, die, das <span class="ex">(auch dem, den, des)</span></p>
+        <p>• <b>unbestimmter Artikel:</b> ein, eine <span class="ex">(auch einen, einem, einer)</span></p>
+      </div>
+      <div class="sc" style="--c: var(--c-nomen)"><b>Nomen</b> <i>Namenwort</i>
+        <p>Menschen, Tiere, Pflanzen, Dinge, Gefühle. Nomen schreibt man <b>groß</b>.</p>
+        <p>• <b>Einzahl (Singular):</b> nur eins – <span class="ex">der Hund, ein Apfel</span></p>
+        <p>• <b>Mehrzahl (Plural):</b> mehrere – <span class="ex">die Hunde, viele Äpfel</span></p>
+      </div>
+      <div class="sc" style="--c: var(--c-v)"><b>Verb</b> <i>Tunwort, Zeitwort</i>
+        <p>Sagt, was jemand tut oder was geschieht.</p>
+        <p class="ex">laufen, er spielt, wir lachen, es regnet, sie ist</p>
+      </div>
+      <div class="sc" style="--c: var(--c-adj)"><b>Adjektiv</b> <i>Wiewort, Eigenschaftswort</i>
+        <p>Sagt, wie jemand oder etwas ist.</p>
+        <p class="ex">groß, schnell, rot, lustig, ein kleiner Hund</p>
+      </div>
+      <div class="sc" style="--c: var(--c-p)"><b>Pronomen</b> <i>Fürwort</i>
+        <p>Steht <b>für</b> ein Nomen.</p>
+        <p class="ex">ich, du, er, sie, es, wir, ihr, sie – „Tim lacht.“ → „<b>Er</b> lacht.“</p>
+      </div>
+      <div class="sc" style="--c: var(--c-vok)"><b>Vokale</b> <i>Selbstlaute</i>
+        <p><b>a, e, i, o, u</b> – und die Umlaute <b>ä, ö, ü</b>.</p>
+        <p class="ex">Auch au, ei, eu bestehen aus Vokalen.</p>
+      </div>
+      <div class="sc" style="--c: var(--c-kon)"><b>Konsonanten</b> <i>Mitlaute</i>
+        <p>Alle anderen Buchstaben.</p>
+        <p class="ex">b, c, d, f, g, h, k, l, m, n, p, r, s, t, w, z …</p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Inhalte ----------
+  // Wort/kürzel: ba = bestimmter Artikel, ua = unbestimmter Artikel, ns = Nomen Singular,
+  // np = Nomen Plural, v = Verb, adj = Adjektiv, p = Pronomen, x = wird nicht abgefragt
+  const SENTENCES = [
+    "Der/ba Hund/ns bellt/v laut/adj .",
+    "Eine/ua Katze/ns schläft/v auf/x dem/ba Sofa/ns .",
+    "Die/ba Kinder/np spielen/v im/x Garten/ns .",
+    "Wir/p essen/v heute/x frische/adj Äpfel/np .",
+    "Ein/ua kleiner/adj Vogel/ns singt/v ein/ua Lied/ns .",
+    "Er/p liest/v ein/ua spannendes/adj Buch/ns .",
+    "Die/ba Sonne/ns scheint/v hell/adj .",
+    "Sie/p malt/v bunte/adj Bilder/np .",
+    "Der/ba Bäcker/ns backt/v leckere/adj Brötchen/np .",
+    "Ich/p trinke/v ein/ua Glas/ns kalte/adj Milch/ns .",
+    "Die/ba Lehrerin/ns erklärt/v eine/ua schwierige/adj Aufgabe/ns .",
+    "Du/p rennst/v schnell/adj zum/x Bus/ns .",
+    "Die/ba Blumen/np blühen/v im/x Frühling/ns .",
+    "Ein/ua Pferd/ns frisst/v frisches/adj Heu/ns .",
+    "Ihr/p baut/v eine/ua hohe/adj Burg/ns aus/x Sand/ns .",
+    "Die/ba Mäuse/np knabbern/v am/x Käse/ns .",
+    "Es/p regnet/v den/ba ganzen/adj Tag/ns .",
+    "Der/ba Fußball/ns fliegt/v über/x den/ba Zaun/ns .",
+    "Wir/p füttern/v die/ba Enten/np am/x See/ns .",
+    "Ein/ua alter/adj Baum/ns steht/v im/x Wald/ns .",
+    "Die/ba Hexe/ns hat/v eine/ua lange/adj Nase/ns .",
+    "Er/p schreibt/v einen/ua Brief/ns an/x die/ba Oma/ns .",
+    "Die/ba Kühe/np grasen/v auf/x der/ba grünen/adj Wiese/ns .",
+    "Sie/p singen/v fröhliche/adj Lieder/np .",
+    "Das/ba Eis/ns schmeckt/v süß/adj .",
+    "Ein/ua Igel/ns sucht/v Würmer/np und/x Schnecken/np .",
+    "Ich/p finde/v einen/ua glänzenden/adj Stein/ns .",
+    "Der/ba Zug/ns ist/v sehr/x voll/adj .",
+    "Eine/ua fleißige/adj Biene/ns sammelt/v Nektar/ns .",
+    "Wir/p besuchen/v morgen/x den/ba Zoo/ns .",
+    "Die/ba Affen/np klettern/v auf/x hohe/adj Bäume/np .",
+    "Du/p hast/v einen/ua neuen/adj Schulranzen/ns .",
+    "Der/ba Schnee/ns ist/v weiß/adj und/x kalt/adj .",
+    "Ein/ua Hase/ns hoppelt/v über/x das/ba Feld/ns .",
+    "Sie/p kauft/v drei/x Brezen/np beim/x Bäcker/ns .",
+    "Er/p trägt/v eine/ua rote/adj Mütze/ns .",
+    "Die/ba Freundinnen/np flüstern/v leise/adj .",
+    "Ihr/p seid/v heute/x sehr/x mutig/adj .",
+    "Das/ba Baby/ns schläft/v tief/adj und/x fest/adj .",
+    "Ein/ua Frosch/ns springt/v in/x den/ba Teich/ns .",
+    "Ich/p putze/v gründlich/adj die/ba Zähne/np .",
+    "Die/ba Feuerwehr/ns löscht/v einen/ua großen/adj Brand/ns .",
+    "Es/p ist/v ein/ua warmer/adj Sommertag/ns .",
+    "Wir/p sehen/v viele/x Sterne/np am/x Himmel/ns .",
+    "Der/ba Clown/ns erzählt/v lustige/adj Witze/np .",
+    "Eine/ua Schnecke/ns kriecht/v langsam/adj .",
+    "Die/ba Ameisen/np tragen/v kleine/adj Blätter/np .",
+    "Der/ba Mond/ns leuchtet/v in/x der/ba Nacht/ns .",
+    "Eine/ua Eule/ns ruft/v im/x dunklen/adj Wald/ns .",
+    "Die/ba Jungen/np bauen/v ein/ua Baumhaus/ns .",
+    "Er/p isst/v eine/ua saftige/adj Birne/ns .",
+    "Die/ba Vögel/np fliegen/v nach/x Süden/ns ."
+  ].map(parseSentence);
+
+  const WORDS = [
+    "Schule", "Banane", "Fahrrad", "Igel", "Ostern", "Wolke", "Käse", "Bär", "Mütze", "Löwe",
+    "Tomate", "Pinsel", "Hund", "Zebra", "Laterne", "Kröte", "Gurke", "Elefant", "Ameise", "Kugel",
+    "Spinne", "Fenster", "Brezel", "Sonne", "Brücke", "Schokolade", "Krokodil", "Uhu", "Tafel",
+    "Rakete", "Blume", "Apfel", "Frosch", "Eule", "Kerze", "Schmetterling", "Regenbogen", "Pullover",
+    "Kartoffel", "Hüpfburg", "Märchen", "Ofen", "Nudel", "Insel", "Drache"
+  ];
+  const VOWELS = "aeiouäöü";
+
+  const TAGS = {
+    ba:  { m: "art",   name: "bestimmter Artikel",          short: "best. Artikel", full: "ein bestimmter Artikel",
+           tip: "Bestimmte Artikel sind <b>der, die, das</b> – auch dem, den, des." },
+    ua:  { m: "art",   name: "unbestimmter Artikel",        short: "unbest. Artikel", full: "ein unbestimmter Artikel",
+           tip: "Unbestimmte Artikel sind <b>ein, eine</b> – auch einen, einem, einer." },
+    ns:  { m: "nomen", name: "Nomen in der Einzahl (Singular)", short: "Nomen · Sg.", full: "ein Nomen in der <b>Einzahl (Singular)</b>",
+           tip: "Nomen schreibt man groß. Einzahl: Es ist nur <b>eins</b>." },
+    np:  { m: "nomen", name: "Nomen in der Mehrzahl (Plural)",  short: "Nomen · Pl.", full: "ein Nomen in der <b>Mehrzahl (Plural)</b>",
+           tip: "Nomen schreibt man groß. Mehrzahl: Es sind <b>mehrere</b>." },
+    v:   { m: "v",     name: "Verb",     short: "Verb",     full: "ein Verb",
+           tip: "Verben sagen, was jemand <b>tut</b> oder was <b>geschieht</b>." },
+    adj: { m: "adj",   name: "Adjektiv", short: "Adjektiv", full: "ein Adjektiv",
+           tip: "Adjektive sagen, <b>wie</b> jemand oder etwas ist." },
+    p:   { m: "p",     name: "Pronomen", short: "Pronomen", full: "ein Pronomen",
+           tip: "Pronomen stehen <b>für</b> ein Nomen: ich, du, er, sie, es, wir, ihr, sie." }
+  };
+  const MAINS = {
+    art:   { name: "Artikel",  de: "Begleiter", subQ: "Welcher <b>Artikel</b> ist es?", subs: [["ba", "bestimmt", "der, die, das"], ["ua", "unbestimmt", "ein, eine"]] },
+    nomen: { name: "Nomen",    de: "Namenwort", subQ: "<b>Einzahl</b> oder <b>Mehrzahl</b>?", subs: [["ns", "Einzahl", "Singular"], ["np", "Mehrzahl", "Plural"]] },
+    v:     { name: "Verb",     de: "Tunwort" },
+    adj:   { name: "Adjektiv", de: "Wiewort" },
+    p:     { name: "Pronomen", de: "Fürwort" }
+  };
+  // Was bei "Wörter finden" gesucht werden kann
+  const FIND = {
+    art:   { label: "alle <b>Artikel</b>", m: "art" },
+    ba:    { label: "alle <b>bestimmten Artikel</b>", m: "art" },
+    ua:    { label: "alle <b>unbestimmten Artikel</b>", m: "art" },
+    nomen: { label: "alle <b>Nomen</b>", m: "nomen" },
+    ns:    { label: "alle <b>Nomen in der Einzahl</b> (Singular)", m: "nomen" },
+    np:    { label: "alle <b>Nomen in der Mehrzahl</b> (Plural)", m: "nomen" },
+    v:     { label: "alle <b>Verben</b>", m: "v" },
+    adj:   { label: "alle <b>Adjektive</b>", m: "adj" },
+    p:     { label: "alle <b>Pronomen</b>", m: "p" }
+  };
+  const FIND_NAME = { art: "Artikel", ba: "bestimmte Artikel", ua: "unbestimmte Artikel", nomen: "Nomen", ns: "Nomen (Singular)", np: "Nomen (Plural)", v: "Verben", adj: "Adjektive", p: "Pronomen" };
+  const fits = (tag, cat) => tag === cat || (TAGS[tag] && TAGS[tag].m === cat);
+
+  function parseSentence(str) {
+    const words = [];
+    str.split(" ").forEach(tok => {
+      const k = tok.lastIndexOf("/");
+      if (k < 0) { if (words.length) words[words.length - 1].punct += tok; return; }
+      words.push({ t: tok.slice(0, k), tag: tok.slice(k + 1), punct: "" });
+    });
+    return words;
+  }
+
+  // ---------- Speicher (nur Komfort, darf fehlen) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("deutsch-fachbegriffe:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("deutsch-fachbegriffe:" + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---------- Ton ----------
+  let ac = null;
+  let soundOn = store.get("sound", true);
+  const soundBtn = $("soundBtn");
+  const paintSound = () => soundBtn.textContent = soundOn ? "🔊" : "🔇";
+  paintSound();
+  soundBtn.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); paintSound(); };
+  function tone(freq, start, dur, type = "triangle", vol = .18) {
+    if (!soundOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t = ac.currentTime + start;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + dur + .02);
+    } catch {}
+  }
+  const sfx = {
+    tap() { tone(660, 0, .08, "sine", .08); },
+    perfect() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .08, .25)); },
+    ok() { tone(440, 0, .25); },
+    bad() { tone(220, 0, .3, "sawtooth", .08); tone(185, .12, .35, "sawtooth", .08); },
+    end() { [392, 523, 659, 784, 659, 784].forEach((f, i) => tone(f, i * .12, .3)); }
+  };
+
+  // ---------- Zustand ----------
+  let mode = store.get("mode", "bestimmen");
+  let state = null;
+  const MODE_NAMES = { bestimmen: "Wortart bestimmen", finden: "Wörter finden", laute: "Vokale & Konsonanten", mix: "Bunt gemischt" };
+
+  const levelBtns = [...document.querySelectorAll(".level")];
+  function paintLevels() {
+    levelBtns.forEach(b => {
+      b.classList.toggle("sel", b.dataset.mode === mode);
+      const best = store.get("best:" + b.dataset.mode, null);
+      b.querySelector(".best").textContent = best ? `Rekord: ${best.pct} %` : "";
+    });
+  }
+  levelBtns.forEach(b => b.onclick = () => { mode = b.dataset.mode; store.set("mode", mode); paintLevels(); });
+  levelBtns.forEach(b => b.ondblclick = () => startGame());
+  paintLevels();
+  $("roundsOpt").value = String(store.get("rounds", 10));
+  $("colorOpt").checked = store.get("color", true);
+
+  function show(id) {
+    ["start", "game", "end"].forEach(s => $(s).style.display = s === id ? (s === "game" ? "flex" : "block") : "none");
+    window.scrollTo(0, 0);
+  }
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  // Jedes Element einmal, bevor sich eins wiederholt
+  function deal(count, pool) {
+    const out = [];
+    while (out.length < count) out.push(...shuffle([...pool]));
+    return out.slice(0, count);
+  }
+
+  // ---------- Runden erzeugen ----------
+  function makeItems(m, n, pool) {
+    const types = m === "mix" ? deal(n, ["bestimmen", "bestimmen", "finden", "finden", "laute"]) : Array(n).fill(m);
+    const tagQ = deal(n, pool && pool.tags && pool.tags.length ? pool.tags : Object.keys(TAGS));
+    const catQ = deal(n, pool && pool.cats && pool.cats.length ? pool.cats : Object.keys(FIND));
+    const wordQ = deal(n, pool && pool.words && pool.words.length ? pool.words : WORDS);
+    const usedS = [];
+    const freshSentence = (ok) => {
+      let cand = SENTENCES.map((s, i) => i).filter(i => ok(SENTENCES[i]));
+      const unused = cand.filter(i => !usedS.includes(i));
+      if (unused.length) cand = unused;
+      const s = pick(cand); usedS.push(s); return s;
+    };
+    let ti = 0, ci = 0, wi = 0;
+    return types.map(type => {
+      if (type === "bestimmen") {
+        const tag = tagQ[ti++];
+        const s = freshSentence(sen => sen.some(w => w.tag === tag));
+        const idx = pick(SENTENCES[s].map((w, i) => i).filter(i => SENTENCES[s][i].tag === tag));
+        return { type, s, w: idx, tag };
+      }
+      if (type === "finden") {
+        const cat = catQ[ci++];
+        const s = freshSentence(sen => sen.some(w => fits(w.tag, cat)));
+        return { type, s, cat };
+      }
+      return { type: "laute", word: wordQ[wi++], task: Math.random() < .6 ? "vok" : "kon" };
+    });
+  }
+
+  function startGame(pool) {
+    const rounds = Number($("roundsOpt").value);
+    store.set("rounds", rounds);
+    store.set("color", $("colorOpt").checked);
+    state = { rounds, items: makeItems(mode, rounds, pool), round: 0, score: 0, results: [], done: false, practice: !!pool };
+    $("roundMax").textContent = rounds;
+    $("dots").innerHTML = state.items.map(() => '<div class="dot"></div>').join("");
+    show("game");
+    nextRound();
+  }
+
+  // ---------- Runde anzeigen ----------
+  const esc = (s) => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+  function sentenceHTML(sen, opts = {}) {
+    return `<div class="sentence${$("colorOpt").checked ? " colored" : ""}" id="sen">` + sen.map((w, i) => {
+      const t = TAGS[w.tag];
+      const cls = ["w"];
+      if (opts.target === i) cls.push("target");
+      if (opts.pick) cls.push("pick");
+      return `<span class="${cls.join(" ")}" data-i="${i}" ${t ? `data-m="${t.m}"` : ""}><span class="t">${esc(w.t)}${esc(w.punct)}</span><span class="lbl">${t ? t.short : ""}</span></span>`;
+    }).join("") + "</div>";
+  }
+
+  function nextRound() {
+    state.done = false;
+    const it = state.items[state.round];
+    $("roundNo").textContent = state.round + 1;
+    $("scoreNo").textContent = state.score;
+    $("feedback").innerHTML = "";
+    $("answers").innerHTML = "";
+    $("nextBtn").classList.remove("show");
+    $("checkBtn").classList.remove("show");
+    [...$("dots").children].forEach((d, k) => d.classList.toggle("now", k === state.round));
+
+    if (it.type === "bestimmen") {
+      $("task").innerHTML = "Welche <b>Wortart</b> ist das markierte Wort?";
+      $("area").innerHTML = sentenceHTML(SENTENCES[it.s], { target: it.w });
+      showMainChoices();
+      $("hint").textContent = "Tipp: Lies den ganzen Satz. Bei Artikel und Nomen kommt noch eine zweite Frage.";
+    } else if (it.type === "finden") {
+      $("task").innerHTML = `Tippe ${FIND[it.cat].label} an.`;
+      $("area").innerHTML = sentenceHTML(SENTENCES[it.s], { pick: true });
+      $("sen").querySelectorAll(".w").forEach(el => el.onclick = () => {
+        if (state.done) return;
+        el.classList.toggle("sel"); sfx.tap();
+      });
+      $("checkBtn").classList.add("show");
+      $("hint").textContent = "Wenn du alle hast: „Prüfen“ drücken (oder Enter).";
+    } else {
+      const what = it.task === "vok" ? "<b>Vokale</b> (Selbstlaute)" : "<b>Konsonanten</b> (Mitlaute)";
+      $("task").innerHTML = `Tippe alle ${what} an.`;
+      $("area").innerHTML = `<div class="letters" id="letters">` + [...it.word].map((ch, i) =>
+        `<button class="lt ${VOWELS.includes(ch.toLowerCase()) ? "vok" : "kon"}" data-i="${i}">${esc(ch)}<span class="lbl">${VOWELS.includes(ch.toLowerCase()) ? "Vokal" : "Kons."}</span></button>`
+      ).join("") + "</div>";
+      $("letters").querySelectorAll(".lt").forEach(el => el.onclick = () => {
+        if (state.done) return;
+        el.classList.toggle("sel"); sfx.tap();
+      });
+      $("checkBtn").classList.add("show");
+      $("hint").textContent = "Vokale: a, e, i, o, u – und ä, ö, ü. Alle anderen sind Konsonanten.";
+    }
+  }
+
+  // Schritt 1: Hauptwortart
+  function showMainChoices() {
+    $("answers").innerHTML = `<div class="choice-grid">` + Object.entries(MAINS).map(([k, m]) =>
+      `<button class="choice" data-m="${k}"><b>${m.name}</b><small>${m.de}</small></button>`).join("") + "</div>";
+    $("answers").querySelectorAll(".choice").forEach(b => b.onclick = () => {
+      if (state.done) return;
+      sfx.tap();
+      const m = b.dataset.m;
+      if (MAINS[m].subs) showSubChoices(m); else answerBestimmen(m, null);
+    });
+  }
+  // Schritt 2: bestimmt/unbestimmt bzw. Einzahl/Mehrzahl
+  function showSubChoices(m) {
+    const M = MAINS[m];
+    $("answers").innerHTML = `<p class="sub-head">${M.name} – ${M.subQ}</p><div class="choice-grid two">` +
+      M.subs.map(([tag, a, b]) => `<button class="choice" data-m="${m}" data-tag="${tag}"><b>${a}</b><small>${b}</small></button>`).join("") +
+      `</div><button class="back-link" id="backLink">← doch eine andere Wortart</button>`;
+    $("answers").querySelectorAll(".choice").forEach(b => b.onclick = () => { if (!state.done) answerBestimmen(m, b.dataset.tag); });
+    $("backLink").onclick = () => { if (!state.done) showMainChoices(); };
+  }
+
+  function answerBestimmen(m, tag) {
+    const it = state.items[state.round];
+    const T = TAGS[it.tag];
+    const word = SENTENCES[it.s][it.w].t;
+    let points, cls, head;
+    if (m !== T.m) { points = 0; cls = "b"; head = "Leider nicht."; }
+    else if (tag && tag !== it.tag) { points = 50; cls = "o"; head = `${MAINS[m].name} stimmt – aber …`; }
+    else { points = 100; cls = "g"; head = "Richtig! 🎉"; }
+
+    // Falsche Wortart im zweiten Schritt: zurück zur Wortarten-Reihe, damit man die Lösung sieht
+    if (m !== T.m && tag) { showMainChoices(); tag = null; }
+
+    // Knöpfe markieren
+    $("answers").querySelectorAll(".choice").forEach(b => {
+      const isRight = b.dataset.tag ? b.dataset.tag === it.tag : b.dataset.m === T.m;
+      const isPicked = b.dataset.tag ? b.dataset.tag === tag : b.dataset.m === m;
+      b.classList.toggle("right", isRight);
+      b.classList.toggle("picked-wrong", isPicked && !isRight);
+      b.classList.toggle("dim", !isRight && !isPicked);
+    });
+    const bl = $("backLink"); if (bl) bl.remove();
+
+    const mine = tag ? TAGS[tag].name : MAINS[m].name;
+    const sub = `„<b>${esc(word)}</b>“ ist ${T.full}. ${T.tip}`;
+    finishRound(points, cls, head, sub, {
+      text: `„${word}“ → ${T.name}`,
+      note: points === 100 ? "" : `Deine Antwort: ${mine}`,
+      tag: it.tag
+    });
+  }
+
+  function check() {
+    if (!state || state.done) return;
+    const it = state.items[state.round];
+    if (it.type === "finden") checkFinden(it);
+    else if (it.type === "laute") checkLaute(it);
+  }
+
+  function score(hits, wrong, needed) { return Math.max(0, Math.round(100 * (hits - wrong) / needed)); }
+
+  function checkFinden(it) {
+    const sen = SENTENCES[it.s];
+    let hits = 0, wrong = 0, needed = 0;
+    $("sen").querySelectorAll(".w").forEach(el => {
+      const w = sen[el.dataset.i];
+      const sel = el.classList.contains("sel");
+      const ok = fits(w.tag, it.cat);
+      if (ok) needed++;
+      el.classList.remove("sel");
+      if (sel && ok) { hits++; el.classList.add("hit"); }
+      else if (sel) { wrong++; el.classList.add("wrong"); }
+      else if (ok) el.classList.add("missed");
+    });
+    const points = score(hits, wrong, needed);
+    const cls = points === 100 ? "g" : points >= 50 ? "o" : "b";
+    const head = points === 100 ? "Alle gefunden! 🎉" : points >= 50 ? "Fast!" : "Da fehlt noch was.";
+    const parts = [`${hits} von ${needed} gefunden`];
+    if (wrong) parts.push(`${wrong} ${wrong === 1 ? "Wort passt" : "Wörter passen"} nicht`);
+    const tipTag = TAGS[it.cat] ? it.cat : ({ art: "ba", nomen: "ns" })[it.cat];
+    const tip = it.cat === "art" ? "Artikel: der, die, das, ein, eine …"
+      : it.cat === "nomen" ? "Nomen schreibt man groß – Einzahl und Mehrzahl zählen beide."
+      : TAGS[tipTag].tip;
+    const sub = `${parts.join(", ")}. ${points < 100 ? "Gestrichelt = übersehen. " : ""}${tip}`;
+    const found = sen.filter(w => fits(w.tag, it.cat)).map(w => w.t).join(", ");
+    finishRound(points, cls, head, sub, {
+      text: `${FIND_NAME[it.cat]}: ${found}`,
+      note: points === 100 ? "" : parts.join(", "),
+      cat: it.cat
+    });
+  }
+
+  function checkLaute(it) {
+    const want = it.task === "vok";
+    let hits = 0, wrong = 0, needed = 0;
+    $("letters").querySelectorAll(".lt").forEach(el => {
+      const isV = VOWELS.includes(it.word[el.dataset.i].toLowerCase());
+      const ok = isV === want;
+      const sel = el.classList.contains("sel");
+      if (ok) needed++;
+      el.classList.remove("sel");
+      if (sel && ok) { hits++; el.classList.add("hit"); }
+      else if (sel) { wrong++; el.classList.add("wrong"); }
+      else if (ok) el.classList.add("missed");
+    });
+    const points = score(hits, wrong, needed);
+    const cls = points === 100 ? "g" : points >= 50 ? "o" : "b";
+    const head = points === 100 ? "Super! 🎉" : points >= 50 ? "Fast!" : "Da fehlt noch was.";
+    const word = it.word.toLowerCase();
+    const vs = [...word].filter(c => VOWELS.includes(c)).length;
+    const name = want ? "Vokale" : "Konsonanten";
+    const sub = `„<b>${esc(it.word)}</b>“ hat ${vs} ${vs === 1 ? "Vokal" : "Vokale"} und ${word.length - vs} ${word.length - vs === 1 ? "Konsonant" : "Konsonanten"}. ` +
+      `Vokale (Selbstlaute) sind a, e, i, o, u und ä, ö, ü – alle anderen Buchstaben sind Konsonanten (Mitlaute).`;
+    finishRound(points, cls, head, sub, {
+      text: `${name} in „${it.word}“`,
+      note: points === 100 ? "" : `${hits} von ${needed} gefunden${wrong ? `, ${wrong} falsch` : ""}`,
+      word: it.word
+    });
+  }
+
+  function finishRound(points, cls, head, sub, rec) {
+    state.done = true;
+    state.score += points;
+    const area = $("sen") || $("letters");
+    if (area) area.classList.add("done");
+    $("feedback").innerHTML = `<div class="head">${head} <span class="pts">+${points}</span></div><div class="sub">${sub}</div>`;
+    $("scoreNo").textContent = state.score;
+    const dot = $("dots").children[state.round];
+    dot.classList.remove("now"); dot.classList.add(cls);
+    if (cls === "g") { sfx.perfect(); confetti(30); } else if (cls === "o") sfx.ok(); else sfx.bad();
+    state.results.push({ points, cls, ...rec });
+    $("checkBtn").classList.remove("show");
+    const nb = $("nextBtn");
+    nb.textContent = state.round + 1 >= state.rounds ? "Ergebnis ansehen" : "Weiter →";
+    nb.classList.add("show");
+    nb.focus({ preventScroll: true });
+    $("hint").textContent = "Mit Enter geht's weiter.";
+  }
+
+  function advance() {
+    if (!state || !state.done) return;
+    state.round++;
+    if (state.round >= state.rounds) finish(); else nextRound();
+  }
+  $("nextBtn").onclick = advance;
+  $("checkBtn").onclick = check;
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Enter" || $("game").style.display !== "flex" || $("sheet").open) return;
+    e.preventDefault();
+    if (state && state.done) advance(); else check();
+  });
+
+  // ---------- Ende ----------
+  function finish() {
+    const max = state.rounds * 100;
+    const pct = Math.round(state.score / max * 100);
+    const starCount = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 45 ? 1 : 0;
+    $("endTitle").textContent = ["Weiter üben!", "Gut gemacht!", "Super!", "Fachbegriffe-Profi!"][starCount];
+    $("stars").innerHTML = [0, 1, 2].map(k => `<span class="${k < starCount ? "" : "off"}">⭐</span>`).join("");
+    $("endScore").textContent = state.score;
+    $("endMax").textContent = max;
+
+    if (state.practice) {
+      $("newBest").textContent = "Fehler-Übung – zählt nicht für den Rekord.";
+    } else {
+      const key = "best:" + mode;
+      const best = store.get(key, null);
+      if (!best || pct > best.pct) {
+        store.set(key, { pct, date: new Date().toISOString().slice(0, 10) });
+        $("newBest").textContent = best ? `Neuer Rekord bei „${MODE_NAMES[mode]}“! (vorher ${best.pct} %)` : `Erster Rekord bei „${MODE_NAMES[mode]}“: ${pct} %`;
+      } else {
+        $("newBest").textContent = `Rekord bei „${MODE_NAMES[mode]}“: ${best.pct} %`;
+      }
+    }
+
+    $("recap").innerHTML = state.results.map(r =>
+      `<div class="rc ${r.cls}"><div class="d">${esc(r.text)}${r.note ? `<small>${esc(r.note)}</small>` : ""}</div><div class="p">+${r.points}</div></div>`
+    ).join("");
+    $("practiceBtn").style.display = state.results.some(r => r.points < 100) ? "" : "none";
+    show("end");
+    sfx.end();
+    if (starCount >= 2) confetti(starCount * 50);
+  }
+
+  // Fehler üben: dieselben Wortarten / Wörter noch einmal
+  function practicePool() {
+    const miss = state.results.filter(r => r.points < 100);
+    return {
+      tags: [...new Set(miss.filter(r => r.tag).map(r => r.tag))],
+      cats: [...new Set(miss.filter(r => r.cat).map(r => r.cat))],
+      words: [...new Set(miss.filter(r => r.word).map(r => r.word))]
+    };
+  }
+
+  function confetti(n) {
+    const colors = ["#f25c54", "#f7b32b", "#4cc9f0", "#7b5cff", "#2ec27e", "#ff70a6"];
+    for (let k = 0; k < n; k++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[k % colors.length];
+      c.style.setProperty("--dx", (Math.random() * 200 - 100) + "px");
+      c.style.setProperty("--rot", (Math.random() * 900 - 450) + "deg");
+      c.style.animationDuration = (1.4 + Math.random() * 1.6) + "s";
+      c.style.animationDelay = (Math.random() * .3) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3600);
+    }
+  }
+
+  // ---------- Buttons ----------
+  $("playBtn").onclick = () => startGame();
+  $("againBtn").onclick = () => startGame();
+  $("practiceBtn").onclick = () => startGame(practicePool());
+  $("menuBtn").onclick = () => { paintLevels(); show("start"); };
+  $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
+  $("sheetBtn").onclick = () => $("sheet").showModal();
+  $("sheetClose").onclick = () => $("sheet").close();
+  $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) $("sheet").close(); });
+})();
+</script>
+</body>
+</html>
