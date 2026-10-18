@@ -1,0 +1,744 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silben-Schere</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf8f0;
+    --bg2: #f3ead9;
+    --card: #ffffff;
+    --ink: #2b2540;
+    --muted: #7a7290;
+    --line: #e6dccb;
+    --accent: #6c4cf1;
+    --accent-ink: #ffffff;
+    --good: #1fa463;
+    --ok: #e8a317;
+    --bad: #e2513b;
+    --r1: #2f7fe0;
+    --r2: #d6336c;
+    --r3: #e5791f;
+    --r4: #1f9e74;
+    --r5: #8a4fd8;
+    --shadow: 0 10px 30px rgba(60, 40, 110, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17142a;
+      --bg2: #211d3a;
+      --card: #262142;
+      --ink: #f2eefc;
+      --muted: #a69fc2;
+      --line: #3a3460;
+      --accent: #9b85ff;
+      --accent-ink: #17142a;
+      --r1: #6aa8ff;
+      --r2: #ff7aa8;
+      --r3: #ffa95c;
+      --r4: #4fd1a5;
+      --r5: #c39bff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: radial-gradient(circle at 20% 0%, var(--bg2), var(--bg) 60%);
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Fredoka", ui-rounded, system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px;
+    -webkit-user-select: none; user-select: none;
+  }
+  .wrap { width: 100%; max-width: 980px; display: flex; flex-direction: column; gap: 18px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  header h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink);
+    border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+
+  .card { background: var(--card); border-radius: 24px; box-shadow: var(--shadow); padding: clamp(18px, 4vw, 36px); }
+
+  /* ---------- Regeln ---------- */
+  .rules { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 0 auto 24px; text-align: left; }
+  .rc5 { border: 2px solid var(--line); border-radius: 16px; padding: 10px 12px; }
+  .rc5 .n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; color: #fff; font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .rc5 .t { font-size: 15px; line-height: 1.3; font-weight: 600; }
+  .rc5 .e { font-size: 15px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+  .bg1 { background: var(--r1); } .bg2 { background: var(--r2); } .bg3 { background: var(--r3); } .bg4 { background: var(--r4); } .bg5 { background: var(--r5); }
+
+  /* ---------- Start ---------- */
+  #start { text-align: center; }
+  #start h2 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; }
+  #start > p { color: var(--muted); font-size: 18px; margin: 0 auto 20px; max-width: 620px; line-height: 1.45; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0 auto 20px; max-width: 820px; }
+  .level {
+    border: 2px solid var(--line); background: transparent; color: var(--ink); border-radius: 18px;
+    padding: 16px 12px; cursor: pointer; font: inherit; text-align: center; transition: transform .15s, border-color .15s;
+  }
+  .level:hover { transform: translateY(-2px); }
+  .level.sel { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .level b { display: block; font-size: 20px; margin-bottom: 4px; }
+  .level small { color: var(--muted); font-size: 14px; line-height: 1.3; display: block; }
+  .level .best { margin-top: 8px; font-size: 13px; color: var(--accent); font-weight: 600; min-height: 16px; }
+  .topics { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 auto 22px; }
+  .topics .lbl { color: var(--muted); font-size: 15px; align-self: center; margin-right: 4px; }
+  .chip {
+    border: 2px solid var(--line); background: transparent; color: var(--muted); border-radius: 999px;
+    padding: 6px 14px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .chip.on { border-color: var(--accent); color: var(--ink); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+  .big-btn {
+    background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 16px;
+    padding: 14px 34px; font: inherit; font-size: 20px; font-weight: 600; cursor: pointer;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 60%, #000);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .big-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 color-mix(in srgb, var(--accent) 60%, #000); }
+  .big-btn:disabled { opacity: .5; cursor: default; }
+  .options { margin-top: 18px; color: var(--muted); font-size: 15px; display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  .options label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+
+  /* ---------- Spiel ---------- */
+  #game { display: none; flex-direction: column; gap: 18px; }
+  .hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .pill { background: var(--card); border-radius: 999px; padding: 8px 16px; box-shadow: var(--shadow); font-weight: 600; font-size: 16px; }
+  .pill em { font-style: normal; color: var(--accent); }
+  .dots { display: flex; gap: 6px; flex-wrap: wrap; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--line); transition: background .3s; }
+  .dot.now { background: var(--accent); transform: scale(1.25); }
+  .dot.g { background: var(--good); } .dot.o { background: var(--ok); } .dot.b { background: var(--bad); }
+
+  .stage { text-align: center; }
+  .prompt { color: var(--muted); font-size: 18px; margin-bottom: 14px; }
+  .prompt b { color: var(--ink); }
+  .bench { display: flex; justify-content: center; min-height: 140px; align-items: center; }
+  .word {
+    display: inline-flex; align-items: stretch; font-weight: 700; line-height: 1.15;
+    font-size: var(--fs, clamp(40px, 8vw, 76px));
+    background: var(--bg2); border-radius: 20px; padding: 10px 22px 34px;
+  }
+  .word.plain { padding-bottom: 10px; }
+  .pop { animation: pop .45s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes pop { from { transform: scale(.3) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* Schere: Lücken zwischen den Buchstaben */
+  .gap {
+    position: relative; width: 12px; border: 0; padding: 0; margin: 0; background: transparent; color: var(--accent);
+    font: inherit; cursor: pointer; transition: width .15s;
+  }
+  .gap::before { content: ""; position: absolute; inset: -10px -9px; }
+  .gap::after {
+    content: ""; position: absolute; left: 50%; top: 12%; bottom: 0; border-left: 2px dashed var(--line);
+    transform: translateX(-50%); transition: border-color .15s;
+  }
+  .gap:hover::after { border-color: var(--accent); }
+  .gap span { display: none; }
+  .gap.on { width: .55em; }
+  .gap.on::after { display: none; }
+  .gap.on span { display: block; animation: snip .25s ease-out; }
+  .gap.bad { color: var(--bad); animation: shake .35s; }
+  .gap.bad span { text-decoration: line-through; text-decoration-thickness: 4px; }
+  .gap.miss::after { border-left: 3px dashed var(--good); }
+  @keyframes snip { from { transform: scale(2) rotate(-20deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  .scissors { font-size: 26px; color: var(--muted); margin-bottom: 4px; }
+
+  /* Gelöstes Wort: Silbenbögen + Regel-Kreise */
+  .syl { position: relative; padding: 0 3px; }
+  .syl::after {
+    content: ""; position: absolute; left: 2px; right: 2px; bottom: -10px; height: 14px;
+    border: 3px solid var(--accent); border-top: 0; border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  }
+  .cut { position: relative; color: var(--accent); padding: 0 1px; }
+  .no { position: relative; width: 0; }
+  .badge {
+    position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%);
+    width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+    font-size: 14px; font-style: normal; font-weight: 700; color: #fff; line-height: 1;
+  }
+  .no .badge { background: var(--r2); }
+  .no .badge::after { content: ""; position: absolute; width: 30px; height: 3px; background: var(--r2); transform: rotate(-45deg); opacity: .7; }
+  .no::before { content: ""; position: absolute; top: 15%; bottom: 0; left: -1px; border-left: 2px dotted var(--r2); }
+
+  .feedback { min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; margin-top: 14px; }
+  .feedback .head { font-size: 26px; font-weight: 700; }
+  .feedback .sub { color: var(--muted); font-size: 17px; line-height: 1.45; max-width: 680px; }
+  .feedback .sub b { color: var(--ink); }
+  .why { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; text-align: left; }
+  .why div { display: flex; gap: 8px; align-items: flex-start; font-size: 16px; color: var(--ink); }
+  .why .n { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; margin-top: 1px; }
+
+  .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 14px; justify-content: center; margin: 22px 0 6px; }
+  .choice {
+    border: 3px solid var(--line); background: var(--card); color: var(--ink); border-radius: 20px;
+    padding: 12px 18px; font: inherit; font-size: clamp(22px, 4vw, 32px); font-weight: 700; cursor: pointer;
+    transition: transform .12s, border-color .12s, background .12s; box-shadow: 0 5px 0 var(--line);
+  }
+  .choice small { display: block; font-size: 13px; font-weight: 500; color: var(--muted); }
+  .choice:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--accent); }
+  .choice:disabled { cursor: default; }
+  .choice.right { border-color: var(--good); background: color-mix(in srgb, var(--good) 14%, var(--card)); }
+  .choice.wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--card)); animation: shake .35s; }
+  .choice.dim { opacity: .4; }
+  @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+  .tools { display: none; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+  .actions { display: flex; justify-content: center; min-height: 58px; margin-top: 8px; }
+  .actions .big-btn { visibility: hidden; }
+  .actions .big-btn.show { visibility: visible; animation: pop .3s ease-out; }
+  .hint { text-align: center; color: var(--muted); font-size: 14px; }
+
+  /* ---------- Ende ---------- */
+  #end { display: none; text-align: center; }
+  #end h2 { font-size: clamp(28px, 5vw, 42px); margin: 0; }
+  .stars { font-size: 46px; letter-spacing: 6px; margin: 6px 0; }
+  .stars .off { opacity: .2; filter: grayscale(1); }
+  .total { font-size: 22px; color: var(--muted); margin-bottom: 4px; }
+  .total b { color: var(--accent); font-size: 34px; }
+  .newbest { color: var(--good); font-weight: 700; min-height: 24px; }
+  .recap { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin: 22px 0; text-align: left; }
+  .rcp { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; }
+  .rcp .w { font-size: 20px; font-weight: 700; }
+  .rcp .d { font-size: 13px; color: var(--muted); line-height: 1.3; }
+  .rcp.g { border-color: var(--good); } .rcp.o { border-color: var(--ok); } .rcp.b { border-color: var(--bad); }
+  .end-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .ghost-btn { background: transparent; color: var(--ink); border: 2px solid var(--line); border-radius: 16px; padding: 12px 24px; font: inherit; font-size: 18px; cursor: pointer; }
+  .ghost-btn:hover { border-color: var(--accent); }
+
+  dialog { border: 0; border-radius: 24px; padding: 24px; background: var(--card); color: var(--ink); max-width: min(900px, calc(100vw - 32px)); box-shadow: var(--shadow); }
+  dialog::backdrop { background: rgba(20, 15, 40, .45); }
+  dialog h3 { margin: 0 0 14px; font-size: 24px; }
+  dialog .rules { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); margin-bottom: 16px; }
+  dialog .tz { color: var(--muted); font-size: 15px; margin: 0 0 16px; }
+
+  .confetti { position: fixed; top: -12px; width: 10px; height: 14px; border-radius: 2px; pointer-events: none; z-index: 50; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); } }
+
+  @media (max-width: 860px) { .rules { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 700px) {
+    .levels { grid-template-columns: 1fr; }
+    .choices { grid-template-columns: 1fr; }
+    .word { padding: 8px 12px 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Silben<span>-Schere</span> ✂️</h1>
+    <div style="display:flex; gap:8px">
+      <a class="icon-btn" href="../index.html" style="text-decoration:none" title="Alle Minispiele">☰</a>
+      <button class="icon-btn" id="rulesBtn" title="Trennregeln">📒 Regeln</button>
+      <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
+      <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
+    </div>
+  </header>
+
+  <!-- Start -->
+  <section id="start" class="card">
+    <h2>Wörter trennen</h2>
+    <p>Schneide die Wörter in Silben! Für die Trennung von Wörtern gibt es Regeln:</p>
+    <div class="rules" id="startRules"></div>
+    <div class="levels" id="levels">
+      <button class="level" data-level="leicht"><b>Leicht</b><small>Die richtige Trennung unter vier finden</small><div class="best"></div></button>
+      <button class="level" data-level="mittel"><b>Mittel</b><small>Selbst schneiden – du weißt, wie viele Striche fehlen</small><div class="best"></div></button>
+      <button class="level" data-level="schwer"><b>Schwer</b><small>Selbst schneiden – ganz ohne Hilfe</small><div class="best"></div></button>
+    </div>
+    <div class="topics" id="topics"><span class="lbl">Wörter mit:</span></div>
+    <button class="big-btn" id="playBtn">Los geht's!</button>
+    <div class="options">
+      <label>Runden:
+        <select id="roundsOpt" class="icon-btn" style="padding:4px 8px">
+          <option>5</option><option selected>10</option><option>15</option><option>20</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- Spiel -->
+  <section id="game">
+    <div class="hud">
+      <div class="pill">Wort <em id="roundNo">1</em> / <span id="roundMax">10</span></div>
+      <div class="dots" id="dots"></div>
+      <div class="pill">Punkte <em id="scoreNo">0</em></div>
+    </div>
+
+    <div class="card">
+      <div class="stage">
+        <div class="prompt" id="prompt"></div>
+        <div class="bench" id="bench"></div>
+        <div class="choices" id="choices"></div>
+        <div class="tools" id="tools">
+          <button class="ghost-btn" id="clearBtn">Alle Striche weg</button>
+          <button class="big-btn" id="checkBtn">Prüfen ✓</button>
+        </div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+      <div class="actions"><button class="big-btn" id="nextBtn">Weiter →</button></div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </section>
+
+  <!-- Ende -->
+  <section id="end" class="card">
+    <h2 id="endTitle">Geschafft!</h2>
+    <div class="stars" id="stars"></div>
+    <div class="total"><b id="endScore">0</b> von <span id="endMax">10</span> Punkten</div>
+    <div class="newbest" id="newBest"></div>
+    <div class="recap" id="recap"></div>
+    <div class="end-actions">
+      <button class="big-btn" id="againBtn">Nochmal</button>
+      <button class="ghost-btn" id="practiceBtn">Fehlerwörter üben</button>
+      <button class="ghost-btn" id="menuBtn">Anderes Level</button>
+    </div>
+  </section>
+</div>
+
+<dialog id="rulesDlg">
+  <h3>📒 Regeln für die Worttrennung</h3>
+  <div class="rules" id="dlgRules"></div>
+  <p class="tz"><b>Tipp für tz:</b> t und z sind zwei Konsonanten – das z kommt in die neue Silbe: Kat-ze, sit-zen. Bei zusammengesetzten Wörtern gilt Regel 5: Schutz-an-zug.</p>
+  <button class="big-btn" id="dlgClose">Alles klar</button>
+</dialog>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Regeln (wie im Arbeitsheft) ----------
+  const RULES = {
+    1: { t: "Wir trennen nach Sprechsilben.", e: "Kä-fer, Lo-ko-mo-ti-ve, El-tern" },
+    2: { t: "Ein einzelner Vokal am Wortanfang oder -ende wird nicht abgetrennt.", e: "Uhu, Ra-dio, Amei-se, über-que-ren" },
+    3: { t: "Bei mehreren Konsonanten kommt der letzte zur neuen Silbe.", e: "Mit-tag, sit-zen, imp-fen, Äs-te" },
+    4: { t: "ch, ck und sch gelten als ein Laut und bleiben zusammen.", e: "rie-chen, Bä-cker, Fla-sche" },
+    5: { t: "Zusammengesetzte Wörter werden in ihre Bausteine zerlegt.", e: "Er-leb-nis, Ab-fall, Voll-korn-brot" }
+  };
+  const ruleCards = () => Object.entries(RULES).map(([n, r]) =>
+    `<div class="rc5"><div class="n bg${n}">${n}</div><div class="t">${r.t}</div><div class="e">${r.e}</div></div>`).join("");
+  $("startRules").innerHTML = ruleCards();
+  $("dlgRules").innerHTML = ruleCards();
+
+  // ---------- Wörter ----------
+  // "-" = Trennstelle, "+" = Trennstelle zwischen Bausteinen (Regel 5),
+  // "|" = hier darf NICHT getrennt werden, weil ein einzelner Vokal übrig bliebe (Regel 2)
+  const TOPICS = {
+    basis: { name: "Sprechsilben", words: [
+      "Kä-fer", "te-le-fo-nie-ren", "Lo-ko-mo-ti-ve", "El-tern", "fer-tig", "Kä-fig", "wie-der", "hei-ßen",
+      "er-le-ben", "Er-de", "blü-hen", "wer-fen", "drau-ßen", "Tie-re", "ges-tern", "Ärz-tin", "Skiz-ze",
+      "heu-te", "Städ-te", "Han-dy", "Bän-der", "nie-mals", "Mit-tag", "imp-fen", "Äs-te", "Ba-na-ne",
+      "To-ma-te", "Fens-ter", "Kis-te", "Wol-ke", "Lam-pe", "Ham-mer", "Win-ter", "Pa-pa-gei", "Kar-tof-fel", "Ap-fel"
+    ] },
+    vokal: { name: "einzelnem Vokal", words: [
+      "U|hu", "Ra-di|o", "A|mei-se", "ü|ber-que-ren", "E|he+paar", "A|horn", "E|le-fan-ten+kuh", "O|pe-ra-ti-on",
+      "O|ran-ge", "A|cker", "ü|ber-ra-schen", "E|cke", "I|gel", "A|bend", "O|fen", "E|sel", "U|fer", "O|ma",
+      "Vi-de|o", "Ka-ka|o"
+    ] },
+    laut: { name: "ch · ck · sch", words: [
+      "rie-chen", "la-chen", "Bä-cker", "pa-cken", "Fla-sche", "Fi-sche", "Ge-schich-te", "Zu-cker", "Brü-cke",
+      "Ja-cke", "Glo-cke", "wa-schen", "Ta-sche", "Kü-che", "Bü-cher", "Ku-chen", "Wä-sche", "Mü-cke",
+      "Schne-cke", "ko-chen", "Dra-chen", "Ma-schi-ne"
+    ] },
+    bau: { name: "Bausteinen", words: [
+      "Er+leb+nis", "Ab+fall", "Voll+korn+brot", "schreck+lich", "Haus+tür", "Fuß+ball", "Schul+ta-sche",
+      "Re-gen+bo-gen", "Son-nen+blu-me", "Kin-der+gar-ten", "Ge+burts+tag", "Ver+käu-fer", "Freund+schaft",
+      "Hand+schuh", "un+glück+lich", "Zahn+bürs-te", "Rad+weg", "Baum+haus"
+    ] },
+    tz: { name: "tz", words: [
+      "blit-zen", "letz-ter", "Pfüt-ze", "schüt-zen", "Schutz+an+zug", "Kat-ze", "Plät-ze", "Platz+hal-ter",
+      "krat-zen", "schmut-zig", "sit-zen", "plötz-lich", "Satz+an+fang", "Sät-ze", "Müt-ze", "Hit-ze", "Spat-zen", "Wit-ze"
+    ] }
+  };
+
+  const VOW = /[aeiouyäöü]/i;
+  function parse(src, topic) {
+    let text = "";
+    const cuts = new Map(), nocut = new Set();
+    for (const c of src) {
+      if (c === "-" || c === "+") cuts.set(text.length, c);
+      else if (c === "|") nocut.add(text.length);
+      else text += c;
+    }
+    return { id: text, text, src, topic, cuts, nocut };
+  }
+  const ALL = [];
+  for (const k in TOPICS) TOPICS[k].words.forEach(s => ALL.push(parse(s, k)));
+
+  // Welche Regel erklärt diese Trennstelle?
+  function ruleAt(w, p) {
+    if (w.cuts.get(p) === "+") return 5;
+    const L = w.text.slice(0, p).toLowerCase(), R = w.text.slice(p).toLowerCase();
+    if (/^(sch|ch|ck)/.test(R) || /(sch|ch|ck)$/.test(L)) return 4;
+    if (!VOW.test(L.at(-1)) && !VOW.test(R[0])) return 3;
+    return 1;
+  }
+  const isTz = (w, p) => w.text[p - 1] === "t" && w.text[p] === "z";
+  const hyph = (text, cuts) => [...text].map((c, i) => (cuts.has(i) ? "-" : "") + c).join("");
+  const sortedCuts = (w) => [...w.cuts.keys()].sort((a, b) => a - b);
+
+  // Gelöstes Wort mit Silbenbögen und Regel-Kreisen
+  function solvedHtml(w) {
+    let h = '<span class="syl">';
+    [...w.text].forEach((c, i) => {
+      if (w.cuts.has(i)) { const n = ruleAt(w, i); h += `</span><span class="cut">-<i class="badge bg${n}">${n}</i></span><span class="syl">`; }
+      else if (w.nocut.has(i)) h += `<span class="no"><i class="badge">2</i></span>`;
+      h += c;
+    });
+    return h + "</span>";
+  }
+
+  // Erklärungen zu den Regeln, die in diesem Wort vorkommen
+  function whyHtml(w) {
+    const used = new Set(sortedCuts(w).map(p => ruleAt(w, p)));
+    if (w.nocut.size) used.add(2);
+    const lines = [...used].sort().map(n => `<div><span class="n bg${n}">${n}</span><span>${RULES[n].t}</span></div>`);
+    if (sortedCuts(w).some(p => isTz(w, p))) lines.push(`<div><span class="n bg3">tz</span><span>Bei <b>tz</b> kommt das z in die neue Silbe.</span></div>`);
+    if (!w.cuts.size) lines.push(`<div><span class="n" style="background:var(--muted)">!</span><span><b>${w.text}</b> wird gar nicht getrennt.</span></div>`);
+    return `<div class="why">${lines.join("")}</div>`;
+  }
+
+  // ---------- Speicher (nur Komfort, darf fehlen) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("silben:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem("silben:" + k, JSON.stringify(v)); } catch {} }
+  };
+
+  // ---------- Ton ----------
+  let ac = null;
+  let soundOn = store.get("sound", true);
+  const soundBtn = $("soundBtn");
+  const paintSound = () => soundBtn.textContent = soundOn ? "🔊" : "🔇";
+  paintSound();
+  soundBtn.onclick = () => { soundOn = !soundOn; store.set("sound", soundOn); paintSound(); };
+  function tone(freq, start, dur, type = "triangle", vol = .18) {
+    if (!soundOn) return;
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      const t = ac.currentTime + start;
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(vol, t + .01);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(g).connect(ac.destination);
+      o.start(t); o.stop(t + dur + .02);
+    } catch {}
+  }
+  const sfx = {
+    snip() { tone(1400, 0, .05, "square", .05); tone(900, .04, .06, "square", .05); },
+    good() { [523, 659, 784].forEach((f, i) => tone(f, i * .08, .25)); },
+    ok() { tone(440, 0, .2); tone(523, .1, .25); },
+    bad() { tone(220, 0, .3, "sawtooth", .08); tone(185, .12, .35, "sawtooth", .08); },
+    end() { [392, 523, 659, 784, 659, 784].forEach((f, i) => tone(f, i * .12, .3)); }
+  };
+
+  // ---------- Startseite ----------
+  let level = store.get("level", "leicht");
+  let topics = store.get("topics", Object.keys(TOPICS)).filter(k => TOPICS[k]);
+  if (!topics.length) topics = Object.keys(TOPICS);
+  let state = null;
+
+  const levelBtns = [...document.querySelectorAll(".level")];
+  function paintLevels() {
+    levelBtns.forEach(b => {
+      b.classList.toggle("sel", b.dataset.level === level);
+      const best = store.get("best:" + b.dataset.level, null);
+      b.querySelector(".best").textContent = best ? `Rekord: ${best.pct} %` : "";
+    });
+  }
+  levelBtns.forEach(b => b.onclick = () => { level = b.dataset.level; store.set("level", level); paintLevels(); });
+
+  for (const k in TOPICS) {
+    const b = document.createElement("button");
+    b.className = "chip"; b.dataset.k = k; b.textContent = TOPICS[k].name;
+    b.onclick = () => {
+      if (topics.includes(k)) { if (topics.length > 1) topics = topics.filter(x => x !== k); }
+      else topics.push(k);
+      store.set("topics", topics); paintTopics();
+    };
+    $("topics").appendChild(b);
+  }
+  const paintTopics = () => document.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", topics.includes(b.dataset.k)));
+  $("roundsOpt").value = String(store.get("rounds", 10));
+  paintLevels(); paintTopics();
+
+  function show(id) {
+    ["start", "game", "end"].forEach(s => $(s).style.display = s === id ? (s === "game" ? "flex" : "block") : "none");
+  }
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  // Abwechselnd aus den gewählten Themen, keines doppelt
+  function drawWords(count, pool) {
+    if (pool) { const out = []; while (out.length < count) out.push(...shuffle([...pool])); return out.slice(0, count); }
+    const bags = Object.fromEntries(topics.map(k => [k, shuffle(ALL.filter(w => w.topic === k))]));
+    const out = [];
+    let i = 0;
+    while (out.length < count) {
+      const k = topics[i++ % topics.length];
+      if (!bags[k].length) bags[k] = shuffle(ALL.filter(w => w.topic === k));
+      out.push(bags[k].pop());
+    }
+    return shuffle(out);
+  }
+
+  function startGame(pool) {
+    if (pool && !pool.length) pool = null;
+    const rounds = pool ? Math.min(10, Math.max(5, pool.length * 2)) : Number($("roundsOpt").value);
+    if (!pool) store.set("rounds", rounds);
+    state = { rounds, round: 0, score: 0, results: [], locked: false };
+    state.words = drawWords(rounds, pool);
+    $("roundMax").textContent = rounds;
+    $("dots").innerHTML = state.words.map(() => '<div class="dot"></div>').join("");
+    show("game");
+    nextRound();
+  }
+
+  // ---------- Runde ----------
+  const fontFor = (w) => w.text.length > 10 ? "--fs:clamp(28px, 6.2vw, 62px);" : w.text.length > 7 ? "--fs:clamp(34px, 7vw, 70px);" : "";
+
+  function nextRound() {
+    const w = state.words[state.round];
+    state.locked = false;
+    state.tries = 0;
+    state.cuts = new Set();
+    $("roundNo").textContent = state.round + 1;
+    $("scoreNo").textContent = String(state.score).replace(".", ",");
+    $("feedback").innerHTML = "";
+    $("nextBtn").classList.remove("show");
+    [...$("dots").children].forEach((d, k) => d.classList.toggle("now", k === state.round));
+    $("choices").innerHTML = "";
+
+    if (level === "leicht") {
+      $("tools").style.display = "none";
+      $("prompt").textContent = "Wie trennt man dieses Wort richtig?";
+      $("bench").innerHTML = `<div class="word plain pop" style="${fontFor(w)}">${w.text}</div>`;
+      const right = hyph(w.text, w.cuts);
+      $("choices").innerHTML = shuffle([right, ...distractors(w)]).map((v, i) =>
+        `<button class="choice" data-v="${v}">${v}${v === w.text ? "<small>gar nicht trennen</small>" : ""}</button>`).join("");
+      [...$("choices").children].forEach(b => b.onclick = () => pick(b));
+      $("hint").textContent = "Tipp: Sprich das Wort langsam und klatsche die Silben mit.";
+    } else {
+      $("tools").style.display = "flex";
+      $("checkBtn").disabled = false; $("clearBtn").disabled = false;
+      const n = w.cuts.size;
+      $("prompt").innerHTML = level === "mittel"
+        ? (n ? `Tippe zwischen die Buchstaben, wo du trennst. Das Wort braucht <b>${n} Trennstrich${n > 1 ? "e" : ""}</b>.` : `Tippe zwischen die Buchstaben, wo du trennst. Dieses Wort braucht <b>keinen</b> Trennstrich!`)
+        : "Tippe zwischen die Buchstaben, wo du trennst. Dann prüfen.";
+      renderCutter(w);
+      $("hint").textContent = "Wird ein Wort gar nicht getrennt, drück einfach auf Prüfen. Mit Enter prüfen.";
+    }
+  }
+
+  function renderCutter(w) {
+    let h = "";
+    [...w.text].forEach((c, i) => {
+      if (i > 0) h += `<button class="gap" data-p="${i}" aria-label="Trennstrich vor ${c}"><span>-</span></button>`;
+      h += `<span>${c}</span>`;
+    });
+    $("bench").innerHTML = `<div><div class="scissors">✂️</div><div class="word pop" id="cutter" style="${fontFor(w)} padding-bottom:10px">${h}</div></div>`;
+    $("cutter").querySelectorAll(".gap").forEach(g => g.onclick = () => {
+      if (state.locked) return;
+      const p = Number(g.dataset.p);
+      if (state.cuts.has(p)) state.cuts.delete(p); else { state.cuts.add(p); sfx.snip(); }
+      g.classList.toggle("on", state.cuts.has(p));
+      g.classList.remove("bad");
+    });
+  }
+
+  // Für „Leicht“: typische Fehler – Strich verrutscht, Strich fehlt, einzelner Vokal abgetrennt
+  function distractors(w) {
+    const right = sortedCuts(w);
+    const ok = (cs) => {
+      const s = [...cs].sort((a, b) => a - b), pts = [0, ...s, w.text.length];
+      for (let i = 1; i < pts.length; i++) if (pts[i] <= pts[i - 1] || !VOW.test(w.text.slice(pts[i - 1], pts[i]))) return false;
+      return true;
+    };
+    const first = [], second = [];
+    const add = (bucket, cs) => { if (ok(cs)) bucket.push(hyph(w.text, new Set(cs))); };
+    w.nocut.forEach(p => add(first, [...right, p]));
+    right.forEach((p, i) => [-1, 1].forEach(d => { const cs = [...right]; cs[i] = p + d; add(first, cs); }));
+    right.forEach((_, i) => add(second, right.filter((_, j) => j !== i)));
+    for (let p = 1; p < w.text.length; p++) if (!w.cuts.has(p)) add(second, [...right, p]);
+    right.forEach((p, i) => [-2, 2].forEach(d => { const cs = [...right]; cs[i] = p + d; add(second, cs); }));
+    const rightStr = hyph(w.text, w.cuts);
+    const out = [];
+    for (const v of [...shuffle(first), ...shuffle(second)]) if (v !== rightStr && !out.includes(v)) out.push(v);
+    return out.slice(0, 3);
+  }
+
+  function pick(btn) {
+    if (state.locked) return;
+    const w = state.words[state.round];
+    const right = hyph(w.text, w.cuts);
+    if (btn.dataset.v === right) {
+      btn.classList.add("right");
+      solve(w, state.tries === 0 ? 1 : 0.5, state.tries === 0 ? "g" : "o");
+      return;
+    }
+    state.tries++;
+    btn.classList.add("wrong"); btn.disabled = true;
+    sfx.bad();
+    const theirs = new Set(); let k = 0;
+    for (const c of btn.dataset.v) { if (c === "-") theirs.add(k); else k++; }
+    $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht!</div><div class="sub">${diagnose(w, theirs)}</div>`;
+    if (state.tries >= 2) {
+      [...$("choices").children].find(b => b.dataset.v === right).classList.add("right");
+      solve(w, 0, "b");
+    }
+  }
+
+  // Warum ist diese Trennstelle falsch?
+  function reasonFor(w, p) {
+    const t = w.text.toLowerCase(), a = t[p - 1], b = t[p];
+    if (w.nocut.has(p)) return `Ein <b>einzelner Vokal</b> am Anfang oder Ende wird nicht abgetrennt (Regel 2).`;
+    if ((a === "c" && (b === "h" || b === "k")) || (a === "s" && t.slice(p, p + 2) === "ch"))
+      return `<b>ch, ck</b> und <b>sch</b> gelten als ein Laut – die trennt man nicht (Regel 4).`;
+    if (b === "t" && t[p + 1] === "z") return `Bei <b>tz</b> kommt nur das <b>z</b> in die neue Silbe: Kat-ze.`;
+    if (["ei", "ai", "au", "eu", "äu", "ie", "aa", "ee", "oo"].includes(a + b)) return `<b>${a + b}</b> wird zusammen gesprochen und bleibt in einer Silbe.`;
+    const near = [p - 1, p + 1].find(q => w.cuts.has(q));
+    if (near) {
+      const n = ruleAt(w, near);
+      if (n === 3) return `Fast! Der Strich sitzt einen Buchstaben daneben. Bei mehreren Konsonanten kommt <b>der letzte</b> zur neuen Silbe (Regel 3).`;
+      if (n === 5) return `Fast! Der Strich sitzt einen Buchstaben daneben. Zerlege das Wort in seine <b>Bausteine</b> (Regel 5).`;
+      if (n === 4) return `Fast! Der Strich sitzt einen Buchstaben daneben. <b>ch, ck, sch</b> bleiben zusammen (Regel 4).`;
+      return `Fast! Der Strich sitzt einen Buchstaben daneben. Ein einzelner Konsonant kommt zur neuen Silbe: Kä-fer.`;
+    }
+    return `Da ist keine Silbengrenze. Sprich das Wort langsam und klatsche mit (Regel 1).`;
+  }
+
+  function diagnose(w, cuts) {
+    const wrong = [...cuts].filter(p => !w.cuts.has(p)).sort((a, b) => a - b);
+    const missing = [...w.cuts.keys()].filter(p => !cuts.has(p));
+    const parts = [];
+    if (wrong.length) parts.push(reasonFor(w, wrong[0]));
+    if (missing.length && !wrong.length) parts.push(missing.length === 1 ? "Es fehlt noch <b>ein</b> Trennstrich." : `Es fehlen noch <b>${missing.length}</b> Trennstriche.`);
+    else if (missing.length > wrong.length) parts.push("Außerdem fehlt noch ein Trennstrich.");
+    return parts.join(" ");
+  }
+
+  function checkCuts() {
+    if (state.locked || level === "leicht") return;
+    const w = state.words[state.round];
+    const wrong = [...state.cuts].filter(p => !w.cuts.has(p));
+    const missing = [...w.cuts.keys()].filter(p => !state.cuts.has(p));
+    if (!wrong.length && !missing.length) { solve(w, state.tries === 0 ? 1 : 0.5, state.tries === 0 ? "g" : "o"); return; }
+    state.tries++;
+    sfx.bad();
+    const msg = diagnose(w, state.cuts);
+    if (state.tries >= 2) { solve(w, 0, "b", `Du hattest: <b>${hyph(w.text, state.cuts)}</b>`); return; }
+    $("cutter").querySelectorAll(".gap").forEach(g => g.classList.toggle("bad", wrong.includes(Number(g.dataset.p))));
+    $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht!</div><div class="sub">${msg} Ein Versuch noch.</div>`;
+  }
+
+  function solve(w, pts, cls, extra) {
+    state.locked = true;
+    state.score += pts;
+    [...$("choices").children].forEach(b => { b.disabled = true; if (!b.classList.contains("right")) b.classList.add("dim"); });
+    $("tools").style.display = "none";
+    $("bench").innerHTML = `<div class="word pop" style="${fontFor(w)}">${solvedHtml(w)}</div>`;
+    const head = cls === "g" ? ["Richtig! 🎉", "Super!", "Genau!", "Klasse geschnitten!"][Math.floor(Math.random() * 4)] : cls === "o" ? "Im zweiten Versuch!" : "So trennt man richtig:";
+    const color = cls === "g" ? "var(--good)" : cls === "o" ? "var(--ok)" : "var(--bad)";
+    $("feedback").innerHTML = `<div class="head" style="color:${color}">${head} <span style="color:var(--accent)">+${pts.toString().replace(".", ",")}</span></div>
+      <div class="sub">${extra ? extra : ""}${whyHtml(w)}</div>`;
+    $("scoreNo").textContent = String(state.score).replace(".", ",");
+    const dot = $("dots").children[state.round];
+    dot.classList.remove("now"); dot.classList.add(cls);
+    (cls === "g" ? sfx.good : cls === "o" ? sfx.ok : () => {})();
+    state.results.push({ w, pts, cls });
+    const nb = $("nextBtn");
+    nb.textContent = state.round + 1 >= state.rounds ? "Ergebnis ansehen" : "Weiter →";
+    nb.classList.add("show");
+    $("hint").textContent = "Mit Enter geht's weiter.";
+    setTimeout(() => nb.focus({ preventScroll: true }), 30);
+  }
+
+  function advance() {
+    if (!state || !state.locked) return;
+    state.round++;
+    if (state.round >= state.rounds) finish(); else nextRound();
+  }
+  $("nextBtn").onclick = advance;
+  $("checkBtn").onclick = checkCuts;
+  $("clearBtn").onclick = () => {
+    if (state.locked) return;
+    state.cuts.clear();
+    $("cutter").querySelectorAll(".gap").forEach(g => g.classList.remove("on", "bad"));
+  };
+  document.addEventListener("keydown", e => {
+    if ($("game").style.display !== "flex" || $("rulesDlg").open) return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (state.locked) advance(); else checkCuts();
+    } else if (!state.locked && level === "leicht" && /^[1-4]$/.test(e.key)) {
+      const b = $("choices").children[Number(e.key) - 1];
+      if (b && !b.disabled) pick(b);
+    }
+  });
+
+  // ---------- Ende ----------
+  const LEVEL_NAMES = { leicht: "Leicht", mittel: "Mittel", schwer: "Schwer" };
+  function finish() {
+    const pct = Math.round(state.score / state.rounds * 100);
+    const starCount = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 45 ? 1 : 0;
+    $("endTitle").textContent = ["Weiter üben!", "Gut gemacht!", "Super!", "Silben-Profi!"][starCount];
+    $("stars").innerHTML = [0, 1, 2].map(k => `<span class="${k < starCount ? "" : "off"}">⭐</span>`).join("");
+    $("endScore").textContent = String(state.score).replace(".", ",");
+    $("endMax").textContent = state.rounds;
+
+    const key = "best:" + level, best = store.get(key, null), name = LEVEL_NAMES[level];
+    if (!best || pct > best.pct) {
+      store.set(key, { pct, date: new Date().toISOString().slice(0, 10) });
+      $("newBest").textContent = best ? `Neuer Rekord auf „${name}“! (vorher ${best.pct} %)` : `Erster Rekord auf „${name}“: ${pct} %`;
+    } else $("newBest").textContent = `Rekord auf „${name}“: ${best.pct} %`;
+
+    $("recap").innerHTML = state.results.map(r => {
+      const d = r.cls === "g" ? "gleich richtig" : r.cls === "o" ? "im zweiten Versuch" : "nicht geschafft";
+      const shown = r.w.cuts.size ? hyph(r.w.text, r.w.cuts) : `${r.w.text} <small style="font-weight:500;color:var(--muted)">(nicht trennen)</small>`;
+      return `<div class="rcp ${r.cls}"><div class="w">${shown}</div><div class="d">${d}</div></div>`;
+    }).join("");
+    $("practiceBtn").style.display = state.results.some(r => r.cls !== "g") ? "" : "none";
+    show("end");
+    sfx.end();
+    if (starCount >= 2) confetti(starCount * 50);
+  }
+  function practicePool() {
+    const seen = new Set();
+    return state.results.filter(r => r.cls !== "g" && !seen.has(r.w.id) && seen.add(r.w.id)).map(r => r.w);
+  }
+
+  function confetti(n) {
+    const colors = ["#f25c54", "#f7b32b", "#4cc9f0", "#7b5cff", "#2ec27e", "#ff70a6"];
+    for (let k = 0; k < n; k++) {
+      const c = document.createElement("div");
+      c.className = "confetti";
+      c.style.left = Math.random() * 100 + "vw";
+      c.style.background = colors[k % colors.length];
+      c.style.setProperty("--dx", (Math.random() * 200 - 100) + "px");
+      c.style.setProperty("--rot", (Math.random() * 900 - 450) + "deg");
+      c.style.animationDuration = (1.4 + Math.random() * 1.6) + "s";
+      c.style.animationDelay = (Math.random() * .3) + "s";
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3600);
+    }
+  }
+
+  // ---------- Buttons ----------
+  $("playBtn").onclick = () => startGame();
+  $("againBtn").onclick = () => startGame();
+  $("practiceBtn").onclick = () => startGame(practicePool());
+  $("menuBtn").onclick = () => { paintLevels(); show("start"); };
+  $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
+  $("rulesBtn").onclick = () => $("rulesDlg").showModal();
+  $("dlgClose").onclick = () => $("rulesDlg").close();
+})();
+</script>
+</body>
+</html>

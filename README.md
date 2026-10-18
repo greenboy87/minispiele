@@ -7,6 +7,7 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Alphabet-Gefühl | `alphabet/` | Ein Buchstabe erscheint, man klickt auf einem Farbband (A links, Z rechts) dahin, wo er ungefähr im Alphabet steht. |
 | Nachsilben-Werkstatt | `nachsilben/` | Aus Nomen werden Adjektive: Mut → mutig, Herz → herzlich, Dank → dankbar (Deutsch, 4. Klasse). |
 | Die Adjektiv-Treppe | `adjektive/` | Adjektive steigern (groß – größer – am größten), nicht steigerbare Adjektive erkennen, mit wie/als/am vergleichen (Deutsch, 4. Klasse). |
+| Silben-Schere | `silben/` | Wörter nach den fünf Trennregeln in Silben schneiden: Kä-fer, Ra-dio, Mit-tag, Bä-cker, Ab-fall (Deutsch, 4. Klasse). |
 | Deutsch-Fachbegriffe | `fachbegriffe/` | Wortarten im Satz bestimmen und finden, Vokale und Konsonanten erkennen (4. Klasse / Unterstufe). |
 
 Start: `index.html` öffnen.
@@ -47,3 +48,12 @@ Start: `index.html` öffnen.
   - **wie, als oder am?** (10 Aufgaben) – Lückensätze, nach jeder Antwort wird die passende Regel eingeblendet.
 - Merkkasten mit Adjektivprobe, Vergleichsregeln, Tabelle der besonderen Adjektive und nicht steigerbaren Wörtern.
 - Aufgaben werden jedes Mal neu gemischt; bis zu 3 Sterne, bestes Ergebnis pro Runde lokal im Browser.
+
+## Silben-Schere
+
+- Die fünf Trennregeln aus dem Arbeitsheft stehen auf der Startseite und jederzeit unter 📒 Regeln: **1** Sprechsilben, **2** kein einzelner Vokal am Anfang/Ende (Uhu, Ra-dio), **3** bei mehreren Konsonanten kommt der letzte zur neuen Silbe (Mit-tag, sit-zen), **4** ch, ck, sch bleiben zusammen (Bä-cker), **5** zusammengesetzte Wörter in Bausteine zerlegen (Voll-korn-brot).
+- Drei Level: **Leicht** (richtige Trennung unter vier finden – die falschen sind typische Fehler wie Bäc-ker, O-fen, si-tzen), **Mittel** (selbst zwischen die Buchstaben tippen, die Zahl der Striche wird verraten), **Schwer** (selbst schneiden ohne Hilfe; Wörter ohne Trennung einfach so prüfen).
+- Themen wählbar: Sprechsilben, einzelner Vokal, ch · ck · sch, Bausteine, tz – alle Wörter aus dem Arbeitsheft plus weitere.
+- Nach jeder Antwort: Silbenbögen unter dem Wort und an jeder Trennstelle ein farbiger Kreis mit der passenden Regelnummer; verbotene Stellen (Regel 2) sind durchgestrichen markiert. Falsche Striche bekommen eine Begründung.
+- Punkte: 1 beim ersten Versuch, 0,5 beim zweiten. Am Ende Sterne, Rekord pro Level (lokal im Browser) und „Fehlerwörter üben“.
+- Wörter stehen oben im Skript: `-` = Trennstelle, `+` = Baustein-Grenze, `|` = hier nicht trennen (Regel 2), z. B. `O|pe-ra-ti-on`, `Schutz+an+zug`.
