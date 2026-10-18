@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Die Adjektiv-Treppe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Kalam:wght@400;700&display=swap">
+<style>
+/* Layout: eine Schultafel mit Holzrahmen; darin wechseln Startseite, drei Spielrunden und der Merkkasten.
+   Bewusst nur ein Look (Kreide auf Tafelgrün), unabhängig vom hellen/dunklen Modus. */
+:root{
+  --board:#2c4a3b;
+  --board-deep:#223b2f;
+  --wood:#8a5a34;
+  --wood-dark:#5e3b20;
+  --chalk:#f3f1e6;
+  --chalk-dim:#b9c7bd;
+  --yellow:#f2d977;
+  --pink:#f3a9b9;
+  --blue:#a6d4ea;
+  --green:#b5e3a1;
+  --red:#ff9b8a;
+  --font-display:"Kalam","Comic Sans MS","Segoe Print",cursive;
+  --font-body:"Andika","Trebuchet MS","Verdana",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0}
+body{
+  background:var(--wood-dark);
+  color:var(--chalk);
+  font-family:var(--font-body);
+  font-size:18px;
+  line-height:1.45;
+  padding-left:max(12px, env(safe-area-inset-left, 0px));
+  padding-right:max(12px, env(safe-area-inset-right, 0px));
+  padding-block:12px;
+  box-sizing:border-box;
+}
+*{box-sizing:border-box}
+.frame{
+  max-width:880px;margin:0 auto;min-height:calc(100% - 4px);
+  background:linear-gradient(135deg,var(--wood),var(--wood-dark));
+  border-radius:10px;padding:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,.45);
+}
+.board{
+  background:radial-gradient(ellipse at 30% 20%, #35574556 0%, transparent 60%), var(--board);
+  border-radius:4px;
+  min-height:calc(100dvh - 72px);
+  padding:clamp(16px,4vw,32px);
+  display:flex;flex-direction:column;gap:20px;
+  position:relative;overflow:hidden;
+}
+.board::after{ /* Kreidestaub */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.4px);
+  background-size:7px 9px;opacity:.6;
+}
+.board > *{position:relative;z-index:1}
+h1,h2,h3{font-family:var(--font-display);font-weight:700;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(34px,7vw,52px);color:var(--yellow)}
+h2{font-size:clamp(26px,5vw,36px)}
+p{margin:0}
+.muted{color:var(--chalk-dim)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.chip{font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:var(--chalk-dim)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--yellow);outline-offset:3px}
+.btn{
+  background:transparent;border:2px solid var(--chalk);border-radius:12px;
+  padding:10px 18px;font-weight:700;font-size:18px;
+}
+.btn:hover{background:rgba(255,255,255,.08)}
+.btn.primary{border-color:var(--yellow);color:var(--yellow)}
+.btn.small{font-size:15px;padding:6px 12px;border-width:1.5px}
+
+/* Startseite */
+.intro{display:flex;flex-direction:column;gap:10px;max-width:60ch}
+.mini-stairs{display:flex;align-items:flex-end;gap:6px;flex-wrap:wrap;font-family:var(--font-display);font-size:clamp(20px,4vw,28px)}
+.mini-stairs span{border-bottom:3px solid currentColor;padding:0 6px}
+.mini-stairs span:nth-child(1){color:var(--chalk)}
+.mini-stairs span:nth-child(2){color:var(--blue);margin-bottom:14px}
+.mini-stairs span:nth-child(3){color:var(--pink);margin-bottom:28px}
+.rounds{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.round-card{
+  text-align:left;background:var(--board-deep);border:2px dashed var(--chalk-dim);border-radius:14px;
+  padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0;
+}
+.round-card:hover{border-color:var(--yellow);border-style:solid}
+.round-card .num{font-family:var(--font-display);color:var(--yellow);font-size:20px}
+.round-card h3{font-size:26px}
+.round-card .best{font-size:15px;color:var(--chalk-dim);margin-top:auto}
+.stars{color:var(--yellow);letter-spacing:2px}
+.stars .off{color:rgba(255,255,255,.18)}
+
+/* Spielbereich */
+.progress{display:flex;gap:6px;flex-wrap:wrap}
+.progress i{width:14px;height:14px;border-radius:50%;border:2px solid var(--chalk-dim);display:block}
+.progress i.ok{background:var(--green);border-color:var(--green)}
+.progress i.miss{background:var(--red);border-color:var(--red)}
+.progress i.now{border-color:var(--yellow);box-shadow:0 0 0 2px var(--yellow)}
+.task{display:flex;flex-direction:column;gap:18px}
+.prompt{font-size:clamp(20px,3.6vw,24px)}
+.prompt b{color:var(--yellow);font-family:var(--font-display);font-size:1.3em}
+
+.stairs{display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:6px;max-width:640px;width:100%}
+.step{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0}
+.slot{
+  min-height:52px;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--font-display);font-size:clamp(19px,4vw,28px);font-weight:700;padding:4px;
+  border-bottom:3px dashed var(--chalk-dim);overflow-wrap:anywhere;line-height:1.1;
+}
+.slot.active{border-bottom-color:var(--yellow);animation:blink 1.2s ease-in-out infinite}
+.slot.filled{border-bottom-style:solid}
+.block{
+  border:2px solid var(--chalk);border-bottom:none;border-radius:6px 6px 0 0;
+  display:flex;align-items:flex-start;justify-content:center;padding-top:6px;
+  font-size:clamp(12px,2.6vw,15px);font-weight:700;letter-spacing:.03em;text-align:center;
+}
+.step:nth-child(1) .block{height:40px;color:var(--chalk)}
+.step:nth-child(2) .block{height:80px;color:var(--blue);border-color:var(--blue)}
+.step:nth-child(3) .block{height:120px;color:var(--pink);border-color:var(--pink)}
+.step:nth-child(1) .slot.filled{color:var(--chalk)}
+.step:nth-child(2) .slot.filled{color:var(--blue)}
+.step:nth-child(3) .slot.filled{color:var(--pink)}
+.floor{height:3px;background:var(--chalk);max-width:640px;width:100%;margin-top:-18px}
+
+.bank{display:flex;flex-wrap:wrap;gap:10px}
+.word{
+  background:var(--chalk);color:var(--board-deep);border:none;border-radius:10px;
+  padding:10px 16px;font-size:20px;font-weight:700;box-shadow:0 3px 0 rgba(0,0,0,.35);
+}
+.word:hover{transform:translateY(-1px)}
+.word:disabled{opacity:0;pointer-events:none}
+.word.wrong{background:var(--red);animation:shake .4s}
+
+.choices{display:flex;flex-wrap:wrap;gap:12px}
+.choice{
+  background:transparent;border:2px solid var(--chalk);border-radius:14px;
+  padding:12px 20px;font-size:21px;font-weight:700;min-width:96px;
+}
+.choice:hover:not(:disabled){background:rgba(255,255,255,.08)}
+.choice.right{border-color:var(--green);color:var(--green);background:rgba(181,227,161,.12)}
+.choice.wrong{border-color:var(--red);color:var(--red);animation:shake .4s}
+.choice:disabled{cursor:default}
+.choice.big{flex:1 1 220px;font-size:20px}
+
+.sentence{font-size:clamp(22px,4.4vw,30px);font-family:var(--font-display);line-height:1.5}
+.gap{display:inline-block;min-width:3.4em;border-bottom:3px solid var(--yellow);text-align:center;color:var(--yellow);padding:0 4px}
+.gap.done{color:var(--green);border-color:var(--green)}
+.big-word{font-family:var(--font-display);font-size:clamp(40px,9vw,64px);color:var(--yellow);line-height:1}
+
+.feedback{
+  border-left:4px solid var(--chalk-dim);padding:8px 14px;background:rgba(0,0,0,.15);border-radius:0 10px 10px 0;
+  display:flex;flex-direction:column;gap:4px;max-width:62ch;
+}
+.feedback.good{border-color:var(--green)}
+.feedback.bad{border-color:var(--red)}
+.feedback strong{font-family:var(--font-display);font-size:22px}
+.feedback.good strong{color:var(--green)}
+.feedback.bad strong{color:var(--red)}
+.rule{display:inline-block;font-size:14px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;color:var(--board-deep);padding:2px 8px;border-radius:6px;margin-right:6px}
+.rule.g{background:var(--chalk)}
+.rule.h{background:var(--blue)}
+.rule.s{background:var(--pink)}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+
+/* Ergebnis */
+.result{display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.result .stars{font-size:52px}
+.score{font-family:var(--font-display);font-size:30px}
+
+/* Merkkasten */
+.merk{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.merk section{border:2px solid var(--chalk-dim);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.merk h3{font-size:24px;color:var(--yellow)}
+.merk ol,.merk ul{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.ex{font-family:var(--font-display);font-size:20px}
+.ex .h{color:var(--blue)} .ex .s{color:var(--pink)}
+table.st{border-collapse:collapse;width:100%;font-size:17px}
+table.st th,table.st td{padding:4px 6px;text-align:left;border-bottom:1px solid rgba(255,255,255,.18)}
+table.st th{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--chalk-dim)}
+table.st td:nth-child(2){color:var(--blue)} table.st td:nth-child(3){color:var(--pink)}
+.tablewrap{overflow-x:auto}
+
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes blink{50%{border-bottom-color:transparent}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:480px){
+  body{font-size:17px}
+  .frame{padding:8px}
+  .word{font-size:18px;padding:9px 13px}
+}
+</style>
+</head>
+<body>
+<div class="frame"><main class="board" id="app" aria-live="polite"></main></div>
+
+<script>
+(function(){
+const $app = document.getElementById('app');
+
+/* ---------- Daten ---------- */
+// [Grundstufe, Höherstufe, Höchststufe, Falschwörter…, besonders?]
+const TREPPE = [
+  {w:['groß','größer','am größten'], d:['großer','am großten','am größesten']},
+  {w:['alt','älter','am ältesten'], d:['alter','am altesten','am ältsten']},
+  {w:['schwer','schwerer','am schwersten'], d:['schwehrer','am schweresten','am schwerersten']},
+  {w:['klein','kleiner','am kleinsten'], d:['kleinerer','am kleinesten','am kleinersten']},
+  {w:['jung','jünger','am jüngsten'], d:['junger','am jungsten','am jüngesten']},
+  {w:['lang','länger','am längsten'], d:['langer','am langsten','am längesten']},
+  {w:['warm','wärmer','am wärmsten'], d:['warmer','am warmsten','am wärmesten']},
+  {w:['laut','lauter','am lautesten'], d:['lauterer','am lautsten','am lautersten']},
+  {w:['schön','schöner','am schönsten'], d:['schönerer','am schönesten','am schönersten']},
+  {w:['lustig','lustiger','am lustigsten'], d:['lustigerer','am lustigesten','am lustigersten']},
+  {w:['riesig','riesiger','am riesigsten'], d:['riesigerer','am riesigesten','am riesigersten']},
+  {w:['gut','besser','am besten'], d:['guter','am gutesten','am bessersten'], x:1},
+  {w:['viel','mehr','am meisten'], d:['vieler','am vielsten','am mehrsten'], x:1},
+  {w:['hoch','höher','am höchsten'], d:['hocher','am hochsten','am höhersten'], x:1},
+  {w:['nah','näher','am nächsten'], d:['naher','am nahesten','am nähesten'], x:1},
+];
+
+const STEIGERN = [
+  {w:'weich', ok:['weich','weicher','am weichsten']},
+  {w:'kalt', ok:['kalt','kälter','am kältesten']},
+  {w:'teuer', ok:['teuer','teurer','am teuersten']},
+  {w:'mutig', ok:['mutig','mutiger','am mutigsten']},
+  {w:'dünn', ok:['dünn','dünner','am dünnsten']},
+  {w:'hell', ok:['hell','heller','am hellsten']},
+  {w:'gut', ok:['gut','besser','am besten']},
+  {w:'rund', why:'Rund ist eine <b>Form</b>. Ein Ball ist rund – runder als rund geht nicht.'},
+  {w:'quadratisch', why:'Quadratisch ist eine <b>Form</b>. Ein Quadrat ist quadratisch oder eben nicht.'},
+  {w:'dreieckig', why:'Dreieckig ist eine <b>Form</b>. Etwas hat drei Ecken oder nicht.'},
+  {w:'rot', why:'Rot ist eine <b>Farbe</b>. Farben steigert man nicht.'},
+  {w:'blau', why:'Blau ist eine <b>Farbe</b>. Farben steigert man nicht.'},
+  {w:'grün', why:'Grün ist eine <b>Farbe</b>. Farben steigert man nicht.'},
+  {w:'kaputt', why:'Kaputt ist <b>endgültig</b>. Kaputt ist kaputt – kaputter geht nicht.'},
+  {w:'tot', why:'Tot ist <b>endgültig</b>. Tot ist tot – toter geht nicht.'},
+];
+
+// t: Satz mit ___ als Lücke; o: Auswahl; a: richtige Antwort; r: g/h/s (Stufe)
+const SAETZE = [
+  {t:'Olivia ist genauso alt ___ Laura.', o:['wie','als','am'], a:'wie', r:'g'},
+  {t:'Frieda ist älter ___ Anna.', o:['wie','als','am'], a:'als', r:'h'},
+  {t:'Abdullah ist ___ ältesten.', o:['wie','als','am'], a:'am', r:'s'},
+  {t:'Der Elefant ist schwerer ___ die Maus.', o:['wie','als','am'], a:'als', r:'h'},
+  {t:'Mein Fahrrad ist genauso schnell ___ dein Fahrrad.', o:['wie','als','am'], a:'wie', r:'g'},
+  {t:'Frieda ist ___ als Anna.', o:['alt','älter','am ältesten'], a:'älter', r:'h'},
+  {t:'Olivia ist genauso ___ wie Laura.', o:['alt','älter','am ältesten'], a:'alt', r:'g'},
+  {t:'Von allen Bergen der Welt ist der Mount Everest ___.', o:['hoch','höher','am höchsten'], a:'am höchsten', r:'s'},
+  {t:'Der Bäcker ist ___ als der Bahnhof.', o:['nah','näher','am nächsten'], a:'näher', r:'h'},
+  {t:'Lea hat ___ Murmeln als Tim.', o:['viel','mehr','am meisten'], a:'mehr', r:'h'},
+  {t:'Ben rechnet genauso ___ wie Mia.', o:['gut','besser','am besten'], a:'gut', r:'g'},
+  {t:'Von allen Kindern liest Ida ___.', o:['gut','besser','am besten'], a:'am besten', r:'s'},
+  {t:'Die Giraffe ist größer ___ das Zebra.', o:['wie','als','am'], a:'als', r:'h'},
+  {t:'Im Sommer ist es ___ wärmsten.', o:['wie','als','am'], a:'am', r:'s'},
+];
+
+const RULE = {
+  g:'<span class="rule g">Grundstufe</span>Gleich groß, gleich alt … → <b>genauso … wie</b>',
+  h:'<span class="rule h">Höherstufe</span>Zwei sind verschieden → <b>… als</b>',
+  s:'<span class="rule s">Höchststufe</span>Einer übertrifft alle → <b>am …sten</b>',
+};
+
+const ROUNDS = [
+  {id:'treppe', title:'Treppe bauen', text:'Lege die drei Stufen eines Adjektivs: Grundstufe, Höherstufe, Höchststufe.', n:8},
+  {id:'steigern', title:'Steigern oder nicht?', text:'Manche Adjektive kann man nicht steigern: Formen, Farben und endgültige Wörter.', n:10},
+  {id:'wie-als', title:'wie, als oder am?', text:'Vergleiche richtig: genauso alt wie, älter als, am ältesten.', n:10},
+];
+
+/* ---------- Hilfen ---------- */
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const best = {};
+try { Object.assign(best, JSON.parse(localStorage.getItem('adjektiv-treppe-best')||'{}')); } catch(e){}
+function saveBest(id, stars){
+  if((best[id]||0) >= stars) return;
+  best[id] = stars;
+  try { localStorage.setItem('adjektiv-treppe-best', JSON.stringify(best)); } catch(e){}
+}
+function starsHtml(n){ let s=''; for(let i=0;i<3;i++) s += i<n ? '★' : '<span class="off">★</span>'; return '<span class="stars" aria-label="'+n+' von 3 Sternen">'+s+'</span>'; }
+function starsFor(score,total){ const p=score/total; return p>=.9?3:p>=.7?2:p>=.4?1:0; }
+
+let G = null; // laufendes Spiel
+
+/* ---------- Startseite ---------- */
+function home(){
+  G = null;
+  $app.innerHTML = `
+    <div class="topbar"><span class="chip">Deutsch · 4. Klasse</span>
+      <button class="btn small" data-act="merk">Merkkasten</button></div>
+    <div class="intro">
+      <h1>Die Adjektiv-Treppe</h1>
+      <div class="mini-stairs" aria-hidden="true"><span>groß</span><span>größer</span><span>am größten</span></div>
+      <p>Adjektive kann man steigern. Jede Stufe ist eine Treppenstufe höher: <b>Grundstufe</b>, <b>Höherstufe</b>, <b>Höchststufe</b>. Wähle eine Runde.</p>
+    </div>
+    <div class="rounds">
+      ${ROUNDS.map((r,i)=>`
+        <button class="round-card" data-round="${i}">
+          <span class="num">Runde ${i+1}</span>
+          <h3>${r.title}</h3>
+          <span class="muted">${r.text}</span>
+          <span class="best">${best[r.id]!=null ? 'Bestes Ergebnis: '+starsHtml(best[r.id]) : r.n+' Aufgaben'}</span>
+        </button>`).join('')}
+    </div>`;
+}
+
+/* ---------- Runde starten ---------- */
+function start(ri){
+  const r = ROUNDS[ri];
+  let items;
+  if(r.id==='treppe'){
+    const special = shuffle(TREPPE.filter(t=>t.x)).slice(0,3);
+    const normal = shuffle(TREPPE.filter(t=>!t.x)).slice(0, r.n - special.length);
+    items = shuffle(normal.concat(special));
+  } else if(r.id==='steigern'){
+    const ja = shuffle(STEIGERN.filter(t=>t.ok)).slice(0,5);
+    const nein = shuffle(STEIGERN.filter(t=>!t.ok)).slice(0,5);
+    items = shuffle(ja.concat(nein));
+  } else {
+    items = shuffle(SAETZE).slice(0, r.n);
+  }
+  G = {ri, round:r, items, i:0, score:0, marks:[]};
+  task();
+}
+
+function header(){
+  const r = G.round;
+  const dots = G.items.map((_,k)=>`<i class="${k<G.marks.length ? (G.marks[k]?'ok':'miss') : (k===G.i?'now':'')}"></i>`).join('');
+  return `<div class="topbar">
+      <span class="chip">Runde ${G.ri+1} · ${r.title} · Aufgabe ${G.i+1} von ${G.items.length}</span>
+      <span class="actions"><button class="btn small" data-act="merk">Merkkasten</button><button class="btn small" data-act="home">Beenden</button></span>
+    </div>
+    <div class="progress" aria-hidden="true">${dots}</div>`;
+}
+
+function task(){
+  if(G.i >= G.items.length) return result();
+  const id = G.round.id;
+  if(id==='treppe') treppe();
+  else if(id==='steigern') steigern();
+  else wieAls();
+}
+
+function next(ok){
+  G.marks.push(ok);
+  if(ok) G.score++;
+}
+
+/* ---------- Runde 1: Treppe bauen ---------- */
+function treppe(){
+  const it = G.items[G.i];
+  const st = {step:0, mistakes:0, bank: shuffle(it.w.concat(it.d))};
+  const names = ['Grundstufe','Höherstufe','Höchststufe'];
+  const hints = [
+    'Die Grundstufe ist das Wort, wie es im Wörterbuch steht.',
+    'Die Höherstufe endet meistens auf <b>-er</b>.',
+    'Die Höchststufe beginnt mit <b>am</b> und endet auf <b>-sten</b> oder <b>-esten</b>.',
+  ];
+  function draw(fb){
+    $app.innerHTML = header() + `
+      <div class="task">
+        <p class="prompt">Baue die Treppe für <b>${esc(it.w[0])}</b>. Tippe die Wörter von unten nach oben an.</p>
+        <div class="stairs">
+          ${names.map((n,k)=>`<div class="step">
+              <div class="slot ${k<st.step?'filled':''} ${k===st.step?'active':''}">${k<st.step?esc(it.w[k]):''}</div>
+              <div class="block">${n}</div></div>`).join('')}
+        </div>
+        <div class="floor"></div>
+        ${st.step<3 ? `<div class="bank">${st.bank.map((w,k)=>`<button class="word" data-w="${k}" ${it.w.indexOf(w)>-1 && it.w.indexOf(w)<st.step?'disabled':''}>${esc(w)}</button>`).join('')}</div>` : ''}
+        ${fb||''}
+      </div>`;
+  }
+  function done(){
+    const ok = st.mistakes===0;
+    next(ok);
+    const special = it.x ? '<p>Achtung, <b>'+esc(it.w[0])+'</b> ist ein besonderes Adjektiv: Es verändert sich beim Steigern ganz.</p>' : '';
+    draw(`<div class="feedback ${ok?'good':'bad'}">
+        <strong>${ok?'Super, alles richtig!':'Geschafft! Beim nächsten Mal ohne Fehler?'}</strong>
+        <p class="ex">${esc(it.w[0])} – <span class="h">${esc(it.w[1])}</span> – <span class="s">${esc(it.w[2])}</span></p>
+        ${special}
+      </div>
+      <div class="actions"><button class="btn primary" data-act="next">Weiter</button></div>`);
+    G.onNext = ()=>{G.i++; task();};
+  }
+  G.onWord = (k, btn)=>{
+    const w = st.bank[k];
+    if(w === it.w[st.step]){
+      st.step++;
+      if(st.step===3) done(); else draw();
+    } else {
+      st.mistakes++;
+      btn.classList.remove('wrong'); void btn.offsetWidth; btn.classList.add('wrong');
+      let hint = hints[st.step];
+      if(it.x && st.step>0) hint += ' Achtung, dieses Wort ist besonders!';
+      const old = $app.querySelector('.feedback'); if(old) old.remove();
+      $app.querySelector('.task').insertAdjacentHTML('beforeend', `<div class="feedback bad"><strong>Hoppla, das passt nicht auf die ${names[st.step]}.</strong><p>${hint}</p></div>`);
+    }
+  };
+  draw();
+}
+
+/* ---------- Runde 2: Steigern oder nicht? ---------- */
+function steigern(){
+  const it = G.items[G.i];
+  const canDo = !!it.ok;
+  $app.innerHTML = header() + `
+    <div class="task">
+      <p class="prompt">Kann man dieses Adjektiv steigern?</p>
+      <p class="big-word">${esc(it.w)}</p>
+      <div class="choices">
+        <button class="choice big" data-yn="1">Ja, kann man steigern</button>
+        <button class="choice big" data-yn="0">Nein, geht nicht</button>
+      </div>
+      <div id="fb"></div>
+    </div>`;
+  G.onYN = (yes, btn)=>{
+    const ok = yes===canDo;
+    next(ok);
+    $app.querySelectorAll('.choice').forEach(b=>{
+      b.disabled = true;
+      if((b.dataset.yn==='1')===canDo) b.classList.add('right');
+    });
+    if(!ok) btn.classList.add('wrong');
+    const body = canDo
+      ? `<p class="ex">${esc(it.ok[0])} – <span class="h">${esc(it.ok[1])}</span> – <span class="s">${esc(it.ok[2])}</span></p>`
+      : `<p>${it.why}</p>`;
+    document.getElementById('fb').innerHTML = `
+      <div class="feedback ${ok?'good':'bad'}"><strong>${ok?'Richtig!':'Nicht ganz.'}</strong>${body}</div>
+      <div class="actions" style="margin-top:14px"><button class="btn primary" data-act="next">Weiter</button></div>`;
+    G.onNext = ()=>{G.i++; task();};
+  };
+}
+
+/* ---------- Runde 3: wie, als oder am? ---------- */
+function wieAls(){
+  const it = G.items[G.i];
+  const parts = it.t.split('___');
+  const opts = it.o.slice();
+  $app.innerHTML = header() + `
+    <div class="task">
+      <p class="prompt">Welches Wort gehört in die Lücke?</p>
+      <p class="sentence">${esc(parts[0])}<span class="gap" id="gap">?</span>${esc(parts[1])}</p>
+      <div class="choices">${opts.map(o=>`<button class="choice" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+      <div id="fb"></div>
+    </div>`;
+  G.onOpt = (o, btn)=>{
+    const ok = o===it.a;
+    next(ok);
+    $app.querySelectorAll('.choice').forEach(b=>{
+      b.disabled = true;
+      if(b.dataset.opt===it.a) b.classList.add('right');
+    });
+    if(!ok) btn.classList.add('wrong');
+    const gap = document.getElementById('gap');
+    gap.textContent = it.a; gap.classList.add('done');
+    document.getElementById('fb').innerHTML = `
+      <div class="feedback ${ok?'good':'bad'}"><strong>${ok?'Richtig!':'Richtig wäre: '+esc(it.a)}</strong><p>${RULE[it.r]}</p></div>
+      <div class="actions" style="margin-top:14px"><button class="btn primary" data-act="next">Weiter</button></div>`;
+    G.onNext = ()=>{G.i++; task();};
+  };
+}
+
+/* ---------- Ergebnis ---------- */
+function result(){
+  const total = G.items.length, s = starsFor(G.score,total);
+  saveBest(G.round.id, s);
+  const lines = ['Übe die Runde gleich noch einmal!','Ein guter Anfang. Schau in den Merkkasten und probier es nochmal.','Gut gemacht!','Spitze! Du bist ein Steigerungs-Profi.'];
+  const ri = G.ri;
+  $app.innerHTML = `
+    <div class="result">
+      <span class="chip">Runde ${ri+1} · ${G.round.title}</span>
+      <h2>Runde geschafft</h2>
+      ${starsHtml(s)}
+      <p class="score">${G.score} von ${total} beim ersten Versuch richtig</p>
+      <p>${lines[s]}</p>
+      <div class="actions">
+        <button class="btn primary" data-round="${ri}">Nochmal spielen</button>
+        ${ri<2?`<button class="btn" data-round="${ri+1}">Weiter zu Runde ${ri+2}</button>`:''}
+        <button class="btn" data-act="home">Zur Übersicht</button>
+      </div>
+    </div>`;
+}
+
+/* ---------- Merkkasten ---------- */
+let backTo = null;
+function merk(){
+  const saved = $app.innerHTML;
+  backTo = G ? ()=>{ $app.innerHTML = saved; } : home;
+  $app.innerHTML = `
+    <div class="topbar"><span class="chip">Merkkasten</span><button class="btn small" data-act="back">Zurück</button></div>
+    <h2>Merke!</h2>
+    <div class="merk">
+      <section>
+        <h3>Adjektivprobe</h3>
+        <p>Mit einer Adjektivprobe finde ich heraus, ob ein Wort ein Adjektiv ist.</p>
+        <ol>
+          <li>Ich kann zu dem Wort <b>Vergleichsstufen</b> bilden: <span class="ex">riesig – <span class="h">riesiger</span> – <span class="s">am riesigsten</span></span></li>
+          <li>Ich kann ein passendes <b>Nomen hinter das Wort</b> setzen: <span class="ex">der riesige Hund</span></li>
+          <li>Viele Adjektive enden auf <b>-lich</b> oder <b>-ig</b>.</li>
+        </ol>
+        <p class="muted">Wörter, die weder Adjektiv, Nomen noch Verb sind, heißen <b>sonstige Wörter</b>: alles, nur, bei …</p>
+      </section>
+      <section>
+        <h3>Vergleichen</h3>
+        <ul>
+          <li><span class="rule g">Grundstufe</span> mit <b>wie</b>:<br><span class="ex">Olivia ist genauso alt wie Laura.</span></li>
+          <li><span class="rule h">Höherstufe</span> mit <b>als</b>:<br><span class="ex">Frieda ist <span class="h">älter</span> als Anna.</span></li>
+          <li><span class="rule s">Höchststufe</span> mit <b>am</b>:<br><span class="ex">Abdullah ist <span class="s">am ältesten</span>.</span></li>
+        </ul>
+      </section>
+      <section>
+        <h3>Besondere Adjektive</h3>
+        <div class="tablewrap"><table class="st">
+          <tr><th>Grundstufe</th><th>Höherstufe</th><th>Höchststufe</th></tr>
+          <tr><td>gut</td><td>besser</td><td>am besten</td></tr>
+          <tr><td>viel</td><td>mehr</td><td>am meisten</td></tr>
+          <tr><td>hoch</td><td>höher</td><td>am höchsten</td></tr>
+          <tr><td>nah</td><td>näher</td><td>am nächsten</td></tr>
+        </table></div>
+      </section>
+      <section>
+        <h3>Nicht steigerbar</h3>
+        <ul>
+          <li><b>Formen:</b> rund, quadratisch, dreieckig</li>
+          <li><b>Farben:</b> rot, blau, grün</li>
+          <li><b>Endgültiges:</b> kaputt, tot</li>
+        </ul>
+      </section>
+    </div>`;
+}
+
+/* ---------- Klicks ---------- */
+$app.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b || b.disabled) return;
+  if(b.dataset.round!=null) return start(+b.dataset.round);
+  if(b.dataset.w!=null) return G && G.onWord(+b.dataset.w, b);
+  if(b.dataset.yn!=null) return G && G.onYN(b.dataset.yn==='1', b);
+  if(b.dataset.opt!=null) return G && G.onOpt(b.dataset.opt, b);
+  const a = b.dataset.act;
+  if(a==='home') return home();
+  if(a==='merk') return merk();
+  if(a==='back') return backTo && backTo();
+  if(a==='next') return G && G.onNext && G.onNext();
+});
+
+home();
+})();
+</script>
+</body>
+</html>

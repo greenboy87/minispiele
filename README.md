@@ -6,6 +6,7 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 |---|---|---|
 | Alphabet-Gefühl | `alphabet/` | Ein Buchstabe erscheint, man klickt auf einem Farbband (A links, Z rechts) dahin, wo er ungefähr im Alphabet steht. |
 | Nachsilben-Werkstatt | `nachsilben/` | Aus Nomen werden Adjektive: Mut → mutig, Herz → herzlich, Dank → dankbar (Deutsch, 4. Klasse). |
+| Die Adjektiv-Treppe | `adjektive/` | Adjektive steigern (groß – größer – am größten), nicht steigerbare Adjektive erkennen, mit wie/als/am vergleichen (Deutsch, 4. Klasse). |
 | Deutsch-Fachbegriffe | `fachbegriffe/` | Wortarten im Satz bestimmen und finden, Vokale und Konsonanten erkennen (4. Klasse / Unterstufe). |
 
 Start: `index.html` öffnen.
@@ -37,3 +38,12 @@ Start: `index.html` öffnen.
 - 30 Wörter auf -ig, 30 auf -lich, 5 auf -bar. Umlaute (Punkt → p**ü**nktlich) werden farbig markiert.
 - Nach jeder Antwort ein Tipp: Verlängern (eisig → eisige, das g wird hörbar) und Umlaut-Hinweis.
 - Punkte: 1 beim ersten Versuch, 0,5 beim zweiten. Am Ende Sterne, Rekord pro Level (lokal im Browser) und „Fehlerwörter üben“.
+
+## Die Adjektiv-Treppe
+
+- Schultafel-Look mit Kreideschrift, drei Runden:
+  - **Treppe bauen** (8 Aufgaben) – die drei Formen eines Adjektivs von unten nach oben auf die Stufen Grundstufe, Höherstufe, Höchststufe tippen. Dazwischen typische Fehlformen (großer, am gutesten, am nähesten). Jede Runde enthält 3 besondere Adjektive (gut, viel, hoch, nah).
+  - **Steigern oder nicht?** (10 Aufgaben) – Formen, Farben und Endgültiges (kaputt, tot) kann man nicht steigern, jeweils mit Begründung.
+  - **wie, als oder am?** (10 Aufgaben) – Lückensätze, nach jeder Antwort wird die passende Regel eingeblendet.
+- Merkkasten mit Adjektivprobe, Vergleichsregeln, Tabelle der besonderen Adjektive und nicht steigerbaren Wörtern.
+- Aufgaben werden jedes Mal neu gemischt; bis zu 3 Sterne, bestes Ergebnis pro Runde lokal im Browser.
