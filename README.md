@@ -12,6 +12,14 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 
 Start: `index.html` öffnen.
 
+## Bestenliste (alle Spiele)
+
+- Am Ende jeder Runde kann man sich in die Bestenliste eintragen – getrennt pro Spiel und Level/Spielart, Top 10, nach Prozent sortiert.
+- Eingegebene Namen merkt sich das Gerät (spielübergreifend). Beim nächsten Mal tippt man einfach auf seinen Namen. „Namen entfernen“ löscht einen Namen aus der Auswahl.
+- Pro Name zählt nur der beste Wert, damit ein Kind nicht die ganze Liste füllt. „Fehler üben“ zählt nicht.
+- 🏆 oben im Spiel öffnet alle Listen; dort lässt sich eine Liste auch löschen.
+- Alles nur lokal im Browser (`localStorage`, Schlüssel `minispiele:namen` und `minispiele:bestenliste:<spiel>:<level>`). Code: `shared/bestenliste.js`.
+
 ## Alphabet-Gefühl
 
 - Vier Level: **Üben** (alle 26 Buchstaben stehen unter dem Band), **Leicht** (26 Striche, A/M/Z beschriftet), **Mittel** (nur A und Z), **Schwer** (nur das Band).

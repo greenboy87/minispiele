@@ -238,6 +238,7 @@
     <div style="display:flex; gap:8px">
       <a class="icon-btn" href="../index.html" style="text-decoration:none" title="Alle Minispiele">☰</a>
       <button class="icon-btn" id="rulesBtn" title="Trennregeln">📒 Regeln</button>
+      <button class="icon-btn" id="hsBtn" title="Bestenliste">🏆</button>
       <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
       <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
     </div>
@@ -294,6 +295,7 @@
     <div class="stars" id="stars"></div>
     <div class="total"><b id="endScore">0</b> von <span id="endMax">10</span> Punkten</div>
     <div class="newbest" id="newBest"></div>
+    <div id="bestenliste"></div>
     <div class="recap" id="recap"></div>
     <div class="end-actions">
       <button class="big-btn" id="againBtn">Nochmal</button>
@@ -310,6 +312,7 @@
   <button class="big-btn" id="dlgClose">Alles klar</button>
 </dialog>
 
+<script src="../shared/bestenliste.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -493,7 +496,7 @@
     if (pool && !pool.length) pool = null;
     const rounds = pool ? Math.min(10, Math.max(5, pool.length * 2)) : Number($("roundsOpt").value);
     if (!pool) store.set("rounds", rounds);
-    state = { rounds, round: 0, score: 0, results: [], locked: false };
+    state = { rounds, round: 0, score: 0, results: [], locked: false, practice: !!pool };
     state.words = drawWords(rounds, pool);
     $("roundMax").textContent = rounds;
     $("dots").innerHTML = state.words.map(() => '<div class="dot"></div>').join("");
@@ -698,6 +701,7 @@
       store.set(key, { pct, date: new Date().toISOString().slice(0, 10) });
       $("newBest").textContent = best ? `Neuer Rekord auf „${name}“! (vorher ${best.pct} %)` : `Erster Rekord auf „${name}“: ${pct} %`;
     } else $("newBest").textContent = `Rekord auf „${name}“: ${best.pct} %`;
+    Bestenliste.offer($("bestenliste"), { level, pct, detail: `${String(state.score).replace(".", ",")} von ${state.rounds} Punkten`, practice: state.practice });
 
     $("recap").innerHTML = state.results.map(r => {
       const d = r.cls === "g" ? "gleich richtig" : r.cls === "o" ? "im zweiten Versuch" : "nicht geschafft";
@@ -734,6 +738,8 @@
   $("playBtn").onclick = () => startGame();
   $("againBtn").onclick = () => startGame();
   $("practiceBtn").onclick = () => startGame(practicePool());
+  Bestenliste.init({ game: "silben", levels: LEVEL_NAMES });
+  $("hsBtn").onclick = () => Bestenliste.open(level);
   $("menuBtn").onclick = () => { paintLevels(); show("start"); };
   $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
   $("rulesBtn").onclick = () => $("rulesDlg").showModal();

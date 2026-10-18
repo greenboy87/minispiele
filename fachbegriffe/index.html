@@ -255,6 +255,7 @@
     <h1>Deutsch<span>-Fachbegriffe</span></h1>
     <div style="display:flex; gap:8px">
       <button class="icon-btn" id="sheetBtn" title="Spickzettel">📒 Spickzettel</button>
+      <button class="icon-btn" id="hsBtn" title="Bestenliste">🏆</button>
       <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
       <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
     </div>
@@ -307,6 +308,7 @@
     <div class="stars" id="stars"></div>
     <div class="total"><b id="endScore">0</b> von <span id="endMax">1000</span> Punkten</div>
     <div class="newbest" id="newBest"></div>
+    <div id="bestenliste"></div>
     <div class="recap" id="recap"></div>
     <div class="end-actions">
       <button class="big-btn" id="againBtn">Nochmal</button>
@@ -354,6 +356,7 @@
   </div>
 </dialog>
 
+<script src="../shared/bestenliste.js"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
@@ -809,6 +812,8 @@
       }
     }
 
+    Bestenliste.offer($("bestenliste"), { level: mode, pct, detail: `${state.score} von ${max} Punkten`, practice: state.practice });
+
     $("recap").innerHTML = state.results.map(r =>
       `<div class="rc ${r.cls}"><div class="d">${esc(r.text)}${r.note ? `<small>${esc(r.note)}</small>` : ""}</div><div class="p">+${r.points}</div></div>`
     ).join("");
@@ -851,6 +856,8 @@
   $("menuBtn").onclick = () => { paintLevels(); show("start"); };
   $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
   $("sheetBtn").onclick = () => $("sheet").showModal();
+  Bestenliste.init({ game: "fachbegriffe", levels: MODE_NAMES });
+  $("hsBtn").onclick = () => Bestenliste.open(mode);
   $("sheetClose").onclick = () => $("sheet").close();
   $("sheet").addEventListener("click", e => { if (e.target === $("sheet")) $("sheet").close(); });
 })();

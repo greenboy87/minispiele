@@ -25,6 +25,9 @@
   --font-display:"Kalam","Comic Sans MS","Segoe Print",cursive;
   --font-body:"Andika","Trebuchet MS","Verdana",system-ui,sans-serif;
   color-scheme:dark;
+  /* für die Bestenliste */
+  --accent:var(--yellow);--accent-ink:var(--board-deep);--card:var(--board-deep);--ink:var(--chalk);
+  --muted:var(--chalk-dim);--line:rgba(255,255,255,.25);--good:var(--green);
 }
 html,body{height:100%;margin:0}
 body{
@@ -198,6 +201,7 @@ table.st td:nth-child(2){color:var(--blue)} table.st td:nth-child(3){color:var(-
 <body>
 <div class="frame"><main class="board" id="app" aria-live="polite"></main></div>
 
+<script src="../shared/bestenliste.js"></script>
 <script>
 (function(){
 const $app = document.getElementById('app');
@@ -290,7 +294,7 @@ function home(){
   G = null;
   $app.innerHTML = `
     <div class="topbar"><span class="chip">Deutsch · 4. Klasse</span>
-      <button class="btn small" data-act="merk">Merkkasten</button></div>
+      <span class="actions"><button class="btn small" data-act="hs">🏆 Bestenliste</button><button class="btn small" data-act="merk">Merkkasten</button></span></div>
     <div class="intro">
       <h1>Die Adjektiv-Treppe</h1>
       <div class="mini-stairs" aria-hidden="true"><span>groß</span><span>größer</span><span>am größten</span></div>
@@ -331,7 +335,7 @@ function header(){
   const dots = G.items.map((_,k)=>`<i class="${k<G.marks.length ? (G.marks[k]?'ok':'miss') : (k===G.i?'now':'')}"></i>`).join('');
   return `<div class="topbar">
       <span class="chip">Runde ${G.ri+1} · ${r.title} · Aufgabe ${G.i+1} von ${G.items.length}</span>
-      <span class="actions"><button class="btn small" data-act="merk">Merkkasten</button><button class="btn small" data-act="home">Beenden</button></span>
+      <span class="actions"><button class="btn small" data-act="hs">🏆</button><button class="btn small" data-act="merk">Merkkasten</button><button class="btn small" data-act="home">Beenden</button></span>
     </div>
     <div class="progress" aria-hidden="true">${dots}</div>`;
 }
@@ -481,7 +485,11 @@ function result(){
         ${ri<2?`<button class="btn" data-round="${ri+1}">Weiter zu Runde ${ri+2}</button>`:''}
         <button class="btn" data-act="home">Zur Übersicht</button>
       </div>
+      <div id="bestenliste" style="width:100%"></div>
     </div>`;
+  Bestenliste.offer(document.getElementById('bestenliste'), {
+    level: G.round.id, pct: Math.round(G.score / total * 100), detail: G.score + ' von ' + total + ' richtig'
+  });
 }
 
 /* ---------- Merkkasten ---------- */
@@ -542,10 +550,12 @@ $app.addEventListener('click', e=>{
   const a = b.dataset.act;
   if(a==='home') return home();
   if(a==='merk') return merk();
+  if(a==='hs') return Bestenliste.open(G ? G.round.id : undefined);
   if(a==='back') return backTo && backTo();
   if(a==='next') return G && G.onNext && G.onNext();
 });
 
+Bestenliste.init({ game: 'adjektive', levels: Object.fromEntries(ROUNDS.map(r=>[r.id, r.title])) });
 home();
 })();
 </script>

@@ -202,6 +202,7 @@
   <header>
     <h1>Alphabet<span>-Gefühl</span></h1>
     <div style="display:flex; gap:8px">
+      <button class="icon-btn" id="hsBtn" title="Bestenliste">🏆</button>
       <button class="icon-btn" id="soundBtn" title="Ton an/aus">🔊</button>
       <button class="icon-btn" id="homeBtn" title="Zum Start">⌂ Start</button>
     </div>
@@ -262,6 +263,7 @@
     <div class="stars" id="stars"></div>
     <div class="total"><b id="endScore">0</b> von <span id="endMax">1000</span> Punkten</div>
     <div class="newbest" id="newBest"></div>
+    <div id="bestenliste"></div>
     <div class="recap" id="recap"></div>
     <div class="end-actions">
       <button class="big-btn" id="againBtn">Nochmal</button>
@@ -271,6 +273,7 @@
   </section>
 </div>
 
+<script src="../shared/bestenliste.js"></script>
 <script>
 (() => {
   const ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -353,7 +356,8 @@
       round: 0,
       score: 0,
       results: [],
-      locked: false
+      locked: false,
+      practice: !!pool
     };
     $("roundMax").textContent = rounds;
     $("dots").innerHTML = state.letters.map(() => '<div class="dot"></div>').join("");
@@ -510,6 +514,8 @@
       $("newBest").textContent = `Rekord auf „${cap(level)}“: ${best.pct} %`;
     }
 
+    Bestenliste.offer($("bestenliste"), { level, pct, detail: `${state.score} von ${max} Punkten`, practice: state.practice });
+
     $("recap").innerHTML = state.results.map(r => {
       const d = r.steps === 0 ? "genau richtig" : `${r.steps} zu ${r.dir < 0 ? "weit vorne" : "weit hinten"}`;
       return `<div class="rc ${r.cls}"><div class="L">${ABC[r.i]}</div><div><div class="p">+${r.points}</div><div class="d">${d}</div></div></div>`;
@@ -552,6 +558,8 @@
   $("practiceBtn").onclick = () => startGame(practicePool());
   $("menuBtn").onclick = () => { paintLevels(); show("start"); };
   $("homeBtn").onclick = () => { state = null; paintLevels(); show("start"); };
+  Bestenliste.init({ game: "alphabet", levels: LEVEL_NAMES });
+  $("hsBtn").onclick = () => Bestenliste.open(level);
 })();
 </script>
 </body>
