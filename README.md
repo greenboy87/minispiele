@@ -8,6 +8,7 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Nachsilben-Werkstatt | `nachsilben/` | Aus Nomen werden Adjektive: Mut → mutig, Herz → herzlich, Dank → dankbar (Deutsch, 4. Klasse). |
 | Die Adjektiv-Treppe | `adjektive/` | Adjektive steigern (groß – größer – am größten), nicht steigerbare Adjektive erkennen, mit wie/als/am vergleichen (Deutsch, 4. Klasse). |
 | Silben-Schere | `silben/` | Wörter nach den fünf Trennregeln in Silben schneiden: Kä-fer, Ra-dio, Mit-tag, Bä-cker, Ab-fall (Deutsch, 4. Klasse). |
+| Zählzeiten-Training | `zaehlzeiten/` | Über jede Note die Zählzeit schreiben (1 e + e …), Takte aus gewählten Bausteinen (Musik). Kommt aus der Rhythmus-Werkstatt. |
 | Deutsch-Fachbegriffe | `fachbegriffe/` | Wortarten im Satz bestimmen und finden, Vokale und Konsonanten erkennen (4. Klasse / Unterstufe). |
 
 Start: `index.html` öffnen.
@@ -65,3 +66,11 @@ Start: `index.html` öffnen.
 - Nach jeder Antwort: Silbenbögen unter dem Wort und an jeder Trennstelle ein farbiger Kreis mit der passenden Regelnummer; verbotene Stellen (Regel 2) sind durchgestrichen markiert. Falsche Striche bekommen eine Begründung.
 - Punkte: 1 beim ersten Versuch, 0,5 beim zweiten. Am Ende Sterne, Rekord pro Level (lokal im Browser) und „Fehlerwörter üben“.
 - Wörter stehen oben im Skript: `-` = Trennstelle, `+` = Baustein-Grenze, `|` = hier nicht trennen (Regel 2), z. B. `O|pe-ra-ti-on`, `Schutz+an+zug`.
+
+## Zählzeiten-Training
+
+- Das Spiel selbst lebt in der **Rhythmus-Werkstatt** (Repo `greenboy87/rhythmus-werkstatt`, Reiter „Zähl-Training“, `js/zaehlspiel.js`). `zaehlzeiten/index.html` bettet nur dessen Spielansicht ein (`https://greenboy87.github.io/rhythmus-werkstatt/?ansicht=zaehlen`) – so gibt es Notensatz, Klänge und Generator nur einmal. Änderungen am Spiel also dort machen. Braucht deshalb Internet.
+- Bausteine wählen, Taktart 2/4 · 3/4 · 4/4, 1–4 Takte je Aufgabe. Über jeder Note ein Kästchen, Eingabe per Zahlenfeld (1–4, e, +) oder Tastatur.
+- Drei Stufen: **1** jede Eingabe sofort geprüft, **2** geprüft, wenn ein Takt voll ist, **3** erst, wenn die ganze Zeile voll ist.
+- Fehler, Trefferquote, Serie fehlerfreier Aufgaben mit Bestwert pro Stufe (lokal, `rw-zaehlen`). Noch nicht an die gemeinsame Bestenliste angebunden.
+- Direkt in der Werkstatt: `https://greenboy87.github.io/rhythmus-werkstatt/?reiter=zaehlen`.

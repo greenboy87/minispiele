@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zählzeiten-Training</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!--
+  Das Spiel selbst lebt in der Rhythmus-Werkstatt (Reiter „Zähl-Training“,
+  js/zaehlspiel.js im Repo greenboy87/rhythmus-werkstatt) und wird hier nur
+  eingebettet: ?ansicht=zaehlen zeigt es ohne Kopfzeile und Reiter. So gibt
+  es den Code (Notensatz, Klänge, Generator) nur einmal – jede Verbesserung
+  in der Werkstatt gilt auch hier. Beide Seiten liegen auf
+  greenboy87.github.io, Einstellungen und Bestwerte teilen sie sich also.
+  Die Werkstatt meldet ihre Höhe per postMessage ({typ:'rw-hoehe', hoehe}),
+  damit der Rahmen ohne eigenen Scrollbalken auskommt.
+-->
+<style>
+  :root {
+    --bg: #fdf8f0; --card: #ffffff; --ink: #2b2540; --muted: #7a7290; --line: #e6dccb; --accent: #6c4cf1;
+    --shadow: 0 10px 30px rgba(60, 40, 110, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17142a; --card: #262142; --ink: #f2eefc; --muted: #a69fc2; --line: #3a3460; --accent: #9b85ff; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+    font-family: "Fredoka", system-ui, sans-serif; display: flex; justify-content: center; padding: 16px;
+  }
+  .wrap { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 14px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: clamp(20px, 3vw, 28px); margin: 0; font-weight: 700; letter-spacing: .5px; }
+  header h1 span { color: var(--accent); }
+  .icon-btn {
+    border: 1px solid var(--line); background: var(--card); color: var(--ink); text-decoration: none;
+    border-radius: 12px; padding: 8px 12px; font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+  .rahmen { border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); background: var(--card); }
+  iframe { display: block; width: 100%; height: calc(100vh - 110px); min-height: 520px; border: 0; }
+  .hinweis { color: var(--muted); font-size: 14px; margin: 0; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Zählzeiten<span>-Training</span> 🥁</h1>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <a class="icon-btn" href="../index.html" title="Zurück zur Übersicht aller Minispiele">← Übersicht</a>
+      <a class="icon-btn" href="https://greenboy87.github.io/rhythmus-werkstatt/?reiter=zaehlen" target="_blank" rel="noopener" title="In der Rhythmus-Werkstatt öffnen">↗ Rhythmus-Werkstatt</a>
+    </div>
+  </header>
+  <div class="rahmen">
+    <iframe id="spiel" title="Zählzeiten-Training" allow="autoplay"
+            src="https://greenboy87.github.io/rhythmus-werkstatt/?ansicht=zaehlen"></iframe>
+  </div>
+  <p class="hinweis">Braucht Internet – das Spiel kommt aus der Rhythmus-Werkstatt.</p>
+</div>
+<script>
+  // Höhe übernehmen, die die Werkstatt meldet (nur von dort)
+  window.addEventListener("message", (e) => {
+    if (e.origin !== "https://greenboy87.github.io" || !e.data || e.data.typ !== "rw-hoehe") return;
+    document.getElementById("spiel").style.height = Math.max(520, e.data.hoehe + 16) + "px";
+  });
+</script>
+</body>
+</html>
