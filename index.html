@@ -6,12 +6,25 @@
 <title>Minispiele</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #fdf8f0; --card: #fff; --ink: #2b2540; --muted: #7a7290; --accent: #6c4cf1; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #17142a; --card: #262142; --ink: #f2eefc; --muted: #a69fc2; --accent: #9b85ff; } }
+  :root { --bg: #fdf8f0; --card: #fff; --ink: #2b2540; --muted: #7a7290; --accent: #6c4cf1; --accent-ink: #fff; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #17142a; --card: #262142; --ink: #f2eefc; --muted: #a69fc2; --accent: #9b85ff; --accent-ink: #17142a; } }
   body { margin: 0; padding: 32px 16px; background: var(--bg); color: var(--ink); font-family: "Fredoka", system-ui, sans-serif; }
-  main { max-width: 760px; margin: 0 auto; }
+  main { max-width: 1000px; margin: 0 auto; }
   h1 { font-size: 40px; margin: 0 0 6px; }
   p { color: var(--muted); margin: 0 0 28px; font-size: 18px; }
+  .layout { display: flex; gap: 24px; align-items: flex-start; }
+  /* Fächer-Leiste links (auf dem Handy oben als Reihe) */
+  nav.faecher { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 16px; flex: 0 0 170px; }
+  nav.faecher button { display: flex; align-items: center; gap: 10px; border: 0; background: var(--card); color: var(--ink);
+       font: inherit; font-size: 19px; font-weight: 600; text-align: left; padding: 12px 16px; border-radius: 16px; cursor: pointer;
+       box-shadow: 0 6px 18px rgba(60, 40, 110, .10); }
+  nav.faecher button:hover { outline: 2px solid var(--accent); }
+  nav.faecher button.an { background: var(--accent); color: var(--accent-ink); }
+  nav.faecher .zahl { margin-left: auto; font-size: 14px; opacity: .7; }
+  .inhalt { flex: 1; min-width: 0; }
+  section.fach { margin-bottom: 32px; }
+  section.fach h2 { font-size: 26px; margin: 0 0 14px; }
+  section.fach.weg { display: none; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
   a.game { display: block; background: var(--card); border-radius: 22px; padding: 22px; color: inherit; text-decoration: none;
            box-shadow: 0 10px 30px rgba(60, 40, 110, .12); transition: transform .15s; }
@@ -19,44 +32,93 @@
   .ic { font-size: 30px; font-weight: 700; color: var(--accent); }
   a.game b { display: block; font-size: 22px; margin: 6px 0 4px; }
   a.game span { color: var(--muted); }
+  @media (max-width: 640px) {
+    .layout { flex-direction: column; gap: 16px; }
+    nav.faecher { flex-direction: row; flex-wrap: wrap; position: static; flex: none; }
+    nav.faecher button { font-size: 17px; padding: 10px 14px; }
+  }
 </style>
 </head>
 <body>
 <main>
   <h1>Minispiele</h1>
   <p>Kleine Lernspiele für zwischendurch.</p>
-  <div class="grid">
-    <a class="game" href="alphabet/index.html">
-      <div class="ic">A ··· Z</div>
-      <b>Alphabet-Gefühl</b>
-      <span>Wo steht der Buchstabe im Alphabet? Schätzen auf dem Farbband.</span>
-    </a>
-    <a class="game" href="fachbegriffe/index.html">
-      <div class="ic">Nomen · Verb</div>
-      <b>Deutsch-Fachbegriffe</b>
-      <span>Artikel, Nomen, Verb, Adjektiv, Pronomen, Vokale und Konsonanten im Satz erkennen.</span>
-    </a>
-    <a class="game" href="nachsilben/index.html">
-      <div class="ic">Mut + ig</div>
-      <b>Nachsilben-Werkstatt</b>
-      <span>Aus Nomen werden Adjektive: -ig, -lich oder -bar?</span>
-    </a>
-    <a class="game" href="adjektive/index.html">
-      <div class="ic">groß · größer</div>
-      <b>Die Adjektiv-Treppe</b>
-      <span>Adjektive steigern: Grundstufe, Höherstufe, Höchststufe – und wie, als oder am?</span>
-    </a>
-    <a class="game" href="silben/index.html">
-      <div class="ic">Kä-fer ✂️</div>
-      <b>Silben-Schere</b>
-      <span>Wörter richtig trennen – nach den fünf Trennregeln, auch mit ch, ck, sch und tz.</span>
-    </a>
-    <a class="game" href="zaehlzeiten/index.html">
-      <div class="ic">1 e + e 🥁</div>
-      <b>Zählzeiten-Training</b>
-      <span>Zählzeiten über die Noten schreiben – Takte werden aus deinen Bausteinen gewürfelt.</span>
-    </a>
+  <div class="layout">
+    <nav class="faecher" aria-label="Fach wählen">
+      <button type="button" data-fach="alle">🎒 Alle</button>
+      <button type="button" data-fach="deutsch">📖 Deutsch <span class="zahl"></span></button>
+      <button type="button" data-fach="musik">🎵 Musik <span class="zahl"></span></button>
+    </nav>
+    <div class="inhalt">
+      <section class="fach" id="deutsch">
+        <h2>📖 Deutsch</h2>
+        <div class="grid">
+          <a class="game" href="alphabet/index.html">
+            <div class="ic">A ··· Z</div>
+            <b>Alphabet-Gefühl</b>
+            <span>Wo steht der Buchstabe im Alphabet? Schätzen auf dem Farbband.</span>
+          </a>
+          <a class="game" href="fachbegriffe/index.html">
+            <div class="ic">Nomen · Verb</div>
+            <b>Deutsch-Fachbegriffe</b>
+            <span>Artikel, Nomen, Verb, Adjektiv, Pronomen, Vokale und Konsonanten im Satz erkennen.</span>
+          </a>
+          <a class="game" href="nachsilben/index.html">
+            <div class="ic">Mut + ig</div>
+            <b>Nachsilben-Werkstatt</b>
+            <span>Aus Nomen werden Adjektive: -ig, -lich oder -bar?</span>
+          </a>
+          <a class="game" href="adjektive/index.html">
+            <div class="ic">groß · größer</div>
+            <b>Die Adjektiv-Treppe</b>
+            <span>Adjektive steigern: Grundstufe, Höherstufe, Höchststufe – und wie, als oder am?</span>
+          </a>
+          <a class="game" href="silben/index.html">
+            <div class="ic">Kä-fer ✂️</div>
+            <b>Silben-Schere</b>
+            <span>Wörter richtig trennen – nach den fünf Trennregeln, auch mit ch, ck, sch und tz.</span>
+          </a>
+        </div>
+      </section>
+      <section class="fach" id="musik">
+        <h2>🎵 Musik</h2>
+        <div class="grid">
+          <a class="game" href="zaehlzeiten/index.html">
+            <div class="ic">1 e + e 🥁</div>
+            <b>Zählzeiten-Training</b>
+            <span>Zählzeiten über die Noten schreiben – Takte werden aus deinen Bausteinen gewürfelt.</span>
+          </a>
+          <a class="game" href="diktat/index.html">
+            <div class="ic">👂 ♩ ♫ ♬</div>
+            <b>Rhythmus-Diktat</b>
+            <span>Zuhören und den Rhythmus aus Bausteinen nachbauen – so oft anhören, wie du willst.</span>
+          </a>
+        </div>
+      </section>
+    </div>
   </div>
 </main>
+<script>
+  // Fach wählen: #deutsch / #musik im Link, sonst die letzte Wahl auf diesem Gerät
+  const KNOEPFE = document.querySelectorAll("[data-fach]");
+  KNOEPFE.forEach(b => {
+    const sec = document.getElementById(b.dataset.fach);
+    if (sec) b.querySelector(".zahl").textContent = sec.querySelectorAll("a.game").length;
+    b.addEventListener("click", () => fachZeigen(b.dataset.fach, true));
+  });
+  function fachZeigen(fach, merken) {
+    if (!["alle", "deutsch", "musik"].includes(fach)) fach = "alle";
+    KNOEPFE.forEach(b => b.classList.toggle("an", b.dataset.fach === fach));
+    document.querySelectorAll("section.fach").forEach(s => s.classList.toggle("weg", fach !== "alle" && s.id !== fach));
+    if (merken) {
+      try { localStorage.setItem("minispiele:fach", fach); } catch (e) { /* egal */ }
+      history.replaceState(null, "", fach === "alle" ? location.pathname : "#" + fach);
+    }
+  }
+  let start = location.hash.slice(1);
+  if (!start) try { start = localStorage.getItem("minispiele:fach") || "alle"; } catch (e) { start = "alle"; }
+  fachZeigen(start, false);
+  window.addEventListener("hashchange", () => fachZeigen(location.hash.slice(1), false));
+</script>
 </body>
 </html>

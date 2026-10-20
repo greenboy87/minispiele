@@ -9,9 +9,10 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Die Adjektiv-Treppe | `adjektive/` | Adjektive steigern (groß – größer – am größten), nicht steigerbare Adjektive erkennen, mit wie/als/am vergleichen (Deutsch, 4. Klasse). |
 | Silben-Schere | `silben/` | Wörter nach den fünf Trennregeln in Silben schneiden: Kä-fer, Ra-dio, Mit-tag, Bä-cker, Ab-fall (Deutsch, 4. Klasse). |
 | Zählzeiten-Training | `zaehlzeiten/` | Über jede Note die Zählzeit schreiben (1 e + e …), Takte aus gewählten Bausteinen (Musik). Kommt aus der Rhythmus-Werkstatt. |
+| Rhythmus-Diktat | `diktat/` | Ein Rhythmus wird vorgespielt, man baut ihn aus Bausteinen nach (Musik). Kommt aus der Rhythmus-Werkstatt. |
 | Deutsch-Fachbegriffe | `fachbegriffe/` | Wortarten im Satz bestimmen und finden, Vokale und Konsonanten erkennen (4. Klasse / Unterstufe). |
 
-Start: `index.html` öffnen.
+Start: `index.html` öffnen. Links wählt eine Leiste das Fach: **Alle**, **Deutsch** (Alphabet, Fachbegriffe, Nachsilben, Adjektive, Silben) oder **Musik** (Zählzeiten, Rhythmus-Diktat). Die Wahl merkt sich das Gerät (`minispiele:fach`); `index.html#musik` bzw. `#deutsch` öffnet direkt ein Fach – dahin führt auch „← Übersicht“ in den Musikspielen. Ein neues Spiel kommt als Karte in die passende `<section class="fach">`.
 
 ## Bestenliste (alle Spiele)
 
@@ -76,3 +77,10 @@ Start: `index.html` öffnen.
 - **Bestenliste:** Nach jeder Runde meldet die Werkstatt das Ergebnis per `postMessage` (`rw-runde`), die Minispiele-Seite trägt es über `shared/bestenliste.js` ein – Spiel `zaehlzeiten`, Listen `stufe1`/`stufe2`/`stufe3`. Nur auf der Minispiele-Seite, nicht in der Werkstatt selbst.
 - Außerdem Serie fehlerfreier Aufgaben mit Bestwert pro Stufe (lokal, `rw-zaehlen`).
 - Direkt in der Werkstatt: `https://greenboy87.github.io/rhythmus-werkstatt/?reiter=zaehlen`.
+
+## Rhythmus-Diktat
+
+- Wie das Zählzeiten-Training nur ein Rahmen: `diktat/index.html` bettet `https://greenboy87.github.io/rhythmus-werkstatt/?ansicht=diktat` ein (Code in der Werkstatt, `js/spiele.js`). Braucht Internet.
+- Bausteine wählen, Taktart 2/4 · 3/4 · 4/4, 1–4 Takte je Aufgabe, Tempo und Vorlauf. „Anhören“ so oft man will, dann aus den Bausteinen nachbauen und prüfen (Takt für Takt). Klatschmodus: Viertel + Pause gilt wie eine Halbe.
+- Runden zu 5 Aufgaben. Ergebnis: 1 Punkt je Aufgabe beim ersten Versuch, 0,5 bei einem späteren, 0 mit „Lösung zeigen“.
+- **Bestenliste:** Spiel `diktat`, Listen `takte1`–`takte4` (nach Takten je Aufgabe). Nachricht der Werkstatt: `{typ:'rw-runde', spiel:'diktat', takte, pct, detail}`.
