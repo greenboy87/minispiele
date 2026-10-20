@@ -72,5 +72,7 @@ Start: `index.html` öffnen.
 - Das Spiel selbst lebt in der **Rhythmus-Werkstatt** (Repo `greenboy87/rhythmus-werkstatt`, Reiter „Zähl-Training“, `js/zaehlspiel.js`). `zaehlzeiten/index.html` bettet nur dessen Spielansicht ein (`https://greenboy87.github.io/rhythmus-werkstatt/?ansicht=zaehlen`) – so gibt es Notensatz, Klänge und Generator nur einmal. Änderungen am Spiel also dort machen. Braucht deshalb Internet.
 - Bausteine wählen, Taktart 2/4 · 3/4 · 4/4, 1–4 Takte je Aufgabe. Über jeder Note ein Kästchen, Eingabe per Zahlenfeld (1–4, e, +) oder Tastatur.
 - Drei Stufen: **1** jede Eingabe sofort geprüft, **2** geprüft, wenn ein Takt voll ist, **3** erst, wenn die ganze Zeile voll ist.
-- Fehler, Trefferquote, Serie fehlerfreier Aufgaben mit Bestwert pro Stufe (lokal, `rw-zaehlen`). Noch nicht an die gemeinsame Bestenliste angebunden.
+- Gespielt wird in Runden zu 5 Aufgaben; die Einstellungen gelten fest für die ganze Runde. Ergebnis = richtige Kästchen / (richtige + Fehler).
+- **Bestenliste:** Nach jeder Runde meldet die Werkstatt das Ergebnis per `postMessage` (`rw-runde`), die Minispiele-Seite trägt es über `shared/bestenliste.js` ein – Spiel `zaehlzeiten`, Listen `stufe1`/`stufe2`/`stufe3`. Nur auf der Minispiele-Seite, nicht in der Werkstatt selbst.
+- Außerdem Serie fehlerfreier Aufgaben mit Bestwert pro Stufe (lokal, `rw-zaehlen`).
 - Direkt in der Werkstatt: `https://greenboy87.github.io/rhythmus-werkstatt/?reiter=zaehlen`.

@@ -14,15 +14,18 @@
   in der Werkstatt gilt auch hier. Beide Seiten liegen auf
   greenboy87.github.io, Einstellungen und Bestwerte teilen sie sich also.
   Die Werkstatt meldet ihre Höhe per postMessage ({typ:'rw-hoehe', hoehe}),
-  damit der Rahmen ohne eigenen Scrollbalken auskommt.
+  damit der Rahmen ohne eigenen Scrollbalken auskommt. Nach jeder Runde
+  (5 Aufgaben) schickt sie {typ:'rw-runde', stufe, pct, detail} - daraus
+  wird hier der Eintrag in die gemeinsame Bestenliste (shared/bestenliste.js),
+  getrennt nach Stufe. {typ:'rw-runde-start'} raeumt das Eintragen wieder weg.
 -->
 <style>
   :root {
-    --bg: #fdf8f0; --card: #ffffff; --ink: #2b2540; --muted: #7a7290; --line: #e6dccb; --accent: #6c4cf1;
+    --bg: #fdf8f0; --card: #ffffff; --ink: #2b2540; --muted: #7a7290; --line: #e6dccb; --accent: #6c4cf1; --accent-ink: #ffffff; --good: #1fa463;
     --shadow: 0 10px 30px rgba(60, 40, 110, .12);
   }
   @media (prefers-color-scheme: dark) {
-    :root { --bg: #17142a; --card: #262142; --ink: #f2eefc; --muted: #a69fc2; --line: #3a3460; --accent: #9b85ff; }
+    :root { --bg: #17142a; --card: #262142; --ink: #f2eefc; --muted: #a69fc2; --line: #3a3460; --accent: #9b85ff; --accent-ink: #17142a; }
   }
   * { box-sizing: border-box; }
   body {
@@ -40,6 +43,8 @@
   .icon-btn:hover { border-color: var(--accent); }
   .rahmen { border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); background: var(--card); }
   iframe { display: block; width: 100%; height: calc(100vh - 110px); min-height: 520px; border: 0; }
+  #bestenliste:empty { display: none; }
+  #bestenliste { background: var(--card); border-radius: 20px; box-shadow: var(--shadow); padding: 4px 16px; }
   .hinweis { color: var(--muted); font-size: 14px; margin: 0; text-align: center; }
 </style>
 </head>
@@ -49,20 +54,37 @@
     <h1>Zählzeiten<span>-Training</span> 🥁</h1>
     <div style="display:flex; gap:8px; flex-wrap:wrap">
       <a class="icon-btn" href="../index.html" title="Zurück zur Übersicht aller Minispiele">← Übersicht</a>
+      <button class="icon-btn" id="hsBtn" title="Bestenliste">🏆</button>
       <a class="icon-btn" href="https://greenboy87.github.io/rhythmus-werkstatt/?reiter=zaehlen" target="_blank" rel="noopener" title="In der Rhythmus-Werkstatt öffnen">↗ Rhythmus-Werkstatt</a>
     </div>
   </header>
+  <div id="bestenliste"></div>
   <div class="rahmen">
     <iframe id="spiel" title="Zählzeiten-Training" allow="autoplay"
             src="https://greenboy87.github.io/rhythmus-werkstatt/?ansicht=zaehlen"></iframe>
   </div>
   <p class="hinweis">Braucht Internet – das Spiel kommt aus der Rhythmus-Werkstatt.</p>
 </div>
+<script src="../shared/bestenliste.js"></script>
 <script>
-  // Höhe übernehmen, die die Werkstatt meldet (nur von dort)
+  const LEVEL_NAMES = { stufe1: "Stufe 1 · sofort", stufe2: "Stufe 2 · je Takt", stufe3: "Stufe 3 · ganze Zeile" };
+  let letzteStufe = "stufe1";
+  Bestenliste.init({ game: "zaehlzeiten", levels: LEVEL_NAMES });
+  document.getElementById("hsBtn").onclick = () => Bestenliste.open(letzteStufe);
+
+  // Nachrichten nur von der Werkstatt annehmen
   window.addEventListener("message", (e) => {
-    if (e.origin !== "https://greenboy87.github.io" || !e.data || e.data.typ !== "rw-hoehe") return;
-    document.getElementById("spiel").style.height = Math.max(520, e.data.hoehe + 16) + "px";
+    if (e.origin !== "https://greenboy87.github.io" || !e.data) return;
+    const d = e.data, mount = document.getElementById("bestenliste");
+    if (d.typ === "rw-hoehe") {
+      document.getElementById("spiel").style.height = Math.max(520, d.hoehe + 16) + "px";
+    } else if (d.typ === "rw-runde" && LEVEL_NAMES["stufe" + d.stufe]) {
+      letzteStufe = "stufe" + d.stufe;
+      Bestenliste.offer(mount, { level: letzteStufe, pct: Math.max(0, Math.min(100, Math.round(d.pct))), detail: String(d.detail || "").slice(0, 40), practice: false });
+      mount.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else if (d.typ === "rw-runde-start") {
+      mount.innerHTML = "";
+    }
   });
 </script>
 </body>
