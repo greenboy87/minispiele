@@ -37,7 +37,40 @@
   .ic { font-size: 30px; font-weight: 700; color: var(--accent); }
   a.game b { display: block; font-size: 22px; margin: 6px 0 4px; }
   a.game span { color: var(--muted); }
+  /* QR-Code oben */
+  .kopf { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 28px; }
+  .kopf p { margin: 0; }
+  .qr-box { display: flex; gap: 14px; align-items: center; background: var(--card); border-radius: 20px; padding: 12px 16px;
+            box-shadow: 0 10px 30px rgba(60, 40, 110, .12); }
+  .qr-klein { width: 96px; height: 96px; background: #fff; border-radius: 10px; padding: 6px; cursor: zoom-in; flex: none; }
+  .qr-klein svg, .qr-gross svg, .druck-qr svg { width: 100%; height: 100%; display: block; }
+  .qr-text { font-size: 15px; color: var(--muted); max-width: 190px; }
+  .qr-text b { color: var(--ink); display: block; font-size: 17px; margin-bottom: 6px; }
+  .qr-knoepfe { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .qr-knoepfe button { border: 1px solid var(--muted); background: transparent; color: var(--ink); border-radius: 10px;
+            padding: 5px 10px; font: inherit; font-size: 14px; cursor: pointer; }
+  .qr-knoepfe button:hover { border-color: var(--accent); }
+  #qrVoll { position: fixed; inset: 0; z-index: 50; background: #fff; color: #2b2540; display: none;
+            flex-direction: column; align-items: center; justify-content: center; gap: 2vh; cursor: zoom-out; padding: 2vh; }
+  #qrVoll.an { display: flex; }
+  #qrVoll h2 { font-size: clamp(28px, 5vh, 60px); margin: 0; }
+  .qr-gross { width: min(72vh, 88vw); height: min(72vh, 88vw); }
+  #qrVoll .url { font-size: clamp(18px, 2.6vh, 30px); color: #6c4cf1; font-weight: 600; word-break: break-all; text-align: center; }
+  #qrVoll small { color: #7a7290; font-size: 15px; }
+  .druck { display: none; }
+  @media print {
+    @page { margin: 15mm; }
+    body { background: #fff !important; color: #000 !important; padding: 0; }
+    main, #qrVoll { display: none !important; }
+    .druck { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8mm; padding-top: 10mm; }
+    .druck h2 { font-size: 34pt; margin: 0; }
+    .druck .fach { font-size: 20pt; margin: 0; color: #444; }
+    .druck-qr { width: 130mm; height: 130mm; }
+    .druck .url { font-size: 16pt; font-weight: 600; word-break: break-all; }
+    .druck p { font-size: 14pt; color: #444; margin: 0; }
+  }
   @media (max-width: 640px) {
+    .kopf { flex-direction: column; }
     .layout { flex-direction: column; gap: 16px; }
     nav.faecher { flex-direction: row; flex-wrap: wrap; position: static; flex: none; }
     nav.faecher button { font-size: 17px; padding: 10px 14px; }
@@ -47,8 +80,23 @@
 </head>
 <body>
 <main>
-  <h1>Minispiele</h1>
-  <p>Kleine Lernspiele für zwischendurch.</p>
+  <div class="kopf">
+    <div>
+      <h1>Minispiele</h1>
+      <p>Kleine Lernspiele für zwischendurch.</p>
+    </div>
+    <div class="qr-box">
+      <div class="qr-klein" id="qrKlein" title="Groß zeigen"></div>
+      <div class="qr-text">
+        <b>📱 Mit dem iPad scannen</b>
+        <span id="qrFach">öffnet diese Seite</span>
+        <div class="qr-knoepfe">
+          <button type="button" id="qrGrossBtn">🔍 Groß zeigen</button>
+          <button type="button" id="qrDruckBtn">🖨️ Drucken</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="layout">
     <nav class="faecher" aria-label="Fach wählen">
       <button type="button" data-fach="alle">🎒 Alle</button>
@@ -139,6 +187,20 @@
     </div>
   </div>
 </main>
+<div id="qrVoll" title="Klicken oder Esc zum Schließen">
+  <h2>📱 Scannen und mitspielen!</h2>
+  <div class="qr-gross" id="qrGross"></div>
+  <div class="url" id="qrUrlGross"></div>
+  <small>Klicken oder Esc zum Schließen</small>
+</div>
+<div class="druck">
+  <h2>Minispiele</h2>
+  <div class="fach" id="druckFach"></div>
+  <div class="druck-qr" id="qrDruck"></div>
+  <div class="url" id="qrUrlDruck"></div>
+  <p>QR-Code mit der Kamera scannen – oder die Adresse im Browser eintippen.</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script>
   // Fach wählen: #deutsch / #musik im Link, sonst die letzte Wahl auf diesem Gerät
   const KNOEPFE = document.querySelectorAll("[data-fach]");
@@ -157,7 +219,31 @@
       try { localStorage.setItem("minispiele:fach", fach); } catch (e) { /* egal */ }
       history.replaceState(null, "", fach === "alle" ? location.pathname : "#" + fach);
     }
+    qrZeichnen(fach);
   }
+  // ---------- QR-Code: zeigt immer auf die öffentliche Seite, mit dem gerade gewählten Fach ----------
+  const BASIS = "https://greenboy87.github.io/minispiele/";
+  const FACH_NAMEN = { alle: "Alle Spiele", deutsch: "Deutsch", "deutsch-neu": "Deutsch – Verben & Rechtschreibung", "deutsch-alt": "Deutsch – Wortarten & Silben", musik: "Musik" };
+  function qrSvg(text) {
+    if (typeof qrcode !== "function") return '<div style="color:#7a7290;font-size:13px;text-align:center;padding-top:30%">QR braucht Internet</div>';
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true });
+  }
+  function qrZeichnen(fach) {
+    const url = BASIS + (fach && fach !== "alle" ? "#" + fach : "");
+    const svg = qrSvg(url);
+    ["qrKlein", "qrGross", "qrDruck"].forEach(id => document.getElementById(id).innerHTML = svg);
+    document.getElementById("qrUrlGross").textContent = url.replace("https://", "");
+    document.getElementById("qrUrlDruck").textContent = url.replace("https://", "");
+    document.getElementById("druckFach").textContent = FACH_NAMEN[fach] || "";
+    document.getElementById("qrFach").textContent = fach && fach !== "alle" ? `öffnet ${FACH_NAMEN[fach]}` : "öffnet diese Seite";
+  }
+  const voll = document.getElementById("qrVoll");
+  document.getElementById("qrKlein").onclick = document.getElementById("qrGrossBtn").onclick = () => voll.classList.add("an");
+  voll.onclick = () => voll.classList.remove("an");
+  document.addEventListener("keydown", e => { if (e.key === "Escape") voll.classList.remove("an"); });
+  document.getElementById("qrDruckBtn").onclick = () => window.print();
+
   let start = location.hash.slice(1);
   if (!start) try { start = localStorage.getItem("minispiele:fach") || "alle"; } catch (e) { start = "alle"; }
   fachZeigen(start, false);
