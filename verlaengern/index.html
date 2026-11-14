@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verlängern-Detektiv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // Wort mit [Buchstabe] an der kniffligen Stelle : Verlängerung mit [Buchstabe] an der Stelle, wo man ihn hört
+  const WORDS = {
+    nomen: [
+      "der Anzu[g]:die Anzü[g]e", "das Ba[d]:die Bä[d]er", "das Bro[t]:die Bro[t]e", "der Die[b]:die Die[b]e", "der Hu[t]:die Hü[t]e",
+      "das Lan[d]:die Län[d]er", "der Ber[g]:die Ber[g]e", "die Bur[g]:die Bur[g]en", "die Wan[d]:die Wän[d]e", "das Wor[t]:die Wör[t]er",
+      "der Sta[b]:die Stä[b]e", "das Gra[b]:die Grä[b]er", "die Kraf[t]:die Kräf[t]e", "das Kin[d]:die Kin[d]er", "der Bran[d]:die Brän[d]e",
+      "der Vorschla[g]:die Vorschlä[g]e", "das Pfer[d]:die Pfer[d]e", "der Solda[t]:die Solda[t]en", "der Mark[t]:die Märk[t]e", "das Schil[d]:die Schil[d]er",
+      "der Wal[d]:die Wäl[d]er", "das Fahrra[d]:die Fahrrä[d]er", "der Momen[t]:die Momen[t]e", "der Kor[b]:die Kör[b]e", "der Kru[g]:die Krü[g]e",
+      "der Zwei[g]:die Zwei[g]e", "der Gas[t]:die Gäs[t]e", "der Bar[t]:die Bär[t]e", "das Nes[t]:die Nes[t]er", "das Hef[t]:die Hef[t]e",
+      "das Fel[d]:die Fel[d]er", "der Hun[d]:die Hun[d]e", "das Bil[d]:die Bil[d]er", "das Lie[d]:die Lie[d]er", "das Fes[t]:die Fes[t]e",
+      "das Pfun[d]:die Pfun[d]e", "die No[t]:die Nö[t]e", "das Kal[b]:die Käl[b]er", "der Zwer[g]:die Zwer[g]e", "der Fein[d]:die Fein[d]e",
+      "das Bioto[p]:die Bioto[p]e", "der Freun[d]:die Freun[d]e", "der Urlau[b]:die Urlau[b]e", "der Grun[d]:die Grün[d]e", "der Hel[d]:die Hel[d]en",
+      "der Aben[d]:die Aben[d]e", "die Fabri[k]:die Fabri[k]en", "die Han[d]:die Hän[d]e", "die Wurs[t]:die Würs[t]e", "der Magne[t]:die Magne[t]e",
+      "der Schran[k]:die Schrän[k]e", "der Punk[t]:die Punk[t]e", "das Hem[d]:die Hem[d]en", "der Or[t]:die Or[t]e", "der Her[d]:die Her[d]e",
+      "der Arz[t]:die Ärz[t]e", "das Ban[d]:die Bän[d]er", "das Klei[d]:die Klei[d]er", "das Gel[d]:die Gel[d]er", "der Zu[g]:die Zü[g]e",
+      "der Win[d]:die Win[d]e", "der Res[t]:die Res[t]e", "der We[g]:die We[g]e", "der Rekor[d]:die Rekor[d]e", "das Pake[t]:die Pake[t]e",
+      "der Mon[d]:die Mon[d]e", "der Mun[d]:die Mün[d]er", "der Krie[g]:die Krie[g]e", "das Boo[t]:die Boo[t]e", "das Gesich[t]:die Gesich[t]er",
+      "der Monta[g]:die Monta[g]e", "der Sonnta[g]:die Sonnta[g]e", "der Mona[t]:die Mona[t]e", "der Ran[d]:die Rän[d]er", "die Gegen[d]:die Gegen[d]en",
+      "der Stan[d]:die Stän[d]e", "das Spielzeu[g]:die Spielzeu[g]e", "der Stran[d]:die Strän[d]e", "der Erfol[g]:die Erfol[g]e", "das Quadra[t]:die Quadra[t]e"
+    ],
+    adjektiv: [
+      "erns[t]:erns[t]er", "wil[d]:wil[d]er", "kran[k]:krän[k]er", "berei[t]:berei[t]e", "blö[d]:blö[d]er", "gesun[d]:gesün[d]er",
+      "blon[d]:blon[d]e", "gel[b]:gel[b]e", "run[d]:run[d]er", "har[t]:här[t]er", "star[k]:stär[k]er", "feuch[t]:feuch[t]er",
+      "flin[k]:flin[k]er", "spä[t]:spä[t]er", "bun[t]:bun[t]e", "hal[b]:hal[b]e", "wüten[d]:wüten[d]e", "frem[d]:frem[d]e",
+      "genügen[d]:genügen[d]e", "dich[t]:dich[t]er", "al[t]:äl[t]er", "lie[b]:lie[b]er", "interessan[t]:interessan[t]er", "klu[g]:klü[g]er",
+      "blin[d]:blin[d]e", "brei[t]:brei[t]er", "kal[t]:käl[t]er", "schlech[t]:schlech[t]er", "mil[d]:mil[d]er", "gro[b]:grö[b]er"
+    ],
+    verb: [
+      "sie ho[b]:he[b]en", "es le[b]t:le[b]en", "sie bo[g]:bie[g]en", "er fe[g]t:fe[g]en", "es la[g]:lie[g]en", "sie hu[p]t:hu[p]en",
+      "er tru[g]:tra[g]en", "es wo[g]:wie[g]en", "du ü[b]st:ü[b]en", "es pum[p]t:pum[p]en", "sie flo[g]:flie[g]en", "er blei[b]t:blei[b]en",
+      "sie ma[g]:mö[g]en", "sie wir[d]:wer[d]en", "er fan[d]:fin[d]en", "er rie[t]:ra[t]en", "es ga[b]:ge[b]en", "es stei[g]t:stei[g]en",
+      "es stin[k]t:stin[k]en", "du le[g]st:le[g]en", "er schen[k]t:schen[k]en", "du bewe[g]st:bewe[g]en", "sie erlau[b]t:erlau[b]en", "er dan[k]t:dan[k]en",
+      "du sa[g]st:sa[g]en", "du schrei[b]st:schrei[b]en", "sie scho[b]:schie[b]en", "sie trin[k]t:trin[k]en", "du fra[g]st:fra[g]en", "sie win[k]t:win[k]en",
+      "du zei[g]st:zei[g]en", "du pfle[g]st:pfle[g]en", "er verbo[t]:verbie[t]en", "du den[k]st:den[k]en", "es schlu[g]:schla[g]en", "er schwie[g]:schwei[g]en",
+      "sie stan[d]:wir stan[d]en"
+    ],
+    zusammen: [
+      "die Lan[d]karte:die Län[d]er", "das Schla[g]zeug:schla[g]en", "das Aben[d]essen:die Aben[d]e", "der Schrei[b]tisch:schrei[b]en",
+      "die Trü[b]sal:trü[b]e", "der Sta[b]hochspringer:die Stä[b]e", "das Köni[g]reich:die Köni[g]e", "das Frem[d]wort:frem[d]e",
+      "der Gel[d]automat:die Gel[d]er", "aben[d]s:die Aben[d]e", "nach[t]s:die Näch[t]e", "nieman[d]:nieman[d]en", "frie[d]lich:der Frie[d]en",
+      "das Gol[d]:gol[d]ig", "unterwe[g]s:die We[g]e", "genu[g]:genü[g]end", "bewöl[k]t:die Wol[k]e", "das Lo[b]:lo[b]en",
+      "der Han[d]schuh:die Hän[d]e", "der Ber[g]steiger:die Ber[g]e", "der Wal[d]weg:die Wäl[d]er", "der Ra[d]weg:die Rä[d]er",
+      "der Kor[b]ball:die Kör[b]e", "die Bro[t]dose:die Bro[t]e", "das Fel[d]bett:die Fel[d]er", "der Zu[g]führer:die Zü[g]e"
+    ]
+  };
+  const PAIR = { d: ["d", "t"], t: ["d", "t"], g: ["g", "k"], k: ["g", "k"], b: ["b", "p"], p: ["b", "p"] };
+  const METHOD = {
+    nomen: { v: "mz", name: "Mehrzahl bilden", ex: "der Hund → die Hunde" },
+    adjektiv: { v: "adj", name: "Adjektiv steigern oder -e anhängen", ex: "wild → wilder" },
+    verb: { v: "gf", name: "Grundform oder wir-Form bilden", ex: "er fegt → fegen" },
+    zusammen: { v: "zl", name: "Wort zerlegen oder verwandtes Wort suchen", ex: "Landkarte → Land → Länder" }
+  };
+  const TOPIC_NAMES = { nomen: "Nomen", adjektiv: "Adjektive", verb: "Verben", zusammen: "Zusammengesetzte & andere Wörter" };
+
+  const ALL = {};
+  for (const topic in WORDS) ALL[topic] = WORDS[topic].map(s => {
+    const [word, long] = s.split(":");
+    const ch = word.match(/\[(.)\]/)[1];
+    return { topic, word, long, ch, pair: PAIR[ch] };
+  });
+  // Artikel oder Pronomen grau, Rest groß
+  function fmt(s, fill) {
+    const parts = s.split(" ");
+    const head = parts.length > 1 && /^(der|die|das|er|sie|es|du|wir)$/.test(parts[0]) ? parts.shift() : null;
+    const body = parts.join(" ").replace(/\[(.)\]/, (m, c) => fill === "gap" ? `<span class="gap">?</span>` : `<span class="m">${c}</span>`);
+    return (head ? `<span class="art">${head}</span>` : "") + body;
+  }
+  const plain = (s) => s.replace(/\[(.)\]/, "$1");
+
+  function makeTasks(level, topics, n) {
+    const list = Quiz.draw(topics.map(t => ALL[t]), n);
+    return list.map(w => {
+      const m = METHOD[w.topic];
+      const solved = `<div class="word">${fmt(w.word)}</div><div class="sub-line">verlängert: <b>${fmt(w.long).replace('class="art"', 'class="muted"')}</b></div>`;
+      const tip = `Verlängern: <b>${plain(w.long)}</b> – jetzt hörst du das <b>${w.ch}</b> deutlich. Also: <b>${plain(w.word)}</b>.`;
+      const base = { key: w.word, solved, tip, recap: `${plain(w.word)} <span class="muted">← ${plain(w.long)}</span>` };
+      if (level === "methode") {
+        return { ...base, prompt: "Wie findest du heraus, wie man das Wort am Ende schreibt?", style: "labels",
+          show: `<div class="word">${fmt(w.word, "gap")}</div><div class="tag">${w.pair.join(" oder ")}?</div>`,
+          choices: Object.values(METHOD).map(x => ({ v: x.v, html: `${x.name}<small>${x.ex}</small>` })), keepOrder: true,
+          answer: m.v,
+          tip: `Das ist ${w.topic === "nomen" ? "ein Nomen" : w.topic === "adjektiv" ? "ein Adjektiv" : w.topic === "verb" ? "eine Verbform" : "ein zusammengesetztes oder abgeleitetes Wort"}: <b>${m.name}</b>. ${tip}`,
+          wrongWhy: () => `Ist das ein Nomen, ein Adjektiv, eine Verbform – oder steckt ein anderes Wort darin?` };
+      }
+      const hilfe = level === "hilfe" ? `<div class="sub-line">Verlängere: <b>${fmt(w.long, "gap").replace('class="art"', 'class="muted"')}</b></div>` : "";
+      return { ...base, style: "letters",
+        prompt: level === "hilfe" ? `Hör beim verlängerten Wort genau hin: <b>${w.pair[0]}</b> oder <b>${w.pair[1]}</b>?` : `Verlängere im Kopf: <b>${w.pair[0]}</b> oder <b>${w.pair[1]}</b>?`,
+        show: `<div class="word">${fmt(w.word, "gap")}</div>${hilfe}`,
+        choices: w.pair.map(c => ({ v: c, html: c })), keepOrder: true, answer: w.ch };
+    });
+  }
+
+  Quiz.create({
+    game: "verlaengern", back: "deutsch-neu",
+    title: "Verlängern-<span>Detektiv</span>",
+    heading: "d oder t? g oder k? b oder p?",
+    intro: "Am Wortende klingen <b>d</b> und <b>t</b>, <b>g</b> und <b>k</b>, <b>b</b> und <b>p</b> gleich. Verlängere das Wort – dann hörst du, welcher Buchstabe hineingehört!",
+    levels: [
+      { id: "hilfe", name: "Mit Hilfe", desc: "Das verlängerte Wort steht schon da – hör genau hin." },
+      { id: "ohne", name: "Ohne Hilfe", desc: "Selbst verlängern und den Buchstaben wählen." },
+      { id: "methode", name: "Wie verlängern?", desc: "Mehrzahl, steigern, Grundform oder zerlegen?" }
+    ],
+    topics: Object.keys(TOPIC_NAMES).map(id => ({ id, name: TOPIC_NAMES[id] })),
+    merk: `<p>Am Ende einer Silbe klingen <b>d</b> wie <b>t</b>, <b>g</b> wie <b>k</b> und <b>b</b> wie <b>p</b>.
+      Besser hören kann man d, g und b am <b>Silbenanfang</b>. Darum: <b>Verlängere zuerst!</b></p>
+      <table><tr><th>Wortart</th><th>So verlängerst du</th><th>Beispiel</th></tr>
+      <tr><td>Nomen</td><td>Mehrzahl bilden</td><td>der Hun<b>d</b> → die Hun<b>d</b>e</td></tr>
+      <tr><td>Adjektiv</td><td>steigern oder -e anhängen</td><td>wil<b>d</b> → wil<b>d</b>er, gel<b>b</b> → gel<b>b</b>e</td></tr>
+      <tr><td>Verb</td><td>Grundform (oder wir-Form) bilden</td><td>er fe<b>g</b>t → fe<b>g</b>en, sie stan<b>d</b> → wir stan<b>d</b>en</td></tr>
+      <tr><td>Zusammengesetztes Wort</td><td>zerlegen, dann den Teil verlängern</td><td>Lan<b>d</b>karte → Lan<b>d</b> → Län<b>d</b>er</td></tr>
+      <tr><td>andere Wörter</td><td>verwandtes Wort suchen</td><td>aben<b>d</b>s → Aben<b>d</b>e, frie<b>d</b>lich → Frie<b>d</b>en</td></tr></table>
+      <p>Es gibt oft mehrere Möglichkeiten zu verlängern. Eine reicht!</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super, Detektiv!", "Meister-Detektiv!"]
+  });
+})();
+</script>
+</body>
+</html>

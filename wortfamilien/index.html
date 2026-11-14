@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wortfamilien-Sortierer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // Wortstamm : Wörter, der Stamm steht in [ ] (so wird er markiert)
+  const FAMILIES = {
+    SCHIEB: "[schieb]en, er [schieb]t, es [schob], sie [schob]en, ge[schob]en, [Schub]lade, [Schub]karre, Nach[schub], an[schieb]en",
+    BIEG: "[bieg]en, er [bieg]t, sie [bog], [bieg]sam, ge[bog]en, [Bieg]ung, ver[bieg]en, der [Bog]en",
+    RAT: "[rat]en, sie [rät], du [rät]st, [Rat]espiel, [Rät]sel, [rät]seln, [rat]los, ver[rat]en, du ver[rät]st, der [Rat]geber",
+    WASCH: "[wasch]en, die [Wäsch]e, er [wäsch]t, du [wäsch]st, Vor[wäsch]e, ab[wasch]en, [Wasch]maschine, ge[wasch]en, sie [wusch]",
+    FAHR: "[fahr]en, die [Fahr]t, das [Fahr]rad, er [fähr]t, sie [fuhr], der [Fahr]er, die [Fähr]e, die Vor[fahr]t, ge[fahr]en",
+    FLIEG: "[flieg]en, der [Flug], der [Flieg]er, sie [flog], das [Flug]zeug, ge[flog]en, der Ab[flug], [flieg]t",
+    SING: "[sing]en, der [Säng]er, sie [sang], der Ge[sang], ge[sung]en, die [Säng]erin, er [sing]t, vor[sing]en",
+    TRAG: "[trag]en, sie [träg]t, er [trug], der [Träg]er, ge[trag]en, [trag]bar, der Vor[trag], ein[trag]en",
+    SCHLAG: "[schlag]en, der [Schlag], das [Schlag]zeug, es [schläg]t, sie [schlug], der [Schläg]er, ge[schlag]en, der Vor[schlag]",
+    TRAUM: "[träum]en, der [Traum], die [Träum]e, sie [träum]te, [traum]haft, der [Träum]er, ge[träum]t, der Alb[traum]",
+    LAUT: "[laut], [läut]en, der [Laut], [laut]er, ge[läut]et, der [Laut]sprecher, es [läut]et",
+    HAUS: "das [Haus], die [Häus]er, das [Häus]chen, [häus]lich, die [Haus]tür, zu [Haus]e, das Bau[haus]",
+    BAU: "[bau]en, der [Bau], das Ge[bäu]de, der [Bau]er, er [bau]t, die [Bau]stelle, ge[bau]t, auf[bau]en",
+    KRAFT: "die [Kraft], [kräft]ig, die [Kräft]e, [kraft]los, das [Kraft]werk, ent[kräft]en",
+    WALD: "der [Wald], die [Wäld]er, der [Wald]weg, das [Wäld]chen, der Ur[wald], [wald]ig",
+    HAND: "die [Hand], die [Händ]e, [hand]lich, der [Hand]schuh, eine [Hand]voll, das [Hand]tuch, der [Händ]ler"
+  };
+  const FAM = Object.entries(FAMILIES).map(([stem, list]) => ({ stem, words: list.split(",").map(w => w.trim()) }));
+  // Diese Familien gehören zusammen, weil sie ähnlich aussehen oder auf den Seiten nebeneinander stehen
+  const GROUPS = [["SCHIEB", "BIEG", "SING"], ["RAT", "WASCH", "TRAG"], ["FAHR", "FLIEG", "SCHLAG"], ["TRAUM", "LAUT", "BAU"], ["HAUS", "HAND", "WALD"], ["KRAFT", "TRAG", "FAHR"]];
+  const plain = (w) => w.replace(/[[\]]/g, "");
+  const marked = (w) => w.replace(/\[(.+?)\]/, '<span class="m">$1</span>');
+  const umlaut = (w) => { const s = w.match(/\[(.+?)\]/)[1].toLowerCase(); return /äu/.test(s) ? "au wird äu" : /ä/.test(s) ? "a wird ä" : ""; };
+
+  function makeTasks(level, topics, n) {
+    const tasks = [];
+    while (tasks.length < n) {
+      const fams = Quiz.pick(GROUPS).map(s => FAM.find(f => f.stem === s));
+      const per = Math.ceil(Math.min(5, n - tasks.length) / fams.length) || 1;
+      const words = Quiz.shuffle(fams.flatMap(f => Quiz.shuffle([...f.words]).slice(0, per).map(w => ({ f, w })))).slice(0, Math.min(5, n - tasks.length));
+      for (const { f, w } of words) {
+        if (level === "stamm") {
+          // „Finde den Wortstamm“: welcher Teil ist der Stamm?
+          const stem = w.match(/\[(.+?)\]/)[1];
+          const opts = new Set([stem]);
+          const p = plain(w), core = p.replace(/^(er|sie|es|du|der|die|das|zu|eine) /, ""), i = core.indexOf(stem);
+          const fake = [core, core.slice(0, i + stem.length + 1), core.slice(i, i + stem.length + 2), core.slice(i + 1, i + stem.length), stem.slice(0, -1)];
+          for (const x of Quiz.shuffle(fake.slice(0, 4))) if (opts.size < 3 && x && x !== stem && x.length > 1) opts.add(x);
+          if (opts.size < 3) opts.add(fake[4]);
+          tasks.push({
+            key: "s:" + w, style: "words",
+            prompt: `Welcher Teil ist der <b>Wortstamm</b>? <span class="muted">(Familie ${f.stem})</span>`,
+            show: `<div class="word small">${p}</div>`, solved: `<div class="word small">${marked(w)}</div>`,
+            choices: [...opts].map(o => ({ v: o, html: o })), answer: stem,
+            tip: `Der Wortstamm ist <b>${stem}</b>${umlaut(w) ? ` – ${umlaut(w)}, der Stamm bleibt trotzdem erkennbar.` : "."} Andere aus der Familie: ${Quiz.shuffle(f.words.filter(x => x !== w)).slice(0, 3).map(marked).join(", ")}`,
+            recap: marked(w)
+          });
+        } else {
+          tasks.push({
+            key: "f:" + w, style: "words",
+            prompt: "Zu welcher <b>Wortfamilie</b> gehört das Wort?",
+            show: `<div class="word small">${plain(w)}</div>`, solved: `<div class="word small">${marked(w)}</div>`,
+            choices: fams.map(x => ({ v: x.stem, html: `Wortstamm <b>${x.stem}</b>` })), keepOrder: true, answer: f.stem,
+            tip: `<b>${plain(w)}</b> gehört zum Wortstamm <b>${f.stem}</b>${umlaut(w) ? ` (${umlaut(w)})` : ""}.${/\[(schob|bog|wusch|fuhr|flog|Flug|sang|sung|trug|schlug)\]/i.test(w) ? " In der Vergangenheit ändert sich der Selbstlaut – das Wort gehört aber trotzdem zur Familie." : ""}`,
+            recap: `${marked(w)} <span class="muted">→ ${f.stem}</span>`
+          });
+        }
+      }
+    }
+    return tasks.slice(0, n);
+  }
+
+  Quiz.create({
+    game: "wortfamilien", back: "deutsch-neu",
+    title: "Wortfamilien-<span>Sortierer</span>",
+    heading: "Welche Wörter gehören zusammen?",
+    intro: "Wörter mit dem gleichen <b>Wortstamm</b> bilden eine <b>Wortfamilie</b>: schieben, die Schublade, geschoben. Manchmal ändert sich der Stamm ein bisschen – aus <b>a</b> wird <b>ä</b>, aus <b>au</b> wird <b>äu</b>.",
+    levels: [
+      { id: "sort", name: "Wörter sortieren", desc: "In welche Familie gehört das Wort?" },
+      { id: "stamm", name: "Wortstamm finden", desc: "Welcher Teil ist der Stamm?" }
+    ],
+    merk: `<p>Wörter mit dem gleichen <b>Wortstamm</b> gehören zu einer <b>Wortfamilie</b>. Der Stamm sieht in allen Wörtern (fast) gleich aus – er wird auch gleich geschrieben.</p>
+      <table><tr><th>Wortstamm</th><th>Wörter</th></tr>
+      <tr><td>SCHIEB</td><td>schieben, er schiebt, es schob, geschoben, Schublade, Schubkarre</td></tr>
+      <tr><td>BIEG</td><td>biegen, er biegt, sie bog, biegsam, gebogen, Biegung</td></tr>
+      <tr><td>RAT</td><td>raten, sie rät, Rätsel, rätseln, ratlos, verraten</td></tr>
+      <tr><td>WASCH</td><td>waschen, Wäsche, er wäscht, Vorwäsche, abwaschen</td></tr></table>
+      <ul><li><b>a</b> wird <b>ä</b>: raten → Rätsel, waschen → Wäsche</li>
+      <li><b>au</b> wird <b>äu</b>: Traum → träumen, laut → läuten</li>
+      <li>In der Vergangenheit ändert sich oft der Selbstlaut: schieben → schob, biegen → bog. Die Wörter gehören trotzdem zur Familie.</li>
+      <li>Tipp: Wenn du ein Wort mit ä oder äu schreiben musst, such ein verwandtes Wort mit a oder au!</li></ul>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Familien-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

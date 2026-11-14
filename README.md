@@ -11,8 +11,13 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Zählzeiten-Training | `zaehlzeiten/` | Über jede Note die Zählzeit schreiben (1 e + e …), Takte aus gewählten Bausteinen (Musik). Kommt aus der Rhythmus-Werkstatt. |
 | Rhythmus-Diktat | `diktat/` | Ein Rhythmus wird vorgespielt, man baut ihn aus Bausteinen nach (Musik). Kommt aus der Rhythmus-Werkstatt. |
 | Deutsch-Fachbegriffe | `fachbegriffe/` | Wortarten im Satz bestimmen und finden, Vokale und Konsonanten erkennen (4. Klasse / Unterstufe). |
+| Verlängern-Detektiv | `verlaengern/` | d oder t, g oder k, b oder p? Durch Verlängern entscheiden (Nomen, Adjektive, Verben, zusammengesetzte Wörter). |
+| Zeitformen-Detektiv | `zeitformen/` | Grundform, Gegenwart, 1. oder 2. Vergangenheit erkennen; Grundform finden. |
+| Verben-Werkstatt | `verbformen/` | Verbformen bilden (Gegenwart, 1. und 2. Vergangenheit), hat oder ist? |
+| Wortfamilien-Sortierer | `wortfamilien/` | Wörter nach dem Wortstamm sortieren, Wortstamm finden (auch a→ä, au→äu). |
+| ä oder e? äu oder eu? | `umlaute/` | Mit verwandten Wörtern ableiten: Wäsche ← waschen, träumen ← Traum. |
 
-Start: `index.html` öffnen. Links wählt eine Leiste das Fach: **Alle**, **Deutsch** (Alphabet, Fachbegriffe, Nachsilben, Adjektive, Silben) oder **Musik** (Zählzeiten, Rhythmus-Diktat). Die Wahl merkt sich das Gerät (`minispiele:fach`); `index.html#musik` bzw. `#deutsch` öffnet direkt ein Fach – dahin führt auch „← Übersicht“ in den Musikspielen. Ein neues Spiel kommt als Karte in die passende `<section class="fach">`.
+Start: `index.html` öffnen. Links wählt eine Leiste das Fach: **Alle**, **Deutsch** oder **Musik** (Zählzeiten, Rhythmus-Diktat). Deutsch hat zwei Unterkategorien: **Verben & Rechtschreibung** (neue Prüfung: Verlängern, Zeitformen, Verbformen, Wortfamilien, ä/äu; `#deutsch-neu`) und **Wortarten & Silben** (frühere Prüfung: Alphabet, Fachbegriffe, Nachsilben, Adjektive, Silben; `#deutsch-alt`). Neue Deutsch-Spiele kommen als Karte in die passende `<div class="gruppe">`. Die Wahl merkt sich das Gerät (`minispiele:fach`); `index.html#musik` bzw. `#deutsch` öffnet direkt ein Fach – dahin führt auch „← Übersicht“ in den Musikspielen. Ein neues Spiel kommt als Karte in die passende `<section class="fach">`.
 
 ## Bestenliste (alle Spiele)
 
@@ -21,6 +26,15 @@ Start: `index.html` öffnen. Links wählt eine Leiste das Fach: **Alle**, **Deut
 - Pro Name zählt nur der beste Wert, damit ein Kind nicht die ganze Liste füllt. „Fehler üben“ zählt nicht.
 - 🏆 oben im Spiel öffnet alle Listen; dort lässt sich eine Liste auch löschen.
 - Alles nur lokal im Browser (`localStorage`, Schlüssel `minispiele:namen` und `minispiele:bestenliste:<spiel>:<level>`). Code: `shared/bestenliste.js`.
+
+## Gemeinsames Quiz-Gerüst (Verben & Rechtschreibung)
+
+Die fünf Spiele der neuen Prüfung sind klein: Jede `index.html` enthält nur Wortlisten und einen Aufgaben-Erzeuger und ruft `Quiz.create({...})` aus `shared/quiz.js` auf (Aussehen: `shared/quiz.css`). Das Gerüst baut Startseite mit Leveln und Themen, Spiel, Merkkasten (📒), Ergebnis mit Sternen, Rekord, Bestenliste und „Fehler üben“. Punkte: 1 beim ersten Versuch, 0,5 beim zweiten (zweiter Versuch nur bei mehr als zwei Antworten). Standard: 10 Aufgaben pro Runde, damit eine Runde kurz bleibt. Grundlage: Arbeitsheft-Seiten 17–24 und 45.
+
+- **Verlängern-Detektiv** – Level *Mit Hilfe* (verlängertes Wort mit Lücke steht da), *Ohne Hilfe*, *Wie verlängern?* (Mehrzahl / steigern / Grundform / zerlegen). Themen: Nomen, Adjektive, Verben, zusammengesetzte & andere Wörter. Wörter als `der Hun[d]:die Hun[d]e`.
+- **Zeitformen-Detektiv** und **Verben-Werkstatt** teilen sich die Verbliste `shared/verben.js` (`Grundform|er-Form|1. Verg.|hat/ist|Partizip`). Falsche Antworten werden erzeugt (gehte, gegeht, ist getroffen). Echte Wörter wie dürfte/müsste werden nicht als Fehler angeboten. Bei stehen, liegen und schwimmen wird nicht nach hat/ist gefragt, weil „ist gestanden/gelegen“ in Bayern richtig ist.
+- **Wortfamilien-Sortierer** – Stamm in eckigen Klammern: `ge[schob]en`. Je Runde drei ähnliche Familien gegeneinander.
+- **ä oder e? äu oder eu?** – `die W[ä]sche:waschen`; ohne verwandtes Wort (`das W[e]tter:`) heißt es e/eu.
 
 ## Alphabet-Gefühl
 

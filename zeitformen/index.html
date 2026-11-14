@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeitformen-Detektiv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/verben.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  const { VERBS, CONFUSE, forms, personFor, strong } = Verben;
+  const ZEIT = {
+    gf: { name: "Grundform", small: "Infinitiv" },
+    pres: { name: "Gegenwart", small: "Präsens" },
+    prat: { name: "1. Vergangenheit", small: "Präteritum" },
+    perf: { name: "2. Vergangenheit", small: "Perfekt" }
+  };
+  const zeitChoices = Object.keys(ZEIT).map(k => ({ v: k, html: `${ZEIT[k].name}<small>${ZEIT[k].small}</small>` }));
+  const stripFirst = (s) => s.split(" ").slice(1).join(" ");
+
+  function zeitTask(v) {
+    const zeit = Quiz.pick(["gf", "pres", "pres", "prat", "prat", "perf", "perf"]);
+    const f = forms(v, personFor(v, zeit !== "pres"));
+    const text = zeit === "gf" ? v.g : zeit === "pres" ? `${f.person} ${f.pres}` : zeit === "prat" ? `${f.person} ${f.prat}` : `${f.person} ${f.perf}`;
+    const why = {
+      gf: "Die Grundform steht ohne Person und endet auf <b>-en</b> oder <b>-n</b>.",
+      pres: "So ist es <b>jetzt</b>, in der Gegenwart.",
+      prat: "Die 1. Vergangenheit besteht aus <b>einem</b> Wort. Man benutzt sie oft beim Erzählen und Schreiben.",
+      perf: `Die 2. Vergangenheit hat <b>zwei Teile</b>: <b>${f.aux}</b> + <b>${f.perf.split(" ").pop()}</b>.`
+    }[zeit];
+    return {
+      key: "z:" + text, style: "labels", keepOrder: true,
+      prompt: "In welcher Zeitform steht das Verb?",
+      show: `<div class="word small">${fmtPerson(text, zeit)}</div>`,
+      choices: zeitChoices, answer: zeit,
+      tip: `${why}<br><span class="muted">${table(v, f)}</span>`,
+      recap: `${text} <span class="muted">→ ${ZEIT[zeit].name}</span>`
+    };
+  }
+  function fmtPerson(text, zeit) {
+    if (zeit === "gf") return text;
+    const [p, ...rest] = text.split(" ");
+    return `<span class="pr">${p}</span>${rest.join(" ")}`;
+  }
+  function table(v, f) {
+    return `Grundform <b>${v.g}</b> · Gegenwart <b>${f.person} ${f.pres}</b> · 1. Verg. <b>${f.person} ${f.prat}</b> · 2. Verg. <b>${f.person} ${f.perf}</b>`;
+  }
+
+  function grundTask(v) {
+    const zeit = Quiz.pick(["pres", "prat", "prat", "perf"]);
+    const f = forms(v, personFor(v, zeit !== "pres"));
+    const text = `${f.person} ${zeit === "pres" ? f.pres : zeit === "prat" ? f.prat : f.perf}`;
+    const opts = new Set([v.g]);
+    const cand = [CONFUSE[v.g], strong(v) ? (v.pt.endsWith("e") ? v.pt + "n" : v.pt + "en") : null,
+      (x => /[aäiouü]en$/.test(x) ? null : x)(v.p3.replace(/e?t$/, "") + "en"), v.pp, f.pres.endsWith("en") ? null : f.pres + "en"];
+    for (const c of Quiz.shuffle(cand.filter(Boolean))) { if (opts.size >= 4) break; if (c !== v.g) opts.add(c); }
+    return {
+      key: "g:" + text, style: "words",
+      prompt: "Wie heißt die <b>Grundform</b>?",
+      show: `<div class="word small">${fmtPerson(text, zeit)}</div><div class="tag">${ZEIT[zeit].name}</div>`,
+      choices: [...opts].map(o => ({ v: o, html: o })), answer: v.g,
+      tip: `Die Grundform ist <b>${v.g}</b>. Tipp: Sag es in der Gegenwart – <b>${v.only || "er"} ${v.p3}</b> → <b>${v.g}</b>.<br><span class="muted">${table(v, f)}</span>`,
+      recap: `${text} <span class="muted">→ ${v.g}</span>`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    const list = Quiz.draw([VERBS], n);
+    return list.map((v, i) => level === "zeit" ? zeitTask(v) : level === "grund" ? grundTask(v) : (i % 2 ? zeitTask(v) : grundTask(v)));
+  }
+
+  Quiz.create({
+    game: "zeitformen", back: "deutsch-neu",
+    title: "Zeitformen-<span>Detektiv</span>",
+    heading: "Gegenwart oder Vergangenheit?",
+    intro: "Jedes Verb hat eine <b>Grundform</b> (gehen) und verschiedene <b>Zeitformen</b>: Gegenwart (sie geht), 1. Vergangenheit (sie ging) und 2. Vergangenheit (sie ist gegangen). Finde heraus, was du vor dir hast!",
+    levels: [
+      { id: "zeit", name: "Zeitform erkennen", desc: "Grundform, Gegenwart, 1. oder 2. Vergangenheit?" },
+      { id: "grund", name: "Grundform finden", desc: "sie schob → schieben, es lag → liegen" },
+      { id: "mix", name: "Gemischt", desc: "Beides abwechselnd." }
+    ],
+    merk: `<table><tr><th>Grundform</th><th>Gegenwart<br><small>Präsens</small></th><th>1. Vergangenheit<br><small>Präteritum</small></th><th>2. Vergangenheit<br><small>Perfekt</small></th></tr>
+      <tr><td>leben</td><td>es lebt</td><td>es lebte</td><td>es hat gelebt</td></tr>
+      <tr><td>gehen</td><td>sie geht</td><td>sie ging</td><td>sie ist gegangen</td></tr>
+      <tr><td>singen</td><td>sie singt</td><td>sie sang</td><td>sie hat gesungen</td></tr>
+      <tr><td>fliegen</td><td>wir fliegen</td><td>wir flogen</td><td>wir sind geflogen</td></tr></table>
+      <ul><li>Die <b>Grundform</b> steht ohne Person und endet auf -en oder -n.</li>
+      <li>Die <b>1. Vergangenheit</b> ist <b>ein</b> Wort. Oft ändert sich der Selbstlaut: singen → sang, schieben → schob.</li>
+      <li>Die <b>2. Vergangenheit</b> hat <b>zwei Teile</b>: <b>hat</b> oder <b>ist</b> + die Form mit <b>ge-</b> (gesungen, gegangen).</li>
+      <li>Grundform finden: Sag es in der Gegenwart – es lag → es <b>liegt</b> → <b>liegen</b>.</li></ul>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Zeitformen-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

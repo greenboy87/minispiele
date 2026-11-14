@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verben-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/verben.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  const { VERBS, forms, personFor, AUX_BOTH } = Verben;
+  const ZEIT = { pres: "Gegenwart", prat: "1. Vergangenheit", perf: "2. Vergangenheit" };
+  const BEWEGUNG = new Set(["gehen", "fliegen", "fahren", "kommen", "schleichen", "schwimmen", "fließen", "laufen", "springen", "steigen", "sinken"]);
+
+  function bench(v, f, zeit, answer) {
+    return `<div class="word small"><span class="pr">${f.person}</span>${answer ? `<span class="m">${answer}</span>` : `<span class="gap" style="min-width:3em">?</span>`}</div>
+      <div class="sub-line">Grundform: <b>${v.g}</b> · <b>${ZEIT[zeit]}</b></div>`;
+  }
+  function overview(v, f) {
+    return `<span class="muted">${v.g} · ${f.person} ${f.pres} · ${f.person} ${f.prat} · ${f.person} ${f.perf}</span>`;
+  }
+  function auxWhy(v, f) {
+    return BEWEGUNG.has(v.g) ? `<b>${f.aux}</b>, weil sich jemand oder etwas <b>von einem Ort zum anderen bewegt</b>.`
+      : ["werden", "bleiben"].includes(v.g) ? `Bei <b>${v.g}</b> heißt es immer <b>${f.aux}</b>.`
+      : `<b>${f.aux}</b> – die meisten Verben bilden die 2. Vergangenheit mit <b>hat</b>.`;
+  }
+
+  function formTask(v, zeit) {
+    const f = forms(v, personFor(v));
+    const right = f[zeit];
+    const cand = zeit === "pres" ? [f.fakePres, f.prat, f.perf]
+      : zeit === "prat" ? [f.fakePrat, f.pres, f.perf]
+      : [...f.fakePerf, f.prat];
+    const opts = new Set([right]);
+    for (const c of cand) { if (opts.size >= 4) break; if (c && c !== right) opts.add(c); }
+    return {
+      key: zeit + ":" + v.g + ":" + f.person, style: "words",
+      prompt: `Bilde die <b>${ZEIT[zeit]}</b>:`,
+      show: bench(v, f, zeit), solved: bench(v, f, zeit, right),
+      choices: [...opts].map(o => ({ v: o, html: o })), answer: right,
+      wrongWhy: (x) => x === f.pres && zeit !== "pres" ? "Das ist die Gegenwart."
+        : x === f.prat ? "Das ist die 1. Vergangenheit."
+        : x === f.perf ? "Das ist die 2. Vergangenheit."
+        : zeit === "perf" && x.startsWith(f.other) ? `Nicht <b>${f.other}</b> …` : "Diese Form gibt es so nicht.",
+      tip: (zeit === "perf" ? auxWhy(v, f) + "<br>" : zeit === "prat" && f.fakePrat && f.prat !== f.fakePrat ? `<b>${v.g}</b> ändert sich in der Vergangenheit: <b>${f.prat}</b> (nicht ${f.fakePrat}).<br>` : "") + overview(v, f),
+      recap: `${f.person} ${right} <span class="muted">(${v.g})</span>`
+    };
+  }
+
+  function auxTask(v) {
+    const f = forms(v, personFor(v));
+    const show = (a) => `<div class="word small"><span class="pr">${f.person}</span>${a ? `<span class="m">${a}</span>` : `<span class="gap">?</span>`} ${v.pp}</div><div class="sub-line">Grundform: <b>${v.g}</b></div>`;
+    return {
+      key: "aux:" + v.g + ":" + f.person, style: "letters", keepOrder: true,
+      prompt: "<b>hat</b> oder <b>ist</b>? Ergänze die 2. Vergangenheit.",
+      show: show(), solved: show(f.aux),
+      choices: (f.person === "wir" ? ["haben", "sind"] : ["hat", "ist"]).map(a => ({ v: a, html: a })), answer: f.aux,
+      tip: auxWhy(v, f),
+      recap: `${f.person} ${f.perf}`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    // für „hat oder ist?“ etwa die Hälfte mit ist
+    const pool = level === "aux" ? [VERBS.filter(v => v.aux === "ist"), VERBS.filter(v => v.aux === "hat")].map(l => l.filter(v => !AUX_BOTH.has(v.g))) : [VERBS];
+    const list = Quiz.draw(pool, n);
+    return list.map((v, i) => {
+      if (level === "aux") return auxTask(v);
+      if (level === "mix") return i % 4 === 3 && !AUX_BOTH.has(v.g) ? auxTask(v) : formTask(v, ["pres", "prat", "perf"][i % 3]);
+      return formTask(v, level);
+    });
+  }
+
+  Quiz.create({
+    game: "verbformen", back: "deutsch-neu",
+    title: "Verben-<span>Werkstatt</span>",
+    heading: "Verbformen bilden",
+    intro: "Aus der Grundform baust du die richtige Form: <b>Gegenwart</b> (sie singt), <b>1. Vergangenheit</b> (sie sang) oder <b>2. Vergangenheit</b> (sie hat gesungen). Pass auf – viele Verben ändern ihren Selbstlaut!",
+    levels: [
+      { id: "pres", name: "Gegenwart", desc: "helfen → sie hilft" },
+      { id: "prat", name: "1. Vergangenheit", desc: "gehen → sie ging" },
+      { id: "perf", name: "2. Vergangenheit", desc: "singen → sie hat gesungen" },
+      { id: "aux", name: "hat oder ist?", desc: "er ist geflogen, er hat getroffen" },
+      { id: "mix", name: "Gemischt", desc: "Alle Formen durcheinander." }
+    ],
+    merk: `<table><tr><th>Grundform</th><th>Gegenwart</th><th>1. Vergangenheit</th><th>2. Vergangenheit</th></tr>
+      <tr><td>kleben</td><td>er klebt</td><td>er klebte</td><td>er hat geklebt</td></tr>
+      <tr><td>singen</td><td>sie singt</td><td>sie sang</td><td>sie hat gesungen</td></tr>
+      <tr><td>sinken</td><td>es sinkt</td><td>es sank</td><td>es ist gesunken</td></tr>
+      <tr><td>bleiben</td><td>sie bleibt</td><td>sie blieb</td><td>sie ist geblieben</td></tr>
+      <tr><td>schlagen</td><td>es schlägt</td><td>es schlug</td><td>es hat geschlagen</td></tr></table>
+      <h4>Manche Verben ändern sich stark</h4>
+      <p>Bei vielen Verben ändert sich der Selbstlaut: gehen → ging, schieben → schob, helfen → sie hilft. Die musst du dir merken – „gehte“ oder „gegeht“ gibt es nicht!</p>
+      <h4>hat oder ist?</h4>
+      <ul><li>Die meisten Verben: <b>hat</b> (er hat gelesen, sie hat getroffen).</li>
+      <li>Bewegung von einem Ort zum anderen: <b>ist</b> (sie ist gegangen, wir sind geflogen, es ist gesunken).</li>
+      <li>Außerdem: <b>ist geworden</b>, <b>ist geblieben</b>.</li>
+      <li>Bei <b>wir</b> heißt es <b>haben</b> oder <b>sind</b>.</li></ul>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Verben-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ä oder e?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // Wort mit [Laut] : verwandtes Wort mit a/au (leer = es gibt keins, also e/eu)
+  const AE = [
+    "die W[ä]sche:waschen", "das R[ä]tsel:raten", "die [Ä]pfel:der Apfel", "die H[ä]nde:die Hand", "die L[ä]nder:das Land",
+    "die K[ä]lte:kalt", "die W[ä]rme:warm", "die Gl[ä]ser:das Glas", "die Bl[ä]tter:das Blatt", "die M[ä]nner:der Mann",
+    "die Z[ä]hne:der Zahn", "n[ä]hen:die Naht", "qu[ä]len:die Qual", "l[ä]cheln:lachen", "dr[ä]ngeln:der Drang",
+    "er f[ä]hrt:fahren", "die F[ä]hre:fahren", "sie schl[ä]ft:schlafen", "er tr[ä]gt:tragen", "gef[ä]hrlich:die Gefahr",
+    "der B[ä]cker:backen", "die K[ä]mme:der Kamm", "sie r[ä]t:raten", "er w[ä]scht:waschen", "die W[ä]nde:die Wand",
+    "st[ä]rker:stark", "l[ä]nger:lang", "[ä]lter:alt", "die G[ä]ste:der Gast", "die S[ä]tze:der Satz",
+    "die B[ä]lle:der Ball", "die Pl[ä]tze:der Platz", "die K[ä]lber:das Kalb", "kr[ä]ftig:die Kraft", "der S[ä]nger:der Gesang"
+  ];
+  const E = [
+    "das W[e]tter:", "der B[e]cher:", "das F[e]st:", "das H[e]rz:", "der H[e]ld:", "der M[e]nsch:", "das Pf[e]rd:", "die W[e]lt:",
+    "der St[e]rn:", "die F[e]der:", "h[e]ll:", "schn[e]ll:", "das F[e]nster:", "der B[e]rg:", "die H[e]cke:", "g[e]stern:",
+    "die Schw[e]ster:", "das B[e]tt:", "l[e]cker:", "das H[e]ft:", "der W[e]g:", "die K[e]rze:"
+  ];
+  const AEU = [
+    "die H[äu]ser:das Haus", "die M[äu]se:die Maus", "die B[äu]me:der Baum", "tr[äu]men:der Traum", "l[äu]ten:laut",
+    "der R[äu]ber:rauben", "der L[äu]fer:laufen", "die Str[äu]cher:der Strauch", "die B[äu]che:der Bauch", "s[äu]bern:sauber",
+    "das Geb[äu]de:bauen", "die Kr[äu]ter:das Kraut", "die H[äu]te:die Haut", "er l[äu]ft:laufen", "die Tr[äu]me:der Traum",
+    "die Z[äu]ne:der Zaun", "h[äu]fig:der Haufen", "die Br[äu]te:die Braut", "die F[äu]ste:die Faust"
+  ];
+  const EU = [
+    "das F[eu]er:", "der Fr[eu]nd:", "h[eu]te:", "die L[eu]te:", "n[eu]:", "t[eu]er:", "die [Eu]le:", "die B[eu]le:",
+    "das Kr[eu]z:", "das H[eu]:", "der B[eu]tel:", "d[eu]tlich:", "das Spielz[eu]g:", "die Fr[eu]de:", "das Z[eu]gnis:"
+  ];
+
+  const parse = (list, kind) => list.map(s => { const [w, rel] = s.split(":"); return { w, rel, ch: w.match(/\[(.+?)\]/)[1].toLowerCase(), kind }; });
+  const TOPIC = { ae: [...parse(AE, "ae"), ...parse(E, "ae")], aeu: [...parse(AEU, "aeu"), ...parse(EU, "aeu")] };
+  const plain = (w) => w.replace(/\[(.+?)\]/, "$1");
+  function fmt(w, mode) {
+    const parts = w.split(" ");
+    const head = parts.length > 1 ? parts.shift() : null;
+    const body = parts.join(" ").replace(/\[(.+?)\]/, (m, c) => mode === "gap" ? `<span class="gap">?</span>` : `<span class="m">${c}</span>`);
+    return (head ? `<span class="art">${head}</span>` : "") + body;
+  }
+  const relMark = (rel) => rel.replace(/(au|a)/i, '<span class="m2">$1</span>');
+
+  function makeTasks(level, topics, n) {
+    const pools = level === "ae" ? [TOPIC.ae.filter(x => x.ch === "ä"), TOPIC.ae.filter(x => x.ch === "e")]
+      : level === "aeu" ? [TOPIC.aeu.filter(x => x.ch === "äu"), TOPIC.aeu.filter(x => x.ch === "eu")]
+      : [TOPIC.ae.filter(x => x.ch === "ä"), TOPIC.ae.filter(x => x.ch === "e"), TOPIC.aeu.filter(x => x.ch === "äu"), TOPIC.aeu.filter(x => x.ch === "eu")];
+    return Quiz.draw(pools, n).map(x => {
+      const pair = x.kind === "ae" ? ["ä", "e"] : ["äu", "eu"];
+      const tip = x.rel
+        ? `Verwandtes Wort: <b>${relMark(x.rel)}</b> – aus <b>${x.kind === "ae" ? "a" : "au"}</b> wird <b>${x.ch}</b>.`
+        : `Es gibt kein verwandtes Wort mit <b>${x.kind === "ae" ? "a" : "au"}</b> – also schreibt man <b>${x.ch}</b>.`;
+      return {
+        key: x.w, style: "letters", keepOrder: true,
+        prompt: `<b>${pair[0]}</b> oder <b>${pair[1]}</b>? Gibt es ein verwandtes Wort mit <b>${x.kind === "ae" ? "a" : "au"}</b>?`,
+        show: `<div class="word">${fmt(x.w, "gap")}</div>`,
+        solved: `<div class="word">${fmt(x.w)}</div>${x.rel ? `<div class="sub-line">kommt von <b>${relMark(x.rel)}</b></div>` : ""}`,
+        choices: pair.map(c => ({ v: c, html: c })), answer: x.ch,
+        tip, recap: `${plain(x.w)}${x.rel ? ` <span class="muted">← ${x.rel}</span>` : ""}`
+      };
+    });
+  }
+
+  Quiz.create({
+    game: "umlaute", back: "deutsch-neu",
+    title: "ä oder e? <span>äu oder eu?</span>",
+    heading: "a wird ä – au wird äu",
+    intro: "<b>ä</b> und <b>e</b> klingen gleich, <b>äu</b> und <b>eu</b> auch. Such ein <b>verwandtes Wort</b>: Gibt es eins mit <b>a</b> oder <b>au</b>, dann schreibst du <b>ä</b> oder <b>äu</b>. Wäsche kommt von waschen, träumen von Traum.",
+    levels: [
+      { id: "ae", name: "ä oder e?", desc: "Wäsche – Wetter" },
+      { id: "aeu", name: "äu oder eu?", desc: "Häuser – heute" },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander." }
+    ],
+    merk: `<h4>a wird ä</h4><p>Gibt es ein verwandtes Wort mit <b>a</b>, schreibst du <b>ä</b>:<br>
+      waschen → die W<b>ä</b>sche, raten → das R<b>ä</b>tsel, die Hand → die H<b>ä</b>nde, kalt → die K<b>ä</b>lte, lachen → l<b>ä</b>cheln</p>
+      <h4>au wird äu</h4><p>Gibt es ein verwandtes Wort mit <b>au</b>, schreibst du <b>äu</b>:<br>
+      der Traum → tr<b>äu</b>men, laut → l<b>äu</b>ten, das Haus → die H<b>äu</b>ser, die Maus → die M<b>äu</b>se</p>
+      <h4>Sonst: e und eu</h4><p>Findest du kein verwandtes Wort mit a oder au, schreibst du meistens <b>e</b> oder <b>eu</b>: das Wetter, das Herz, heute, der Freund.</p>
+      <p><b>So geht's:</b> Nomen in die Einzahl setzen (die Bäume → der Baum), Verben in die Grundform (er fährt → fahren), Adjektive in die Grundstufe (stärker → stark).</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Umlaut-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

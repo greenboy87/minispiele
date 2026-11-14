@@ -21,6 +21,11 @@
   nav.faecher button:hover { outline: 2px solid var(--accent); }
   nav.faecher button.an { background: var(--accent); color: var(--accent-ink); }
   nav.faecher .zahl { margin-left: auto; font-size: 14px; opacity: .7; }
+  nav.faecher button.unter { margin-left: 18px; font-size: 16px; padding: 9px 14px; }
+  .gruppe { margin-bottom: 26px; }
+  .gruppe h3 { font-size: 19px; margin: 0 0 12px; color: var(--muted); }
+  .gruppe h3 .neu { background: var(--accent); color: var(--accent-ink); border-radius: 999px; font-size: 13px; padding: 2px 10px; margin-left: 6px; vertical-align: 2px; }
+  .gruppe.weg { display: none; }
   .inhalt { flex: 1; min-width: 0; }
   section.fach { margin-bottom: 32px; }
   section.fach h2 { font-size: 26px; margin: 0 0 14px; }
@@ -36,6 +41,7 @@
     .layout { flex-direction: column; gap: 16px; }
     nav.faecher { flex-direction: row; flex-wrap: wrap; position: static; flex: none; }
     nav.faecher button { font-size: 17px; padding: 10px 14px; }
+    nav.faecher button.unter { margin-left: 0; font-size: 15px; }
   }
 </style>
 </head>
@@ -47,11 +53,45 @@
     <nav class="faecher" aria-label="Fach wählen">
       <button type="button" data-fach="alle">🎒 Alle</button>
       <button type="button" data-fach="deutsch">📖 Deutsch <span class="zahl"></span></button>
+      <button type="button" class="unter" data-fach="deutsch-neu">✏️ Verben &amp; Rechtschreibung <span class="zahl"></span></button>
+      <button type="button" class="unter" data-fach="deutsch-alt">🔤 Wortarten &amp; Silben <span class="zahl"></span></button>
       <button type="button" data-fach="musik">🎵 Musik <span class="zahl"></span></button>
     </nav>
     <div class="inhalt">
       <section class="fach" id="deutsch">
         <h2>📖 Deutsch</h2>
+        <div class="gruppe" id="deutsch-neu">
+        <h3>✏️ Verben &amp; Rechtschreibung <span class="neu">neue Prüfung</span></h3>
+        <div class="grid">
+          <a class="game" href="verlaengern/index.html">
+            <div class="ic">Hun<u>d</u> → Hun<u>d</u>e</div>
+            <b>Verlängern-Detektiv</b>
+            <span>d oder t, g oder k, b oder p? Erst verlängern, dann hörst du es.</span>
+          </a>
+          <a class="game" href="zeitformen/index.html">
+            <div class="ic">ging = ?</div>
+            <b>Zeitformen-Detektiv</b>
+            <span>Grundform, Gegenwart, 1. oder 2. Vergangenheit erkennen – und die Grundform finden.</span>
+          </a>
+          <a class="game" href="verbformen/index.html">
+            <div class="ic">singen → sang</div>
+            <b>Verben-Werkstatt</b>
+            <span>Verbformen bilden: Gegenwart, 1. und 2. Vergangenheit – und hat oder ist?</span>
+          </a>
+          <a class="game" href="wortfamilien/index.html">
+            <div class="ic">SCHIEB 👨‍👩‍👧</div>
+            <b>Wortfamilien-Sortierer</b>
+            <span>Wörter nach dem Wortstamm sortieren und den Stamm finden.</span>
+          </a>
+          <a class="game" href="umlaute/index.html">
+            <div class="ic">ä/e · äu/eu</div>
+            <b>ä oder e? äu oder eu?</b>
+            <span>Wäsche kommt von waschen, träumen von Traum – mit verwandten Wörtern ableiten.</span>
+          </a>
+        </div>
+        </div>
+        <div class="gruppe" id="deutsch-alt">
+        <h3>🔤 Wortarten &amp; Silben <span style="font-weight:400">(frühere Prüfung)</span></h3>
         <div class="grid">
           <a class="game" href="alphabet/index.html">
             <div class="ic">A ··· Z</div>
@@ -78,6 +118,7 @@
             <b>Silben-Schere</b>
             <span>Wörter richtig trennen – nach den fünf Trennregeln, auch mit ch, ck, sch und tz.</span>
           </a>
+        </div>
         </div>
       </section>
       <section class="fach" id="musik">
@@ -107,9 +148,11 @@
     b.addEventListener("click", () => fachZeigen(b.dataset.fach, true));
   });
   function fachZeigen(fach, merken) {
-    if (!["alle", "deutsch", "musik"].includes(fach)) fach = "alle";
+    if (!["alle", "deutsch", "deutsch-neu", "deutsch-alt", "musik"].includes(fach)) fach = "alle";
     KNOEPFE.forEach(b => b.classList.toggle("an", b.dataset.fach === fach));
-    document.querySelectorAll("section.fach").forEach(s => s.classList.toggle("weg", fach !== "alle" && s.id !== fach));
+    const haupt = fach.split("-")[0], unter = fach.includes("-") ? fach : null;
+    document.querySelectorAll("section.fach").forEach(s => s.classList.toggle("weg", fach !== "alle" && s.id !== haupt));
+    document.querySelectorAll(".gruppe").forEach(g => g.classList.toggle("weg", !!unter && g.id !== unter));
     if (merken) {
       try { localStorage.setItem("minispiele:fach", fach); } catch (e) { /* egal */ }
       history.replaceState(null, "", fach === "alle" ? location.pathname : "#" + fach);
