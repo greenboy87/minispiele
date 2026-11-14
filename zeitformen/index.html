@@ -16,12 +16,12 @@
 (() => {
   const { VERBS, CONFUSE, forms, personFor, strong } = Verben;
   const ZEIT = {
-    gf: { name: "Grundform", small: "Infinitiv" },
+    gf: { name: "Grundform", small: "" },
     pres: { name: "Gegenwart", small: "Präsens" },
     prat: { name: "1. Vergangenheit", small: "Präteritum" },
     perf: { name: "2. Vergangenheit", small: "Perfekt" }
   };
-  const zeitChoices = Object.keys(ZEIT).map(k => ({ v: k, html: `${ZEIT[k].name}<small>${ZEIT[k].small}</small>` }));
+  const zeitChoices = Object.keys(ZEIT).map(k => ({ v: k, html: ZEIT[k].name + (ZEIT[k].small ? `<small>${ZEIT[k].small}</small>` : "") }));
   const stripFirst = (s) => s.split(" ").slice(1).join(" ");
 
   function zeitTask(v) {

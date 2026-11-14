@@ -61,7 +61,7 @@ springen|springt|sprang|ist|gesprungen
 essen|isst|aß|hat|gegessen`;
 
   // Leicht verwechselbare Grundformen
-  const CONFUSE = { liegen: "legen", legen: "liegen", sinken: "singen", singen: "sinken", biegen: "bügeln", wiegen: "wägen", schieben: "schüben", raten: "reiten", heben: "haben", haben: "heben", steigen: "stiegen", treffen: "trifften" };
+  const CONFUSE = { liegen: "legen", legen: "liegen", sinken: "singen", singen: "sinken", biegen: "beugen", schieben: "schüben", raten: "reiten", heben: "haben", haben: "heben", steigen: "stiegen", treffen: "trifften" };
 
   // Diese „falschen“ 1.-Vergangenheit-Formen gibt es wirklich (dürfte, müsste, könnte, wiegte) – nicht als Fehler anbieten
   const NO_FAKE_PRAT = new Set(["dürfen", "müssen", "können", "wiegen"]);

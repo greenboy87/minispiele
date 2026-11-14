@@ -165,7 +165,7 @@
     function nextRound() {
       const t = state.tasks[state.round];
       state.locked = false; state.tries = 0;
-      state.maxTries = t.choices.length > 2 ? 2 : 1;
+      state.maxTries = t.input || t.choices.length > 2 ? 2 : 1;
       $("roundNo").textContent = state.round + 1;
       $("scoreNo").textContent = num(state.score);
       $("feedback").innerHTML = "";
@@ -174,11 +174,49 @@
       $("prompt").innerHTML = t.prompt;
       $("bench").innerHTML = t.show;
       [...$("bench").children].forEach(c => c.classList.add("pop"));
+      if (t.input) {
+        // Zahleneingabe: Ergebnis steht im Element #entry der Bühne
+        state.entry = "";
+        $("choices").className = "choices pad";
+        $("choices").innerHTML = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "✓"]
+          .map(k => `<button class="choice${k === "✓" ? " ok" : ""}" data-k="${k}">${k}</button>`).join("");
+        [...$("choices").children].forEach(b => b.onclick = () => key(b.dataset.k));
+        $("hint").textContent = "Zahl tippen, dann ✓ oder Enter.";
+        return;
+      }
       $("choices").className = "choices " + (t.style || "words");
       const order = t.keepOrder ? t.choices : shuffle([...t.choices]);
       $("choices").innerHTML = order.map((c, i) => `<button class="choice" data-v="${c.v}" title="Taste ${i + 1}">${c.html}</button>`).join("");
       [...$("choices").children].forEach(b => b.onclick = () => choose(b));
       $("hint").textContent = `Tippen oder Taste 1–${order.length}.`;
+    }
+
+    function key(k) {
+      if (state.locked) return;
+      const ent = $("entry");
+      if (k === "✓") return submitInput();
+      if (k === "⌫") state.entry = state.entry.slice(0, -1);
+      else if (state.entry.length < 3) state.entry = (state.entry + k).replace(/^0+(?=\d)/, "");
+      ent.textContent = state.entry || "?";
+      ent.classList.toggle("filled", !!state.entry);
+    }
+    function submitInput() {
+      const t = state.tasks[state.round];
+      if (!state.entry) return;
+      const v = state.entry;
+      if (v === String(t.answer)) {
+        $("entry").classList.add("right");
+        solve(t, state.tries === 0 ? 1 : 0.5, state.tries === 0 ? "g" : "o");
+        return;
+      }
+      state.tries++;
+      sfx.bad();
+      const why = t.wrongWhy ? t.wrongWhy(v) : "";
+      if (state.tries >= state.maxTries) { solve(t, 0, "b", `Du hattest <b>${v}</b>. ` + why); return; }
+      $("entry").classList.add("wrong");
+      setTimeout(() => { const e = $("entry"); if (e) e.classList.remove("wrong"); }, 400);
+      state.entry = ""; $("entry").textContent = "?"; $("entry").classList.remove("filled");
+      $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht – ${v} stimmt nicht.</div><div class="sub">${why ? why + " " : ""}Rechne nochmal, ein Versuch noch.</div>`;
     }
 
     function choose(btn) {
@@ -232,6 +270,13 @@
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") $("merk").classList.remove("open");
       if ($("game").style.display !== "flex" || $("merk").classList.contains("open")) return;
+      const t = state && state.tasks[state.round];
+      if (t && t.input && !state.locked) {
+        if (/^[0-9]$/.test(e.key)) key(e.key);
+        else if (e.key === "Backspace") { e.preventDefault(); key("⌫"); }
+        else if (e.key === "Enter") { e.preventDefault(); submitInput(); }
+        return;
+      }
       if (e.key === "Enter") { e.preventDefault(); advance(); }
       else if (!state.locked && /^[1-9]$/.test(e.key)) {
         const b = $("choices").children[Number(e.key) - 1];

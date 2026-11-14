@@ -137,3 +137,13 @@ header h1 span { color: var(--accent); }
 .confetti { position: fixed; top: -12px; width: 10px; height: 14px; border-radius: 2px; pointer-events: none; z-index: 50; animation: fall linear forwards; }
 @keyframes fall { to { transform: translate(var(--dx), 105vh) rotate(var(--rot)); } }
 @media (max-width: 700px) { .choice { min-width: 90px; padding: 12px 18px; } }
+
+/* Zahlenfeld (Mathe) */
+.choices.pad { display: grid; grid-template-columns: repeat(3, 84px); gap: 10px; justify-content: center; }
+.choices.pad .choice { min-width: 0; padding: 10px 0; font-size: 30px; }
+.choices.pad .choice.ok { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.calc { font-size: clamp(40px, 9vw, 76px); font-weight: 700; line-height: 1.15; background: var(--bg2); border-radius: 20px; padding: 8px 26px; white-space: nowrap; }
+.calc .gap { min-width: 1.6em; }
+.calc .gap.filled { color: var(--ink); }
+.calc .gap.right { color: var(--good); border-color: var(--good); }
+.calc .gap.wrong { color: var(--bad); border-color: var(--bad); animation: shake .35s; }

@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechen-Rakete bis 100</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script src="../shared/rechnen.js"></script>
+<script>
+(() => {
+  const { make, weg } = Rechnen;
+
+  const sign = (op) => op === "+" ? "+" : "−";
+  const gap = '<span class="gap" id="entry">?</span>';
+  function task(t, luecke) {
+    const text = `${t.a} ${sign(t.op)} ${t.b} = ${t.c}`;
+    let show, solved, answer, prompt, tip = weg(t);
+    if (luecke) {
+      answer = t.b;
+      prompt = "Welche Zahl fehlt?";
+      show = `<div class="calc">${t.a} ${sign(t.op)} ${gap} = ${t.c}</div>`;
+      tip = (t.op === "+" ? `Rechne von ${t.a} bis ${t.c}: ` : `Wie viel muss von ${t.a} weg, damit ${t.c} bleibt? `) + `Es fehlt <b>${t.b}</b>. Probe: ${text.replace(/= (\d+)$/, "= <b>$1</b>")}`;
+    } else {
+      answer = t.c;
+      prompt = t.op === "+" ? "Rechne <b>plus</b>:" : "Rechne <b>minus</b>:";
+      show = `<div class="calc">${t.a} ${sign(t.op)} ${t.b} = ${gap}</div>`;
+    }
+    solved = show.replace(gap, `<span class="gap filled right">${answer}</span>`);
+    return {
+      key: (luecke ? "l:" : "") + text, input: true, answer, prompt, show, solved, tip,
+      wrongWhy: (v) => {
+        v = Number(v);
+        if (!luecke && t.op === "+" && v === t.c - 10) return "Hast du beim Übergang über den Zehner einen Zehner vergessen?";
+        if (!luecke && t.op === "-" && v === t.c + 10) return "Beim Minus über den Zehner musst du einen Zehner mehr wegnehmen.";
+        if (!luecke && Math.abs(v - t.c) <= 2) return "Knapp daneben!";
+        return "";
+      },
+      recap: luecke ? `${t.a} ${sign(t.op)} <span class="m">${t.b}</span> = ${t.c}` : `${t.a} ${sign(t.op)} ${t.b} = <span class="m">${t.c}</span>`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    const ops = topics.map(t => t === "plus" ? "+" : "-");
+    const arts = level === "zehner" ? ["zehner"] : level === "ohne" ? ["ohne"] : level === "mit" ? ["mit"] : ["zehner", "ohne", "mit", "mit"];
+    const out = [], seen = new Set();
+    for (let i = 0; out.length < n && i < n * 30; i++) {
+      const t = make(arts[out.length % arts.length], Quiz.pick(ops));
+      const luecke = level === "luecke";
+      const key = t.a + t.op + t.b;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(task(t, luecke));
+    }
+    return Quiz.shuffle(out);
+  }
+
+  Quiz.create({
+    game: "rechnen100", back: "mathe",
+    title: "Rechen-<span>Rakete</span> 🚀",
+    heading: "Plus und Minus bis 100",
+    intro: "Rechne im Kopf und tipp das Ergebnis ins Zahlenfeld. Tipp: Rechne <b>erst die Zehner</b>, dann die Einer – und geh <b>über den Zehner</b> in zwei Schritten: 38 + 7 = 38 + 2 + 5.",
+    levels: [
+      { id: "zehner", name: "Zehner", desc: "30 + 40, 90 − 60" },
+      { id: "ohne", name: "Ohne Übergang", desc: "34 + 5, 68 − 23" },
+      { id: "mit", name: "Über den Zehner", desc: "38 + 7, 52 − 8, 47 + 28" },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander." },
+      { id: "luecke", name: "Zahl fehlt", desc: "34 + ? = 50" }
+    ],
+    topics: [{ id: "plus", name: "➕ Plus" }, { id: "minus", name: "➖ Minus" }],
+    merk: `<h4>Erst die Zehner, dann die Einer</h4>
+      <p>47 + 28 &nbsp;→&nbsp; 47 + 20 = 67 &nbsp;→&nbsp; 67 + 8 = <b>75</b></p>
+      <p>63 − 27 &nbsp;→&nbsp; 63 − 20 = 43 &nbsp;→&nbsp; 43 − 7 = <b>36</b></p>
+      <h4>Über den Zehner: in zwei Schritten</h4>
+      <p>38 + 7 &nbsp;→&nbsp; 38 + 2 = 40 &nbsp;→&nbsp; 40 + 5 = <b>45</b> &nbsp;(die 7 zerlegen in 2 und 5)</p>
+      <p>52 − 8 &nbsp;→&nbsp; 52 − 2 = 50 &nbsp;→&nbsp; 50 − 6 = <b>44</b> &nbsp;(die 8 zerlegen in 2 und 6)</p>
+      <h4>Zehner rechnen</h4>
+      <p>30 + 40 ist wie 3 + 4 – nur mit Zehnern: <b>70</b>.</p>
+      <h4>Zahl fehlt</h4>
+      <p>34 + ? = 50: Wie viel fehlt von 34 bis 50? 34 → 40 sind 6, 40 → 50 sind 10, zusammen <b>16</b>.</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gerechnet!", "Super!", "Rechen-Profi! 🚀"]
+  });
+})();
+</script>
+</body>
+</html>

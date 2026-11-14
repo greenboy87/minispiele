@@ -103,6 +103,7 @@
       <button type="button" data-fach="deutsch">📖 Deutsch <span class="zahl"></span></button>
       <button type="button" class="unter" data-fach="deutsch-neu">✏️ Verben &amp; Rechtschreibung <span class="zahl"></span></button>
       <button type="button" class="unter" data-fach="deutsch-alt">🔤 Wortarten &amp; Silben <span class="zahl"></span></button>
+      <button type="button" data-fach="mathe">🔢 Mathe <span class="zahl"></span></button>
       <button type="button" data-fach="musik">🎵 Musik <span class="zahl"></span></button>
     </nav>
     <div class="inhalt">
@@ -169,6 +170,26 @@
         </div>
         </div>
       </section>
+      <section class="fach" id="mathe">
+        <h2>🔢 Mathe</h2>
+        <div class="grid">
+          <a class="game" href="rechnen100/index.html">
+            <div class="ic">38 + 7 = ?</div>
+            <b>Rechen-Rakete bis 100</b>
+            <span>Plus und Minus bis 100: Zehner, ohne und mit Übergang, fehlende Zahl (2. Klasse).</span>
+          </a>
+          <a class="game" href="zahlenmauer/index.html">
+            <div class="ic">🧱 12 · 15</div>
+            <b>Zahlenmauer</b>
+            <span>Jeder Stein ist die Summe der zwei darunter – finde den fehlenden Stein (bis 100).</span>
+          </a>
+          <a class="game" href="rechenwaage/index.html">
+            <div class="ic">45 + 8 &gt; 50</div>
+            <b>Rechen-Waage</b>
+            <span>Kleiner, größer oder gleich? Beide Seiten ausrechnen und vergleichen.</span>
+          </a>
+        </div>
+      </section>
       <section class="fach" id="musik">
         <h2>🎵 Musik</h2>
         <div class="grid">
@@ -210,7 +231,7 @@
     b.addEventListener("click", () => fachZeigen(b.dataset.fach, true));
   });
   function fachZeigen(fach, merken) {
-    if (!["alle", "deutsch", "deutsch-neu", "deutsch-alt", "musik"].includes(fach)) fach = "alle";
+    if (!["alle", "deutsch", "deutsch-neu", "deutsch-alt", "mathe", "musik"].includes(fach)) fach = "alle";
     KNOEPFE.forEach(b => b.classList.toggle("an", b.dataset.fach === fach));
     const haupt = fach.split("-")[0], unter = fach.includes("-") ? fach : null;
     document.querySelectorAll("section.fach").forEach(s => s.classList.toggle("weg", fach !== "alle" && s.id !== haupt));
@@ -223,7 +244,7 @@
   }
   // ---------- QR-Code: zeigt immer auf die öffentliche Seite, mit dem gerade gewählten Fach ----------
   const BASIS = "https://greenboy87.github.io/minispiele/";
-  const FACH_NAMEN = { alle: "Alle Spiele", deutsch: "Deutsch", "deutsch-neu": "Deutsch – Verben & Rechtschreibung", "deutsch-alt": "Deutsch – Wortarten & Silben", musik: "Musik" };
+  const FACH_NAMEN = { alle: "Alle Spiele", deutsch: "Deutsch", "deutsch-neu": "Deutsch – Verben & Rechtschreibung", "deutsch-alt": "Deutsch – Wortarten & Silben", mathe: "Mathe", musik: "Musik" };
   function qrSvg(text) {
     if (typeof qrcode !== "function") return '<div style="color:#7a7290;font-size:13px;text-align:center;padding-top:30%">QR braucht Internet</div>';
     const q = qrcode(0, "M"); q.addData(text); q.make();

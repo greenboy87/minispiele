@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechen-Waage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+<style>
+  .waage { display: flex; align-items: center; justify-content: center; gap: clamp(10px, 3vw, 26px); flex-wrap: wrap; }
+  .schale { font-size: clamp(30px, 6.5vw, 54px); font-weight: 700; background: var(--bg2); border-radius: 18px; padding: 8px 20px; min-width: 3.2em; text-align: center; }
+  .schale small { display: block; font-size: .45em; color: var(--muted); font-weight: 600; }
+  .zeichen { font-size: clamp(40px, 8vw, 66px); font-weight: 700; min-width: 1.4em; text-align: center; border-bottom: 4px solid var(--accent); color: var(--accent); }
+  .zeichen.ok { color: var(--good); border-color: var(--good); }
+</style>
+</head>
+<body>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script src="../shared/rechnen.js"></script>
+<script>
+(() => {
+  const { make, rnd } = Rechnen;
+  const sign = (op) => op === "+" ? "+" : "−";
+  const term = (t) => `${t.a} ${sign(t.op)} ${t.b}`;
+  const ARTS = ["ohne", "mit", "mit", "zehner"];
+
+  // Eine Seite: eine Aufgabe; andere Seite: eine Zahl (Level „zahl“) oder noch eine Aufgabe (Level „zwei“)
+  function paar(level, ops) {
+    const L = make(Quiz.pick(ARTS), Quiz.pick(ops));
+    const ziel = Quiz.pick(["<", ">", "=", "<", ">"]);
+    if (level === "zahl") {
+      let r = ziel === "=" ? L.c : ziel === "<" ? L.c + rnd(1, 9) : L.c - rnd(1, 9);
+      if (r < 0 || r > 100) r = L.c;
+      return { L, R: null, r };
+    }
+    for (let k = 0; k < 300; k++) {
+      const R = make(Quiz.pick(ARTS), Quiz.pick(ops));
+      const d = L.c - R.c;
+      if (R.a === L.a && R.b === L.b && R.op === L.op) continue;
+      if (ziel === "=" ? d === 0 : ziel === "<" ? d < 0 && d > -12 : d > 0 && d < 12) return { L, R, r: R.c };
+    }
+    const R = make("ohne", Quiz.pick(ops));
+    return { L, R, r: R.c };
+  }
+
+  function makeTasks(level, topics, n) {
+    const ops = topics.map(t => t === "plus" ? "+" : "-");
+    const out = [];
+    for (let i = 0; out.length < n && i < n * 20; i++) {
+      const { L, R, r } = paar(level, ops);
+      const rel = L.c < r ? "<" : L.c > r ? ">" : "=";
+      const rechts = R ? term(R) : String(r);
+      const box = (z) => `<div class="waage"><div class="schale">${term(L)}${z ? `<small>= ${L.c}</small>` : ""}</div>
+        <div class="zeichen${z ? " ok" : ""}">${z || "?"}</div>
+        <div class="schale">${rechts}${z && R ? `<small>= ${R.c}</small>` : ""}</div></div>`;
+      const word = { "<": "kleiner als", ">": "größer als", "=": "gleich" }[rel];
+      out.push({
+        key: term(L) + rel + rechts, style: "letters", keepOrder: true,
+        prompt: "Ist die linke Seite <b>kleiner</b>, <b>größer</b> oder <b>gleich</b>?",
+        show: box(), solved: box(rel),
+        choices: [{ v: "<", html: "&lt;<small>kleiner</small>" }, { v: "=", html: "=<small>gleich</small>" }, { v: ">", html: "&gt;<small>größer</small>" }],
+        answer: rel,
+        tip: `${term(L)} = <b>${L.c}</b>${R ? `, ${term(R)} = <b>${R.c}</b>` : ""}. ${L.c} ist ${word} ${r}. <span class="muted">Das Krokodil frisst immer die größere Zahl: 🐊 &lt; &gt;</span>`,
+        wrongWhy: () => "Rechne zuerst jede Seite aus.",
+        recap: `${term(L)} <span class="m">${rel === "<" ? "&lt;" : rel === ">" ? "&gt;" : "="}</span> ${rechts}`
+      });
+    }
+    return out;
+  }
+
+  Quiz.create({
+    game: "rechenwaage", back: "mathe",
+    title: "Rechen-<span>Waage</span> ⚖️",
+    heading: "Kleiner, größer oder gleich?",
+    intro: "Rechne beide Seiten aus und vergleiche: <b>&lt;</b> kleiner, <b>&gt;</b> größer oder <b>=</b> gleich. Die Spitze zeigt immer zur kleineren Zahl!",
+    levels: [
+      { id: "zahl", name: "Aufgabe und Zahl", desc: "45 + 8 ○ 50" },
+      { id: "zwei", name: "Zwei Aufgaben", desc: "37 + 6 ○ 50 − 9" }
+    ],
+    topics: [{ id: "plus", name: "➕ Plus" }, { id: "minus", name: "➖ Minus" }],
+    merk: `<h4>Die drei Zeichen</h4>
+      <ul><li><b>&lt;</b> kleiner als: 43 &lt; 50</li><li><b>&gt;</b> größer als: 61 &gt; 58</li><li><b>=</b> gleich: 40 + 5 = 45</li></ul>
+      <p>🐊 Das Krokodil reißt sein Maul immer zur <b>größeren</b> Zahl auf. Die Spitze zeigt zur kleineren.</p>
+      <h4>So gehst du vor</h4>
+      <p>1. Linke Seite ausrechnen. 2. Rechte Seite ausrechnen. 3. Die zwei Ergebnisse vergleichen: Wer hat mehr Zehner? Bei gleich vielen Zehnern: Wer hat mehr Einer?</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut verglichen!", "Super!", "Waagen-Profi! ⚖️"]
+  });
+})();
+</script>
+</body>
+</html>

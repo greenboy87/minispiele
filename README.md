@@ -16,6 +16,9 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Verben-Werkstatt | `verbformen/` | Verbformen bilden (Gegenwart, 1. und 2. Vergangenheit), hat oder ist? |
 | Wortfamilien-Sortierer | `wortfamilien/` | Wörter nach dem Wortstamm sortieren, Wortstamm finden (auch a→ä, au→äu). |
 | ä oder e? äu oder eu? | `umlaute/` | Mit verwandten Wörtern ableiten: Wäsche ← waschen, träumen ← Traum. |
+| Rechen-Rakete bis 100 | `rechnen100/` | Plus und Minus bis 100 im Zahlenfeld: Zehner, ohne/mit Übergang, fehlende Zahl (Mathe, 2. Klasse). |
+| Zahlenmauer | `zahlenmauer/` | Fehlenden Stein ausrechnen, bis 50 oder 100; unten fehlende Steine mit Minus (Mathe, 2. Klasse). |
+| Rechen-Waage | `rechenwaage/` | <, > oder =: Aufgabe gegen Zahl oder zwei Aufgaben vergleichen (Mathe, 2. Klasse). |
 
 Start: `index.html` öffnen. Oben rechts steht ein **QR-Code** zur öffentlichen Seite (immer `greenboy87.github.io/minispiele/`, mit dem gerade gewählten Fach als `#…`): antippen oder „Groß zeigen“ für den Laptop/Beamer, „Drucken“ gibt eine A4-Seite nur mit QR-Code und Adresse aus. Bibliothek: qrcode-generator 1.4.4 von cdnjs. Links wählt eine Leiste das Fach: **Alle**, **Deutsch** oder **Musik** (Zählzeiten, Rhythmus-Diktat). Deutsch hat zwei Unterkategorien: **Verben & Rechtschreibung** (neue Prüfung: Verlängern, Zeitformen, Verbformen, Wortfamilien, ä/äu; `#deutsch-neu`) und **Wortarten & Silben** (frühere Prüfung: Alphabet, Fachbegriffe, Nachsilben, Adjektive, Silben; `#deutsch-alt`). Neue Deutsch-Spiele kommen als Karte in die passende `<div class="gruppe">`. Die Wahl merkt sich das Gerät (`minispiele:fach`); `index.html#musik` bzw. `#deutsch` öffnet direkt ein Fach – dahin führt auch „← Übersicht“ in den Musikspielen. Ein neues Spiel kommt als Karte in die passende `<section class="fach">`.
 
@@ -35,6 +38,10 @@ Die fünf Spiele der neuen Prüfung sind klein: Jede `index.html` enthält nur W
 - **Zeitformen-Detektiv** und **Verben-Werkstatt** teilen sich die Verbliste `shared/verben.js` (`Grundform|er-Form|1. Verg.|hat/ist|Partizip`). Falsche Antworten werden erzeugt (gehte, gegeht, ist getroffen). Echte Wörter wie dürfte/müsste werden nicht als Fehler angeboten. Bei stehen, liegen und schwimmen wird nicht nach hat/ist gefragt, weil „ist gestanden/gelegen“ in Bayern richtig ist.
 - **Wortfamilien-Sortierer** – Stamm in eckigen Klammern: `ge[schob]en`. Je Runde drei ähnliche Familien gegeneinander.
 - **ä oder e? äu oder eu?** – `die W[ä]sche:waschen`; ohne verwandtes Wort (`das W[e]tter:`) heißt es e/eu.
+
+## Mathe (2. Klasse)
+
+Die drei Mathe-Spiele nutzen dasselbe Quiz-Gerüst. Rakete und Zahlenmauer verwenden dessen Zahlenfeld (`input: true` in der Aufgabe, Ziffern auch über die Tastatur). Aufgaben werden zufällig erzeugt (`shared/rechnen.js`: `make(art, op)` mit art = zehner/ohne/mit, Ergebnis immer 0–100). Nach jeder Aufgabe wird der Rechenweg gezeigt, z. B. 38 + 7 → 38 + 2 = 40 → 40 + 5 = 45. In der Übersicht: Fach **Mathe** (`#mathe`).
 
 ## Alphabet-Gefühl
 
