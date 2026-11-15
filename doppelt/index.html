@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Doppel-Mitlaut-Detektiv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // Selbstlaut in [ ] und k = kurz, l = lang
+  const LAENGE = [
+    "S[o]nne:k", "R[o]se:l", "H[a]mmer:k", "N[a]me:l", "T[e]ller:k", "T[a]fel:l", "M[u]tter:k", "Bl[u]me:l", "K[a]nne:k", "H[a]se:l",
+    "W[o]lle:k", "[O]fen:l", "H[i]mmel:k", "H[o]se:l", "B[u]tter:k", "N[u]del:l", "T[a]sse:k", "[E]sel:l", "Br[i]lle:k", "F[e]der:l",
+    "S[u]ppe:k", "R[a]be:l", "P[u]ppe:k", "Pf[a]nne:k", "Kr[o]ne:l", "R[o]ller:k", "Sch[a]le:l", "K[a]mm:k", "T[o]n:l", "Schn[e]cke:k",
+    "W[a]l:l", "K[a]tze:k", "B[ä]r:l", "M[ü]tze:k", "T[ü]te:l", "L[ö]ffel:k", "V[o]gel:l", "Z[u]cker:k"
+  ];
+  // Doppel-Mitlaut in [ ]: richtig ist wie geschrieben; [m] = einfach (langer Selbstlaut), Fehlerform wird verdoppelt
+  const DOPPELT = [
+    "So[mm]er", "Hi[mm]el", "So[nn]e", "Ka[nn]e", "Te[ll]er", "Mu[tt]er", "Bu[tt]er", "Wo[ll]e", "Pu[pp]e", "Su[pp]e", "Ta[ss]e",
+    "Ha[mm]er", "Bri[ll]e", "Ro[ll]er", "Sti[mm]e", "Ze[tt]el", "Pfa[nn]e", "Wa[nn]e", "Fla[mm]e", "Ri[tt]er",
+    "Zi[mm]er", "Ba[ll]on", "Ko[ff]er", "Lö[ff]el", "Wa[ff]el", "He[mm]d", "Spi[nn]e", "Gewi[tt]er", "re[nn]en",
+    "schwi[mm]en", "ko[mm]en", "ho[ff]en", "kna[ll]en", "sto[pp]en", "kle[tt]ern", "ble[tt]ern", "zi[tt]ern", "do[nn]ern"
+  ];
+  const EINFACH = ["Na[m]e", "Ta[f]el", "Blu[m]e", "Nu[d]el", "O[f]en", "Ra[b]e", "Kro[n]e", "Scha[l]e", "Fe[d]er", "Sche[r]e",
+    "Bo[d]en", "Ha[f]en", "Le[b]en", "Ru[d]er", "Ka[t]er", "Tü[t]e", "Vo[g]el", "Lö[w]e", "ma[l]en", "ho[l]en", "re[d]en", "Ga[b]el"];
+  const CKTZ = ["Zu[ck]er", "De[ck]e", "He[ck]e", "Ja[ck]e", "Brü[ck]e", "Rü[ck]en", "Schne[ck]e", "So[ck]e", "le[ck]er", "E[ck]e",
+    "Bä[ck]er", "Mü[ck]e", "We[ck]er", "pa[ck]en", "Ka[tz]e", "Mü[tz]e", "Pfü[tz]e", "Hi[tz]e", "Spi[tz]e", "Ta[tz]e", "si[tz]en",
+    "pu[tz]en", "schwi[tz]en", "Wi[tz]e", "Bli[tz]e", "Plä[tz]e", "Sä[tz]e", "Ne[tz]e"];
+  // nach langem Selbstlaut, Doppellaut oder Mitlaut: nur k / z
+  const KZ = ["Schau[k]el:Schauckel", "Pau[k]e:Paucke", "On[k]el:Onckel", "E[k]el:Eckel", "Bal[k]on:Balckon", "Hei[z]ung:Heitzung",
+    "Wur[z]el:Wurtzel", "Pil[z]:Piltz", "Ker[z]e:Kertze", "Bre[z]el:Bretzel", "Schnau[z]e:Schnautze", "Her[z]:Hertz",
+    "Wei[z]en:Weitzen", "Kreu[z]:Kreutz", "Wol[k]e:Wolcke", "Bän[k]e:Bäncke", "Schmer[z]:Schmertz"];
+  // Am Wortende hört man es nicht – verlängern! [richtig] | verlängerte Form
+  const VERL = ["er ko[mm]t|kommen", "das Be[tt]|die Betten", "der Ba[ll]|die Bälle", "schne[ll]|schneller", "das Fe[ll]|die Felle",
+    "der Sto[ff]|die Stoffe", "dü[nn]|dünner", "der Ka[mm]|die Kämme", "sie re[nn]t|rennen", "er schwi[mm]t|schwimmen", "vo[ll]|voller",
+    "das Schi[ff]|die Schiffe", "er ho[ff]t|hoffen", "es kna[ll]t|knallen", "der Ma[nn]|die Männer", "das Ki[nn]|die Kinne",
+    "sie bre[nn]t|brennen", "er ho[l]t|holen", "sie ma[l]t|malen", "der To[n]|die Töne", "er fü[ll]t|füllen", "es kla[pp]t|klappen"];
+
+  const VOK = /(au|ei|eu|ie|äu|[aeiouäöü])$/i;
+  const teile = (w) => { const m = w.match(/^(.*?)\[(.+?)\](.*)$/); return { vor: m[1], k: m[2], nach: m[3] }; };
+  const plain = (w) => w.replace(/[\[\]]/g, "");
+  const letzterVokal = (s) => (s.match(/(au|ei|eu|ie|äu|[aeiouäöü])[^aeiouäöü]*$/i) || [, "?"])[1];
+  const satzWort = (w) => `<div class="word">${w}</div>`;
+
+  // Fehlerform: doppelt ↔ einfach, ck ↔ k, tz ↔ z
+  function falsch(w) {
+    const { vor, k, nach } = teile(w);
+    const f = k === "ck" ? "k" : k === "tz" ? "z" : k.length === 2 && k[0] === k[1] ? k[0] : k + k;
+    return vor + f + nach;
+  }
+  // Silben zum Mitsprechen: Som·mer, Na·me, Zu·cker, Kat·ze
+  function silben(w) {
+    const { vor, k, nach } = teile(w);
+    if (!/[aeiouäöü]/i.test(nach)) return vor + k + nach;
+    if (k === "ck") return `${vor}·ck${nach}`;
+    if (k === "tz") return `${vor}t·z${nach}`;
+    if (k.length === 2 && k[0] === k[1]) return `${vor}${k[0]}·${k[1]}${nach}`;
+    if (/[^aeiouäöü]$/i.test(vor)) return `${vor}·${k}${nach}`;
+    return `${vor}·${k}${nach}`;
+  }
+
+  function wahlAufgabe(richtig, fehler, tip, sub) {
+    const r = plain(richtig);
+    const show = (x) => `${satzWort(x)}${sub ? `<div class="sub-line">${sub}</div>` : ""}`;
+    return {
+      key: r, style: "words", say: r.replace(/^(der|die|das|er|sie|es) /, ""),
+      prompt: "Wie schreibt man das Wort richtig?",
+      show: show(`<span class="gap" style="min-width:4em">?</span>`), solved: show(`<span class="m">${r}</span>`),
+      choices: [{ v: r, html: r }, { v: fehler, html: fehler }], answer: r,
+      tip, recap: r
+    };
+  }
+
+  function doppeltTask(w) {
+    const { vor, k } = teile(w), v = letzterVokal(vor), dop = k.length === 2 && k[0] === k[1];
+    const tip = dop
+      ? `Sprich in Silben: <b>${silben(w)}</b>. Das <b>${v}</b> ist <b>kurz</b> → danach zwei Mitlaute: <b>${k}</b>.<br><span class="regel">Kurzer Selbstlaut → doppelter Mitlaut</span>`
+      : `Sprich in Silben: <b>${silben(w)}</b>. Das <b>${v}</b> ist <b>lang</b> → danach nur ein <b>${k}</b>.<br><span class="regel">Langer Selbstlaut → nur ein Mitlaut</span>`;
+    return wahlAufgabe(w, falsch(w), tip);
+  }
+  function cktzTask(w) {
+    const { vor, k } = teile(w), v = letzterVokal(vor);
+    return wahlAufgabe(w, falsch(w), `Sprich in Silben: <b>${silben(w)}</b>. Das <b>${v}</b> ist kurz → ${k === "ck" ? "statt kk schreibt man <b>ck</b>" : "statt zz schreibt man <b>tz</b>"}.<br><span class="regel">Kurzer Selbstlaut → ck und tz</span>`);
+  }
+  function kzTask(s) {
+    const [w, f] = s.split(":"), { vor, k } = teile(w);
+    const grund = /[^aeiouäöü]$/i.test(vor) ? `vor dem ${k} steht schon ein Mitlaut (<b>${vor.slice(-1)}</b>)` : /(au|ei|eu|äu)$/i.test(vor) ? `vor dem ${k} steht ein Doppellaut (<b>${vor.match(/(au|ei|eu|äu)$/i)[1]}</b>)` : `das <b>${letzterVokal(vor)}</b> ist lang`;
+    return wahlAufgabe(w, f, `<b>${plain(w)}</b>: ${grund} → nur <b>${k}</b>, kein ${k === "k" ? "ck" : "tz"}.<br><span class="regel">Nach Mitlaut, Doppellaut oder langem Selbstlaut nie ck oder tz!</span>`);
+  }
+  function verlTask(s) {
+    const [w, lang] = s.split("|"), { k } = teile(w), dop = k.length === 2 && k[0] === k[1];
+    const tip = dop ? `Verlängere: <b>${lang}</b> – da hörst du den kurzen Selbstlaut und die zwei Mitlaute. Also: <b>${plain(w)}</b>.`
+      : `Verlängere: <b>${lang}</b> – der Selbstlaut ist lang, also nur ein <b>${k}</b>: <b>${plain(w)}</b>.`;
+    return wahlAufgabe(w, falsch(w), tip + `<br><span class="regel">Am Wortende: verlängern!</span>`, `Tipp: verlängere das Wort`);
+  }
+  function laengeTask(s) {
+    const [w, l] = s.split(":"), r = plain(w), m = w.match(/\[(.+?)\]/)[1];
+    const zeig = (cls) => `${satzWort(w.replace(/\[(.+?)\]/, `<span class="${cls}">$1</span>`))}`;
+    return {
+      key: "l:" + r, style: "labels", keepOrder: true, say: r, autoSay: true,
+      prompt: `Hör genau hin: Ist das <b>${m}</b> kurz oder lang?`,
+      show: zeig("m2"), solved: zeig("m"),
+      choices: [{ v: "k", html: "● kurz" }, { v: "l", html: "━━ lang" }], answer: l,
+      tip: l === "k" ? `<b>${r}</b>: Das ${m} ist kurz – es klingt knapp und schnell. Darum kommen danach zwei Mitlaute.`
+        : `<b>${r}</b>: Das ${m} ist lang – man kann es dehnen („${r.replace(m, m + m + m)}“). Danach kommt nur ein Mitlaut.`,
+      recap: `${r} <span class="muted">(${l === "k" ? "kurz" : "lang"})</span>`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    if (level === "laenge") return Quiz.draw([LAENGE.filter(x => x.endsWith(":k")), LAENGE.filter(x => x.endsWith(":l"))], n).map(laengeTask);
+    if (level === "doppelt") return Quiz.draw([DOPPELT, EINFACH], n).map(doppeltTask);
+    if (level === "cktz") return Quiz.draw([CKTZ, KZ], n).map(x => x.includes(":") ? kzTask(x) : cktzTask(x));
+    if (level === "verl") return Quiz.draw([VERL], n).map(verlTask);
+    return Quiz.draw([DOPPELT, EINFACH, CKTZ, KZ, VERL], n).map(x => x.includes("|") ? verlTask(x) : x.includes(":") ? kzTask(x) : /\[(ck|tz)\]/.test(x) ? cktzTask(x) : doppeltTask(x));
+  }
+
+  Quiz.create({
+    game: "doppelt", back: "k4-lrs",
+    title: "Doppel-<span>Mitlaut</span>-Detektiv",
+    heading: "Doppelt oder einfach?",
+    intro: "Ob ein Mitlaut doppelt kommt, hörst du am Selbstlaut davor: <b>kurz</b> (Som-mer) → doppelt, <b>lang</b> (Na-me) → einfach. Mit 🔊 kannst du dir jedes Wort vorlesen lassen. Sprich es in Silben mit!",
+    levels: [
+      { id: "laenge", name: "Kurz oder lang?", desc: "Erst hören lernen: Sonne (kurz) – Rose (lang)." },
+      { id: "doppelt", name: "mm, nn, ll, tt …", desc: "Sommer oder Somer? Name oder Namme?" },
+      { id: "cktz", name: "ck und tz", desc: "Zucker, Katze – aber Schaukel, Kerze." },
+      { id: "verl", name: "Am Wortende", desc: "er kommt ← kommen, das Bett ← die Betten" },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander." }
+    ],
+    merk: `<h4>1. Hör auf den Selbstlaut</h4><p>Sprich das Wort in Silben und klatsch mit. Ist der Selbstlaut <b>kurz</b> (knapp, wie abgehackt) oder <b>lang</b> (man kann ihn dehnen)?</p>
+      <h4>2. Kurz → doppelt</h4><p>Nach einem <b>kurzen</b> Selbstlaut kommen <b>zwei Mitlaute</b>: Som-mer, Kan-ne, Mut-ter. Hört man nur einen, wird er verdoppelt.</p>
+      <p>Statt kk schreibt man <b>ck</b> (Zu-cker), statt zz schreibt man <b>tz</b> (Kat-ze).</p>
+      <h4>3. Lang → einfach</h4><p>Nach einem <b>langen</b> Selbstlaut kommt nur <b>ein</b> Mitlaut: Na-me, Ro-se, Blu-me.</p>
+      <h4>4. Nie ck oder tz nach …</h4><p>… einem Mitlaut (Kerze, Onkel, Pilz) oder einem Doppellaut au, ei, eu (Schaukel, Heizung, Kreuz).</p>
+      <h4>5. Am Wortende: verlängern</h4><p>er kommt → <b>kommen</b>, das Bett → <b>die Betten</b>, schnell → <b>schneller</b>. In der langen Form hörst du es.</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Doppel-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

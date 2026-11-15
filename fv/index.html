@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>f oder v?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  const VOR = ["[v]ergessen", "[v]erlieren", "[v]erstecken", "[v]erkaufen", "[v]erbinden", "[v]erletzen", "[v]orlesen", "[v]orsichtig",
+    "der [V]orhang", "[v]orbei", "[v]orne", "der [V]orname", "[v]erstehen", "[v]erraten", "[v]orher", "[v]erreisen", "der [V]erband",
+    "die [V]orfahrt", "[v]erschenken", "[v]erlaufen", "[v]ortragen", "[v]erzeihen"];
+  const FER = ["[f]ertig", "die [F]erien", "der [F]ernseher", "das [F]erkel", "[f]ern", "die [F]orm", "der [F]orscher", "die [F]orelle",
+    "[f]ort", "das [F]ernglas", "der [F]örster", "[f]ordern"];
+  const VMERK = ["der [V]ogel", "der [V]ater", "[v]iel", "[v]ier", "[v]oll", "[v]on", "[v]om", "[v]ielleicht", "das [V]eilchen",
+    "das [V]olk", "der [V]etter", "das [V]ieh", "bra[v]", "der Ner[v]", "[v]ierzig", "der [V]ogelkäfig"];
+  const F = ["das [F]enster", "die [F]eder", "der [F]isch", "der [F]uß", "das [F]euer", "[f]inden", "der [F]rosch", "[f]allen",
+    "der Ha[f]en", "das Scha[f]", "der Ho[f]", "die Sei[f]e", "[f]ünf", "die [F]arbe", "[f]ahren", "der [F]uchs", "[f]ein",
+    "der [F]reund", "[f]alsch", "das [F]ahrrad", "die [F]amilie", "der [F]rühling"];
+  const VW = ["die [V]ase", "der [V]ulkan", "das Kla[v]ier", "der Pullo[v]er", "das [V]ideo", "die Kur[v]e", "die [V]anille",
+    "der No[v]ember", "die [V]illa", "der Pa[v]ian", "die Oli[v]e", "die La[v]a"];
+  const W = ["die [W]olke", "das [W]asser", "die Mö[w]e", "der Lö[w]e", "das Ge[w]itter", "die [W]urst", "der [W]al", "die [W]iese",
+    "die Kra[w]atte", "der [W]agen", "die [W]ippe", "der [W]urm"];
+
+  const teile = (w) => { const m = w.match(/^(.*?)\[(.+?)\](.*)$/); return { vor: m[1], k: m[2], nach: m[3] }; };
+  const plain = (w) => w.replace(/[\[\]]/g, "");
+  const ohneArtikel = (w) => plain(w).replace(/^(der|die|das) /, "");
+  const IN = (l, w) => l.includes(w);
+
+  function tipp(w) {
+    const r = ohneArtikel(w);
+    if (IN(VOR, w)) return `<b>${r}</b> beginnt mit der Vorsilbe <b>${/^[Vv]er/.test(r) ? "ver-" : "vor-"}</b>. Die Vorsilben ver- und vor- schreibt man <b>immer mit v</b>.<br><span class="regel">ver- und vor- → immer v</span>`;
+    if (IN(FER, w)) return `In <b>${r}</b> steckt keine Vorsilbe ver- oder vor- → <b>f</b>, wie bei fertig, Ferien, fern.`;
+    if (IN(VMERK, w)) return `<b>${r}</b> ist ein <b>v-Merkwort</b>: Man hört f, schreibt aber v. Merke: Vogel, Vater, viel, vier, voll, von, vom.`;
+    if (IN(F, w)) return `<b>${r}</b>: Man hört f und schreibt <b>f</b>. Die meisten Wörter mit f-Laut schreibt man mit f.<br><span class="regel">Im Zweifel f – v nur bei ver-, vor- und Merkwörtern</span>`;
+    if (IN(VW, w)) return `<b>${r}</b> kommt aus einer anderen Sprache: Das <b>v</b> klingt hier wie w.`;
+    return `<b>${r}</b>: Man hört w und schreibt <b>w</b>.`;
+  }
+
+  function aufgabe(w, opts) {
+    const { vor, k, nach } = teile(w);
+    const parts = (vor + "\u0000" + nach).split(" ");
+    const head = /^(der|die|das)$/.test(parts[0]) && parts.length > 1 ? parts.shift() : null;
+    const body = parts.join(" ");
+    const zeig = (x) => `<div class="word">${head ? `<span class="art">${head}</span>` : ""}${body.replace("\u0000", x)}</div>`;
+    const gross = /[A-Z]/.test(k);
+    const r = ohneArtikel(w);
+    return {
+      key: plain(w), style: "letters", keepOrder: true, say: r,
+      prompt: `Welcher Buchstabe fehlt: ${opts.join(", ").replace(/, ([^,]*)$/, " oder $1")}?`,
+      show: zeig(`<span class="gap">?</span>`), solved: zeig(`<span class="m">${k}</span>`),
+      choices: opts.map(o => ({ v: o, html: gross ? o.toUpperCase() : o })), answer: k.toLowerCase(),
+      tip: tipp(w), recap: plain(w)
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    if (level === "vor") return Quiz.draw([VOR, FER], n).map(w => aufgabe(w, ["f", "v"]));
+    if (level === "merk") return Quiz.draw([VMERK, F], n).map(w => aufgabe(w, ["f", "v"]));
+    if (level === "vw") return Quiz.draw([VW, W], n).map(w => aufgabe(w, ["v", "w"]));
+    return Quiz.draw([VOR, FER, VMERK, F, VW, W], n).map(w => aufgabe(w, ["f", "v", "w"]));
+  }
+
+  Quiz.create({
+    game: "fv", back: "k4-lrs",
+    title: "f oder <span>v</span>?",
+    heading: "f, v oder w?",
+    intro: "Man hört f – aber schreibt man f oder v? Die gute Nachricht: <b>Meistens f!</b> Mit v schreibt man die Vorsilben <b>ver-</b> und <b>vor-</b> und ein paar <b>Merkwörter</b> wie Vogel, Vater, viel.",
+    levels: [
+      { id: "vor", name: "ver- und vor-", desc: "vergessen, vorlesen – aber fertig, Ferien" },
+      { id: "merk", name: "v-Merkwörter", desc: "Vogel, Vater, viel, vier – aber Fenster, Feder" },
+      { id: "vw", name: "v wie w", desc: "Vase, Klavier, Vulkan – aber Wolke, Löwe" },
+      { id: "mix", name: "Gemischt", desc: "f, v oder w – alles durcheinander." }
+    ],
+    merk: `<h4>1. Meistens f</h4><p>Die meisten Wörter mit f-Laut schreibt man mit <b>f</b>: Fenster, Feder, fahren, fünf, Hafen.</p>
+      <h4>2. ver- und vor- → immer v</h4><p>vergessen, verlieren, verstecken, vorlesen, vorsichtig, der Vorhang. Aber: <b>f</b>ertig, <b>F</b>erien, <b>f</b>ern, <b>F</b>orm sind keine Vorsilben.</p>
+      <h4>3. v-Merkwörter</h4><p>Vogel, Vater, viel, vier, voll, von, vom, vielleicht, Veilchen, Volk, Vetter, Vieh, brav, Nerv. Am besten auf eine Karteikarte schreiben!</p>
+      <h4>4. v klingt wie w</h4><p>In Wörtern aus anderen Sprachen: Vase, Vulkan, Klavier, Pullover, Video, Kurve, Vanille, November.</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "f-v-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

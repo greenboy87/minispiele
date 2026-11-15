@@ -22,9 +22,16 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Blitz-Rechnen ⏱️ | `blitzrechnen/` | Zeitspiel: bis 20, Zehner/Einer, über den Zehner, Verdoppeln/Halbieren, Einmaleins mit 2, 5, 10 (Mathe, 2. Klasse). |
 | Einmaleins-Blitz ⏱️ | `einmaleins/` | Zeitspiel: mal, geteilt, mit Zehnern/Hundertern, großes Einmaleins (Mathe-Profi, 4. Klasse). |
 | Kopfrechen-Profi ⏱️ | `kopfrechnen/` | Zeitspiel: bis 1000, ergänzen, große Zahlen bis 1 Million, verdoppeln/halbieren, · und : durch 10/100/1000 (Mathe-Profi, 4. Klasse). |
+| Groß oder klein? | `grossklein/` | LRS: Artikelprobe, Signalwörter (beim Schwimmen, etwas Neues), Zeitwörter, Satzanfang (4. Klasse). |
+| Doppel-Mitlaut-Detektiv | `doppelt/` | LRS: kurz/lang hören, doppelt oder einfach, ck/tz, am Wortende verlängern (4. Klasse). |
+| i oder ie? | `iie/` | LRS: langes i → ie, kurzes i → i, Merkwörter (Tiger, wir) und ih (4. Klasse). |
+| f oder v? | `fv/` | LRS: ver-/vor-, v-Merkwörter, v wie w (4. Klasse). |
+| s, ss oder ß? | `sss/` | LRS: ss/ß, s/ss/ß mit Verlängern, das oder dass (4. Klasse). |
+| Fehler-Detektiv | `fehlerdetektiv/` | LRS: Fehler im Satz finden bzw. richtig schreiben, Fehlerarten wählbar (4. Klasse). |
+| Wörter-Werkstatt | `hoerdiktat/` | LRS: Wort hören (Sprachausgabe) oder kurz ansehen, dann selbst schreiben (4. Klasse). |
 | Rechen-Ketten ⏱️ | `rechenkette/` | Zeitspiel: Ketten mit 2–4 Schritten, Punkt vor Strich und Klammern (Mathe-Profi, 4. Klasse). |
 
-Start: `index.html` öffnen. Die Übersicht wird aus **`shared/katalog.js`** gebaut und ist nach Klassen geordnet: **2. Klasse** (`#k2`, Mathe `#k2-mathe`), **4. Klasse** (`#k4` mit Mathe-Profi `#k4-mathe`, Verben & Rechtschreibung `#k4-deutsch`, Wortarten & Silben `#k4-wortarten`) und **Musik** (`#musik`, für alle Klassen, nicht nach Klasse geordnet). Alte Links (`#deutsch`, `#deutsch-neu`, `#deutsch-alt`, `#mathe`) werden umgeleitet. Ein neues Spiel kommt als Eintrag in den Katalog (mit `stufen` in derselben Reihenfolge wie die Level im Spiel). Oben rechts steht ein **QR-Code** zur öffentlichen Seite (immer `greenboy87.github.io/minispiele/`, mit dem gerade gewählten Bereich als `#…`): antippen oder „Groß zeigen“ für den Laptop/Beamer, „Drucken“ gibt eine A4-Seite nur mit QR-Code und Adresse aus. Bibliothek: qrcode-generator 1.4.4 von cdnjs. Die Wahl merkt sich das Gerät (`minispiele:fach`).
+Start: `index.html` öffnen. Die Übersicht wird aus **`shared/katalog.js`** gebaut und ist nach Klassen geordnet: **2. Klasse** (`#k2`, Mathe `#k2-mathe`), **4. Klasse** (`#k4` mit LRS-Training `#k4-lrs`, Mathe-Profi `#k4-mathe`, Verben & Rechtschreibung `#k4-deutsch`, Wortarten & Silben `#k4-wortarten`) und **Musik** (`#musik`, für alle Klassen, nicht nach Klasse geordnet). Alte Links (`#deutsch`, `#deutsch-neu`, `#deutsch-alt`, `#mathe`) werden umgeleitet. Ein neues Spiel kommt als Eintrag in den Katalog (mit `stufen` in derselben Reihenfolge wie die Level im Spiel). Oben rechts steht ein **QR-Code** zur öffentlichen Seite (immer `greenboy87.github.io/minispiele/`, mit dem gerade gewählten Bereich als `#…`): antippen oder „Groß zeigen“ für den Laptop/Beamer, „Drucken“ gibt eine A4-Seite nur mit QR-Code und Adresse aus. Bibliothek: qrcode-generator 1.4.4 von cdnjs. Die Wahl merkt sich das Gerät (`minispiele:fach`).
 
 ## Anmeldung und „Mein Stand“
 
@@ -33,6 +40,12 @@ Start: `index.html` öffnen. Die Übersicht wird aus **`shared/katalog.js`** geb
 - Nach jeder Runde meldet `Bestenliste.offer()` ein kleines Ergebnis an `/api/ergebnisse`: Spiel `mini-<game ohne Ziffern>` (z. B. `mini-rechnen`), Stufe = Position des Levels, Sterne 0–3, Punkte = Prozent bzw. Anzahl richtig, Dauer. „Fehler üben“ wird nicht gemeldet. Ohne Netz wartet es in `minispiele-offen`. Angemeldet wird die Bestenliste gleich mit dem Kontonamen gefüllt.
 - `stand/` („📊 Mein Stand“) liest nur die eigenen Runden mit `GET /api/meinverlauf?praefix=mini-` (neu im Worker, höchstens 3000 Zeilen) und zeigt: Runden, Tage, Übungszeit, die letzten 7 Tage, je Spiel und Level Runden, Bestwert, letztes Ergebnis, Verlauf, die letzten 20 Runden. Die Karten der Übersicht zeigen „✔ 5× gespielt“.
 - Testen ohne Cloudflare: `music-trainer/test/attrappe.js` und `cloudflare/` vorübergehend nach `Minispiele/_test/` kopieren, dann in der Konsole `await (await import('/_test/test/attrappe.js')).starten(); MiniKonto.API = 'https://attrappe.musiktrainer.test'` (Origin `http://localhost:8765` ist im Worker erlaubt). `_test/` nicht committen.
+
+## LRS-Training (4. Klasse, `#k4-lrs`)
+
+Sieben Rechtschreib-Spiele auf dem Quiz-Gerüst. Ausgerichtet an der Studienlage: Laut-Buchstaben-Zuordnung (kurz/lang hören), ausdrücklich vermittelte Rechtschreibregeln und Strategien (Schwingen in Silben, Verlängern, Artikelprobe, Ersatzprobe) und Wortbausteine wirken bei LRS am besten. Reines Auswendiglernen wirkt in Studien kaum, darum nur kleine Merkwort-Gruppen (Galuschka u. a. 2020, Educational Psychologist 55(1); Galuschka u. a. 2014, PLoS ONE 9(2)). Jede Rückmeldung nennt die Regel. „Fehler üben“ wiederholt die falschen Wörter.
+
+Neu im Gerüst (`shared/quiz.js`): `say` liest das Wort mit der deutschen Stimme des Geräts vor (🔊, `Quiz.sprich`), `autoSay` gleich beim Start. `text: true` zeigt ein Schreibfeld (ohne Autokorrektur und automatische Großschreibung, Groß/klein zählt) und markiert falsche Buchstaben rot. Im Level „Anschauen, merken, schreiben“ blendet CSS das Wort nach 4 Sekunden aus.
 
 ## Zeitspiele (Mathe-Profi)
 

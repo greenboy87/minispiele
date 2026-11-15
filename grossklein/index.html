@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groß oder klein?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // [Wort] in der richtigen Schreibung | Art: n:Artikel (Nomen), v (Verb), a (Adjektiv), z (Zeitwort ohne Begleiter),
+  // w (kleines Wort), nv / na (Verb / Adjektiv mit Signalwort davor → Nomen), s (Satzanfang)
+  const NOMEN = [
+    "Wir gehen in den [Wald].|n:der", "Im [Sommer] ist es heiß.|n:der", "Meine [Freundin] heißt Mia.|n:die", "Der [Hund] bellt laut.|n:der",
+    "Ich trinke ein Glas [Milch].|n:die", "Die [Kinder] spielen im Hof.|n:die", "Wir haben viel [Spaß].|n:der", "Er hat [Angst] vor Spinnen.|n:die",
+    "Das [Wetter] ist schön.|n:das", "Ich habe keine [Zeit].|n:die", "Der [Schlüssel] ist weg.|n:der", "Opa erzählt eine [Geschichte].|n:die",
+    "Wir fahren mit dem [Fahrrad].|n:das", "In der [Pause] essen wir.|n:die", "Sie hatte großes [Glück].|n:das", "Er sagt immer die [Wahrheit].|n:die",
+    "Am [Abend] lese ich.|n:der", "Am [Morgen] frühstücken wir.|n:der", "Lisa hat viel [Mut].|n:der", "Die [Freude] war riesig.|n:die",
+    "Ich habe [Hunger].|n:der", "Wir warten auf den [Bus].|n:der", "Mein [Bruder] ist älter als ich.|n:der", "Die [Sonne] scheint hell.|n:die",
+    "Das [Ende] war spannend.|n:das", "Nach dem [Regen] kam die Sonne.|n:der", "Er hat eine gute [Idee].|n:die", "Mein [Geburtstag] ist im Mai.|n:der"
+  ];
+  const KLEIN = [
+    "Die Kinder [spielen] im Hof.|v", "Wir [laufen] zur Schule.|v", "Der Ball ist [rund].|a", "Das Wasser ist [kalt].|a",
+    "Ich [lese] ein Buch.|v", "Sie [singt] ein Lied.|v", "Der Hund ist [lieb].|a", "Heute ist es [warm].|a",
+    "Er [schreibt] einen Brief.|v", "Das Auto fährt [schnell].|a", "Wir [essen] Nudeln.|v", "Die Suppe ist [heiß].|a",
+    "Mama [kocht] Suppe.|v", "Der Weg ist [lang].|a", "Die Katze ist [müde].|a", "Wir [fahren] ans Meer.|v",
+    "Das Bild ist [schön].|a", "Ich komme [morgen] zu dir.|z", "Wir spielen [abends] Karten.|z", "Er war [gestern] krank.|z",
+    "Sie geht [mit] ihrer Oma.|w", "Ich weiß es [nicht].|w", "Wir treffen uns [oft].|w", "Das ist ein [schönes] Bild.|a",
+    "Ich mag den [roten] Pullover.|a", "Der Hase [hoppelt] davon.|v", "Wir [freuen] uns auf Ferien.|v", "Er ist [stark].|a"
+  ];
+  const SIGNAL = [
+    "Beim [Schwimmen] friere ich.|nv", "Das [Lesen] macht mir Spaß.|nv", "Zum [Malen] brauche ich Farben.|nv", "Vom [Laufen] bin ich müde.|nv",
+    "Ich übe das [Rechnen].|nv", "Beim [Essen] reden wir nicht.|nv", "Zum [Schlafen] ist es zu früh.|nv", "Das [Lachen] steckt an.|nv",
+    "Beim [Spielen] vergesse ich die Zeit.|nv", "Das [Singen] klappt gut.|nv", "Ich wünsche dir alles [Gute].|na", "Wir erleben etwas [Neues].|na",
+    "Es gibt nichts [Schöneres].|na", "Er hat viel [Lustiges] erzählt.|na", "Sie erzählt wenig [Neues].|na", "Das [Beste] kommt zum Schluss.|na",
+    "Ich habe etwas [Leckeres] gekocht.|na", "Im Zoo gab es viel [Spannendes].|na"
+  ];
+  const GEGEN = [
+    "Wir [schwimmen] im See.|v", "Ich [lese] gern Comics.|v", "Sie will heute [malen].|v", "Wir [lachen] laut.|v",
+    "Das Buch ist [neu].|a", "Das ist das [beste] Eis.|a", "Er will [spielen].|v", "Wir [essen] gleich.|v",
+    "Das ist eine [lustige] Geschichte.|a", "Der Kuchen ist [lecker].|a"
+  ];
+  const ANFANG = [
+    "[Heute] scheint die Sonne.|s", "[Morgen] fahren wir weg.|s", "[Schnell] lief er nach Hause.|s", "[Laut] bellte der Hund.|s",
+    "[Gestern] war ich krank.|s", "[Wir] spielen Fußball.|s", "[Plötzlich] ging das Licht aus.|s", "[Leise] schlich die Katze.|s"
+  ];
+  const SIGNALWOERTER = ["das", "beim", "zum", "vom", "im", "etwas", "alles", "nichts", "viel", "wenig"];
+
+  function zerlege(s) {
+    const [satz, art] = s.split("|");
+    const m = satz.match(/^(.*?)\[(.+?)\](.*)$/);
+    const vor = m[1], wort = m[2], nach = m[3];
+    const sig = vor.trim().split(" ").pop().toLowerCase();
+    return { satz, art, vor, wort, nach, sig };
+  }
+  const gross = (w) => w[0] === w[0].toUpperCase();
+
+  function tipp(x) {
+    const W = x.wort, [art, artikel] = x.art.split(":");
+    if (art === "n") return `<b>${W}</b> ist ein Nomen. Artikelprobe: <b>${artikel} ${W}</b> passt → groß.<br><span class="regel">Kann ich der, die oder das davorsetzen? Dann groß!</span>`;
+    if (art === "v") return `<b>${W}</b> ist ein Verb: Was tut jemand? Kein Signalwort davor → klein.${/en$/.test(W) ? `<br><span class="regel">Nur mit Signalwort wird es ein Nomen: beim ${W[0].toUpperCase() + W.slice(1)}.</span>` : ""}`;
+    if (art === "a") return `<b>${W}</b> ist ein Adjektiv: Wie ist etwas? → klein.${/\[[a-zäöü]+\] [A-ZÄÖÜ]/.test(x.satz) ? ` Es gehört zum Nomen <b>${x.nach.trim().split(" ")[0].replace(/[.,!?]/g, "")}</b>.` : ""}`;
+    if (art === "z") return `<b>${W}</b> sagt, wann – ohne Begleiter davor → klein.<br><span class="regel">Aber: am Morgen, am Abend, der Abend → groß.</span>`;
+    if (art === "w") return `<b>${W}</b> ist ein kleines Wort (kein Nomen) → klein.`;
+    if (art === "nv") return `Das Signalwort <b>${x.sig}</b> macht aus dem Verb ein Nomen: <b>${x.sig} ${W}</b> → groß.<br><span class="regel">Signalwörter: das, beim, zum, vom, im …</span>`;
+    if (art === "na") return `Das Signalwort <b>${x.sig}</b> macht aus dem Adjektiv ein Nomen: <b>${x.sig} ${W}</b> → groß.<br><span class="regel">Signalwörter: etwas, alles, nichts, viel, wenig, das …</span>`;
+    return `Am <b>Satzanfang</b> schreibt man immer groß.`;
+  }
+
+  function aufgabe(s) {
+    const x = zerlege(s), G = gross(x.wort);
+    const satz = (wort) => `<div class="satz">${x.vor}${wort}${x.nach}</div>`;
+    const rest = x.wort.slice(1);
+    return {
+      key: x.satz, style: "letters", keepOrder: true,
+      prompt: "Groß oder klein? Welcher Buchstabe gehört an den Anfang?",
+      show: satz(`<span class="gap">?</span>${rest}`),
+      solved: satz(`<span class="m">${x.wort[0]}</span>${rest}`),
+      choices: [{ v: "g", html: `${x.wort[0].toUpperCase()}<small>groß</small>` }, { v: "k", html: `${x.wort[0].toLowerCase()}<small>klein</small>` }],
+      answer: G ? "g" : "k",
+      tip: tipp(x),
+      recap: `${x.vor}<span class="m">${x.wort}</span>${x.nach}`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    const pools = level === "nomen" ? [NOMEN, KLEIN] : level === "signal" ? [SIGNAL, GEGEN] : [NOMEN, KLEIN, SIGNAL, GEGEN, ANFANG];
+    return Quiz.draw(pools, n).map(aufgabe);
+  }
+
+  Quiz.create({
+    game: "grossklein", back: "k4-lrs",
+    title: "Groß oder <span>klein</span>?",
+    heading: "Groß oder klein?",
+    intro: "Schau dir das Wort im Satz an und entscheide: großer oder kleiner Anfangsbuchstabe? Nutze die <b>Artikelprobe</b> (der, die, das davor?) und achte auf <b>Signalwörter</b> wie beim, zum, das, etwas.",
+    levels: [
+      { id: "nomen", name: "Nomen erkennen", desc: "Artikelprobe: der Wald, die Angst – aber: wir laufen, es ist kalt." },
+      { id: "signal", name: "Signalwörter", desc: "beim Schwimmen, das Lesen, etwas Neues – aber: wir schwimmen." },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander, auch der Satzanfang." }
+    ],
+    merk: `<h4>1. Artikelprobe</h4><p>Kann ich <b>der, die oder das</b> davorsetzen? Dann ist es ein Nomen → <b>groß</b>: der Wald, die Angst, das Glück.</p>
+      <p>Auch Gefühle und Dinge, die man nicht anfassen kann, sind Nomen: die Freude, der Mut, die Zeit, der Spaß.</p>
+      <h4>2. Verben und Adjektive → klein</h4><p>Was tut jemand? (laufen, lesen) Wie ist etwas? (kalt, schön) → <b>klein</b>.</p>
+      <h4>3. Signalwörter machen Nomen</h4><p>Steht ein Signalwort davor, wird das Wort ein Nomen → <b>groß</b>:</p>
+      <ul><li><b>das, beim, zum, vom</b> + Verb: das Lesen, beim Schwimmen, zum Malen</li>
+      <li><b>etwas, alles, nichts, viel, wenig</b> + Adjektiv: etwas Neues, alles Gute, viel Spannendes</li></ul>
+      <h4>4. Zeitwörter</h4><p>heute, morgen, abends → <b>klein</b>. Aber mit Begleiter: am Morgen, der Abend → <b>groß</b>.</p>
+      <h4>5. Satzanfang</h4><p>Das erste Wort im Satz schreibt man immer groß.</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Groß-klein-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

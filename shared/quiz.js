@@ -18,6 +18,8 @@
 //     solved, tip, recap, wrongWhy(v) }
 //   show / solved: HTML für die Bühne vor / nach der Antwort; tip: Erklärung danach; recap: Zeile im Ergebnis.
 //   Bei mehr als zwei Auswahlknöpfen gibt es einen zweiten Versuch (0,5 Punkte).
+//   say: "Himmel" → 🔊-Knopf liest das vor (Sprachausgabe des Geräts), autoSay: true liest gleich beim Start vor.
+//   text: true → Schreibfeld statt Knöpfen; answer ist das Wort genau so (Groß/klein zählt), zwei Versuche.
 (() => {
   const $ = (id) => document.getElementById(id);
   const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -166,7 +168,7 @@
     function nextRound() {
       const t = state.tasks[state.round];
       state.locked = false; state.tries = 0;
-      state.maxTries = t.input || t.choices.length > 2 ? 2 : 1;
+      state.maxTries = t.input || t.text || t.choices.length > 2 ? 2 : 1;
       $("roundNo").textContent = state.round + 1;
       $("scoreNo").textContent = num(state.score);
       $("feedback").innerHTML = "";
@@ -175,6 +177,17 @@
       $("prompt").innerHTML = t.prompt;
       $("bench").innerHTML = t.show;
       [...$("bench").children].forEach(c => c.classList.add("pop"));
+      sagKnopf(t);
+      if (t.say && t.autoSay) setTimeout(() => sprich(t.say), 300);
+      if (t.text) {
+        state.maxTries = 2;
+        $("choices").className = "choices schreiben";
+        $("choices").innerHTML = `<input id="tin" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" placeholder="hier schreiben" aria-label="Wort schreiben"><button class="choice ok" id="tok">Prüfen ✓</button>`;
+        $("tok").onclick = submitText;
+        setTimeout(() => $("tin") && $("tin").focus({ preventScroll: true }), 50);
+        $("hint").textContent = "Schreiben, dann „Prüfen“ oder Enter. Groß und klein zählt!";
+        return;
+      }
       if (t.input) {
         // Zahleneingabe: Ergebnis steht im Element #entry der Bühne
         state.entry = "";
@@ -220,6 +233,51 @@
       $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht – ${v} stimmt nicht.</div><div class="sub">${why ? why + " " : ""}Rechne nochmal, ein Versuch noch.</div>`;
     }
 
+    // ---------- Vorlesen und Schreiben ----------
+    function sagKnopf(t) {
+      if (!t.say || !("speechSynthesis" in window)) return;
+      $("bench").insertAdjacentHTML("beforeend", `<button class="icon-btn sprich" type="button">🔊 Anhören</button>`);
+      $("bench").querySelector(".sprich").onclick = () => sprich(t.say);
+    }
+    // Zeigt im geschriebenen Wort die Buchstaben, die nicht zum richtigen Wort passen (längste gemeinsame Folge)
+    function markiere(v, a) {
+      const n = v.length, m = a.length, L = [...Array(n + 1)].map(() => Array(m + 1).fill(0));
+      for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = v[i] === a[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+      let i = 0, j = 0, out = "";
+      const e = (c) => c.replace(/[&<>]/g, x => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[x]));
+      while (i < n) {
+        if (j < m && v[i] === a[j]) { out += e(v[i]); i++; j++; }
+        else if (j < m && L[i][j + 1] >= L[i + 1][j]) { out += '<span class="fehlt">_</span>'; j++; }
+        else { out += `<span class="falsch">${e(v[i])}</span>`; i++; }
+      }
+      if (j < m) out += '<span class="fehlt">_</span>';
+      return out;
+    }
+    function submitText() {
+      const t = state.tasks[state.round], inp = $("tin");
+      if (state.locked || !inp) return;
+      const v = inp.value.trim().replace(/\s+/g, " ");
+      if (!v) return;
+      if (v === t.answer) {
+        inp.classList.add("right"); inp.disabled = true;
+        solve(t, state.tries === 0 ? 1 : 0.5, state.tries === 0 ? "g" : "o");
+        return;
+      }
+      state.tries++;
+      sfx.bad();
+      const why = t.wrongWhy ? t.wrongWhy(v) : "";
+      const gross = v.toLowerCase() === t.answer.toLowerCase() ? "Fast! Nur <b>groß oder klein</b> stimmt nicht. " : "";
+      if (state.tries >= state.maxTries) {
+        inp.disabled = true;
+        solve(t, 0, "b", `Du hast geschrieben: <span class="dein">${markiere(v, t.answer)}</span><br>${gross}${why}`);
+        return;
+      }
+      inp.classList.add("wrong");
+      setTimeout(() => inp.classList.remove("wrong"), 400);
+      $("feedback").innerHTML = `<div class="head" style="color:var(--bad)">Noch nicht!</div><div class="sub">${gross || "Schau genau hin – die rot markierten Stellen stimmen nicht: "}${gross ? "" : `<span class="dein">${markiere(v, t.answer)}</span><br>`}${why ? why + " " : ""}Verbessere dein Wort.</div>`;
+      inp.focus({ preventScroll: true });
+    }
+
     function choose(btn) {
       if (state.locked || btn.disabled) return;
       const t = state.tasks[state.round];
@@ -245,7 +303,7 @@
       state.locked = true;
       state.score += pts;
       [...$("choices").children].forEach(b => { b.disabled = true; if (!b.classList.contains("right")) b.classList.add("dim"); });
-      if (t.solved) { $("bench").innerHTML = t.solved; [...$("bench").children].forEach(c => c.classList.add("pop")); }
+      if (t.solved) { $("bench").innerHTML = t.solved; [...$("bench").children].forEach(c => c.classList.add("pop")); sagKnopf(t); }
       const head = cls === "g" ? pick(["Richtig! 🎉", "Super!", "Genau!", "Klasse!", "Stark!"]) : cls === "o" ? "Im zweiten Versuch!" : "So ist es richtig:";
       const color = cls === "g" ? "var(--good)" : cls === "o" ? "var(--ok)" : "var(--bad)";
       $("feedback").innerHTML = `<div class="head" style="color:${color}">${head} <span style="color:var(--accent)">+${num(pts)}</span></div>
@@ -272,6 +330,10 @@
       if (e.key === "Escape") $("merk").classList.remove("open");
       if ($("game").style.display !== "flex" || $("merk").classList.contains("open")) return;
       const t = state && state.tasks[state.round];
+      if (t && t.text && !state.locked) {
+        if (e.key === "Enter") { e.preventDefault(); submitText(); }
+        return;
+      }
       if (t && t.input && !state.locked) {
         if (/^[0-9]$/.test(e.key)) key(e.key);
         else if (e.key === "Backspace") { e.preventDefault(); key("⌫"); }
@@ -355,5 +417,19 @@
     return shuffle(out);
   }
 
-  window.Quiz = { create, shuffle, pick, draw };
+  // Vorlesen mit der deutschen Stimme des Geräts (iPad: „Anna“), etwas langsamer als normal
+  function sprich(text) {
+    try {
+      const s = window.speechSynthesis;
+      s.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "de-DE"; u.rate = 0.8;
+      const v = s.getVoices().filter(x => /^de/i.test(x.lang));
+      if (v.length) u.voice = v.find(x => /anna|petra|helena|google/i.test(x.name)) || v[0];
+      s.speak(u);
+    } catch {}
+  }
+  if ("speechSynthesis" in window) { try { speechSynthesis.getVoices(); } catch {} }
+
+  window.Quiz = { create, shuffle, pick, draw, sprich };
 })();

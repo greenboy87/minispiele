@@ -19,6 +19,22 @@ window.KATALOG = {
       ] }
     ] },
     { id: "k4", name: "4. Klasse", icon: "4️⃣", gruppen: [
+      { id: "k4-lrs", name: "🧠 LRS-Training: Rechtschreibung", kurz: "LRS-Training", spiele: [
+        { id: "grossklein", pfad: "grossklein", titel: "Groß oder klein?", ic: "der <u>W</u>ald · <u>l</u>aufen", text: "Artikelprobe und Signalwörter: das Lesen, etwas Neues – aber wir lesen.",
+          neu: true, stufen: ["Nomen erkennen", "Signalwörter", "Gemischt"] },
+        { id: "doppelt", pfad: "doppelt", titel: "Doppel-Mitlaut-Detektiv", ic: "So<u>mm</u>er · Na<u>m</u>e", text: "Kurz oder lang hören, dann doppelt oder einfach – auch ck, tz und am Wortende.",
+          neu: true, stufen: ["Kurz oder lang?", "mm, nn, ll, tt …", "ck und tz", "Am Wortende", "Gemischt"] },
+        { id: "iie", pfad: "iie", titel: "i oder ie?", ic: "B<u>ie</u>ne · K<u>i</u>nd", text: "Langes i → ie, kurzes i → i. Dazu die Merkwörter Tiger, Kino, wir und ihr, ihm, ihn.",
+          neu: true, stufen: ["i oder ie?", "Merkwörter", "Gemischt"] },
+        { id: "fv", pfad: "fv", titel: "f oder v?", ic: "<u>V</u>ogel · <u>F</u>enster", text: "Meistens f – aber ver-, vor- und die v-Merkwörter. Und wann klingt v wie w?",
+          neu: true, stufen: ["ver- und vor-", "v-Merkwörter", "v wie w", "Gemischt"] },
+        { id: "sss", pfad: "sss", titel: "s, ss oder ß?", ic: "Wa<u>ss</u>er · Fu<u>ß</u>", text: "Kurz → ss, lang → ß, summend → s. Am Wortende verlängern. Und: das oder dass?",
+          neu: true, stufen: ["ss oder ß?", "s, ss oder ß?", "das oder dass?", "Gemischt"] },
+        { id: "fehlerdetektiv", pfad: "fehlerdetektiv", titel: "Fehler-Detektiv 🔍", ic: "Im <s>Somer</s> …", text: "In jedem Satz steckt ein Fehler: finden und richtig schreiben. Fehlerarten wählbar.",
+          neu: true, stufen: ["Fehler finden", "Fehler verbessern"] },
+        { id: "hoerdiktat", pfad: "hoerdiktat", titel: "Wörter-Werkstatt ✍️", ic: "🔊 → ✍️", text: "Selbst schreiben: Wort hören oder kurz ansehen, dann aus dem Kopf schreiben.",
+          neu: true, stufen: ["Hören und schreiben", "Anschauen, merken, schreiben"] }
+      ] },
       { id: "k4-mathe", name: "🏆 Mathe-Profi: auf Zeit", kurz: "Mathe-Profi", spiele: [
         { id: "einmaleins", pfad: "einmaleins", titel: "Einmaleins-Blitz ⏱️", ic: "7 · 8 = ?", text: "Mal und geteilt gegen die Uhr – auch mit Zehnern, Hundertern und dem großen Einmaleins.",
           einheit: "richtig", neu: true, stufen: ["Malaufgaben", "Geteilt", "Mal und geteilt", "Mit Zehnern und Hundertern", "Großes Einmaleins"] },

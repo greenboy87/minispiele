@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fehler-Detektiv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+<style>
+  .satz .falschwort { color: var(--bad); text-decoration: underline wavy; text-underline-offset: 6px; }
+  .choices.words .choice { font-size: clamp(18px, 3.2vw, 24px); }
+</style>
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // [falsch|richtig] – genau ein Fehler pro Satz
+  const SAETZE = {
+    gk: ["Wir gehen in den [wald|Wald] spielen.", "Beim [schwimmen|Schwimmen] ist mir kalt.", "Der Hund [Bellt|bellt] laut.", "Ich wünsche dir alles [gute|Gute].",
+      "Meine Oma hat [angst|Angst] vor Mäusen.", "Das Wasser ist sehr [Kalt|kalt].", "Ich komme [Morgen|morgen] zu dir.", "Das [lesen|Lesen] macht mir Spaß.",
+      "Am [abend|Abend] schaue ich fern.", "Wir haben etwas [neues|Neues] gelernt.", "Die Kinder [Spielen|spielen] im Hof."],
+    dop: ["Im [Somer|Sommer] gehen wir baden.", "Die [Kaze|Katze] schläft auf dem Sofa.", "Mein [Zimer|Zimmer] ist aufgeräumt.", "Ich mag keinen [Zuker|Zucker] im Tee.",
+      "Der [Bal|Ball] rollt weg.", "Wir [komen|kommen] gleich.", "Die [Schauckel|Schaukel] quietscht.", "Im Winter trage ich eine [Müze|Mütze].",
+      "Der [Teler|Teller] ist leer.", "Er [schwimt|schwimmt] sehr schnell.", "Mein [Onckel|Onkel] wohnt in Berlin."],
+    ie: ["Die [Bine|Biene] summt.", "Ich schreibe einen [Brif|Brief].", "Wir [spilen|spielen] Fußball.", "Im Zoo sehen wir einen [Tieger|Tiger].",
+      "Mein [Fiesch|Fisch] heißt Nemo.", "Die [Zige|Ziege] meckert.", "Kommt [ir|ihr] mit?", "Wir gehen heute ins [Kieno|Kino].",
+      "Ich habe [siben|sieben] Murmeln.", "Das [Tir|Tier] ist sehr scheu.", "Der [Hiemmel|Himmel] ist blau."],
+    fv: ["Ich habe mein Heft [fergessen|vergessen].", "Der [Fogel|Vogel] singt.", "Mein [Fater|Vater] kocht heute.", "Ich habe [fier|vier] Stifte.",
+      "Die Hausaufgabe ist [vertig|fertig].", "Fahr bitte [forsichtig|vorsichtig]!", "In den [Verien|Ferien] fahren wir weg.", "Das Glas ist [foll|voll].",
+      "Sie spielt [Klawier|Klavier].", "Ich habe [fiel|viel] gelernt."],
+    s: ["Wir laufen über die [Strasse|Straße].", "Ich trinke ein Glas [Waser|Wasser].", "Mein [Fus|Fuß] tut weh.", "Die Wiese ist [nas|nass].",
+      "Ich hoffe, [das|dass] du kommst.", "Der Tee ist [heis|heiß].", "Das Buch, [dass|das] ich lese, ist toll.", "Im [Glass|Glas] ist Saft.",
+      "Wir haben viel [Spass|Spaß].", "Die [Rosse|Rose] duftet."]
+  };
+  const REGEL = {
+    gk: "Artikelprobe und Signalwörter: Nomen und Wörter mit Signalwort (das, beim, etwas …) groß, Verben und Adjektive klein.",
+    dop: "Kurzer Selbstlaut → doppelter Mitlaut, ck oder tz. Nach Mitlaut, au/ei/eu oder langem Selbstlaut nur einer.",
+    ie: "Langes i → ie, kurzes i → i. Merkwörter: Tiger, Kino, wir – und ihr, ihm, ihn.",
+    fv: "Meistens f. Immer v bei ver- und vor- und in Merkwörtern wie Vogel, Vater, viel, vier, voll.",
+    s: "Kurz → ss, lang oder au/ei/eu → ß, summend → s. das/dass: Ersatzprobe mit dieses/welches."
+  };
+  const NAMEN = { gk: "Groß/klein", dop: "Doppelt, ck, tz", ie: "i oder ie", fv: "f oder v", s: "s, ss, ß" };
+
+  function zerlege(s) {
+    const tokens = s.split(" ");
+    const i = tokens.findIndex(t => t.includes("["));
+    const m = tokens[i].match(/^(.*?)\[(.+?)\|(.+?)\](.*)$/);
+    return { tokens, i, vor: m[1], falsch: m[2], richtig: m[3], nach: m[4] };
+  }
+  const nackt = (t) => t.replace(/[.,!?]/g, "");
+
+  function aufgabe(s, kat, verbessern) {
+    const x = zerlege(s);
+    const mit = (wort, cls) => x.tokens.map((t, j) => j === x.i ? `${x.vor}<span class="${cls}">${wort}</span>${x.nach}` : t).join(" ");
+    const tip = `Richtig: <b>${x.richtig}</b> (statt ${x.falsch}).<br><span class="regel">${NAMEN[kat]}: ${REGEL[kat]}</span>`;
+    if (verbessern) return {
+      key: "v:" + s, text: true, answer: x.richtig, say: x.tokens.map((t, j) => j === x.i ? x.vor + x.richtig + x.nach : t).join(" ").replace(/[\[\]|]/g, ""),
+      prompt: "Das <b>markierte Wort</b> ist falsch geschrieben. Schreib es richtig!",
+      show: `<div class="satz">${mit(x.falsch, "falschwort")}</div>`, solved: `<div class="satz">${mit(x.richtig, "m")}</div>`,
+      tip, recap: `<s>${x.falsch}</s> → <span class="m">${x.richtig}</span>`
+    };
+    return {
+      key: s, style: "words", keepOrder: true,
+      prompt: "Fehler-Detektiv: Welches Wort ist <b>falsch</b> geschrieben? Tipp es an!",
+      show: `<div class="satz">${mit(x.falsch, "")}</div>`, solved: `<div class="satz">${mit(x.richtig, "m")}</div>`,
+      choices: x.tokens.map((t, j) => ({ v: String(j), html: nackt(j === x.i ? x.vor + x.falsch + x.nach : t) })), answer: String(x.i),
+      wrongWhy: (v) => `<b>${nackt(x.tokens[+v])}</b> ist richtig geschrieben.`,
+      tip, recap: `<s>${x.falsch}</s> → <span class="m">${x.richtig}</span>`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    const pools = topics.map(k => SAETZE[k].map(s => ({ s, k })));
+    return Quiz.draw(pools, n).map(({ s, k }) => aufgabe(s, k, level === "verbessern"));
+  }
+
+  Quiz.create({
+    game: "fehlerdetektiv", back: "k4-lrs",
+    title: "Fehler-<span>Detektiv</span> 🔍",
+    heading: "Finde den Fehler im Satz",
+    intro: "In jedem Satz hat sich <b>ein</b> Fehler versteckt. Lies Wort für Wort – langsam! Erst finden, dann (im zweiten Level) richtig schreiben. Oben wählst du, welche Fehler vorkommen.",
+    levels: [
+      { id: "finden", name: "Fehler finden", desc: "Tipp auf das falsche Wort." },
+      { id: "verbessern", name: "Fehler verbessern", desc: "Das falsche Wort ist markiert – schreib es richtig." }
+    ],
+    topics: [{ id: "gk", name: "Groß/klein" }, { id: "dop", name: "Doppelt, ck, tz" }, { id: "ie", name: "i/ie" }, { id: "fv", name: "f/v" }, { id: "s", name: "s/ss/ß" }],
+    merk: `<h4>So arbeitet ein Fehler-Detektiv</h4><ul><li>Lies den Satz <b>langsam, Wort für Wort</b> – mit dem Finger darunter.</li>
+      <li>Frag bei jedem Wort: Nomen? (groß) · kurzer Selbstlaut? (doppelt) · langes i? (ie) · ver-/vor-? (v)</li></ul>
+      <h4>Die Regeln</h4><ul>${Object.keys(REGEL).map(k => `<li><b>${NAMEN[k]}:</b> ${REGEL[k]}</li>`).join("")}</ul>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gesucht!", "Super!", "Meister-Detektiv! 🔍"]
+  });
+})();
+</script>
+</body>
+</html>

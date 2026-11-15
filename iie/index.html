@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>i oder ie?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // [ ] markiert die Stelle; Artikel steht davor
+  const IE = ["die B[ie]ne", "der Br[ie]f", "der Sp[ie]gel", "die W[ie]se", "die Z[ie]ge", "die Fl[ie]ge", "der R[ie]se", "der D[ie]b",
+    "das L[ie]d", "t[ie]f", "l[ie]b", "s[ie]ben", "das T[ie]r", "das Pap[ie]r", "sch[ie]f", "fr[ie]ren", "sp[ie]len", "l[ie]gen",
+    "fl[ie]gen", "sch[ie]ben", "das Z[ie]l", "der St[ie]fel", "das Kn[ie]", "der S[ie]g", "der R[ie]gel", "v[ie]l", "w[ie]der",
+    "n[ie]", "h[ie]r", "die Zw[ie]bel", "das F[ie]ber", "r[ie]chen", "z[ie]hen", "s[ie]gen", "die D[ie]le", "schl[ie]ßen"];
+  const I = ["das K[i]nd", "der F[i]sch", "der T[i]sch", "der W[i]nd", "die M[i]tte", "die K[i]ste", "der H[i]mmel", "der P[i]lz",
+    "das L[i]cht", "der R[i]ng", "das G[i]ft", "b[i]tte", "das Sch[i]ff", "die M[i]lch", "s[i]ngen", "tr[i]nken", "f[i]nden", "das Z[i]mmer",
+    "das K[i]nn", "der R[i]tter", "die H[i]tze", "der Bl[i]tz", "st[i]ll", "m[i]t", "die Sp[i]nne", "die [I]nsel", "der St[i]ft",
+    "der W[i]nter", "das B[i]ld", "die Br[i]lle", "die K[i]rsche", "w[i]ssen", "sch[i]mpfen", "der F[i]lm", "w[i]nken"];
+  // Langes i ohne ie: Merkwörter (oft Fremdwörter) und ih in ihr, ihm, ihn, ihnen
+  const MERK = ["der T[i]ger", "das K[i]no", "das Krokod[i]l", "die Masch[i]ne", "das Benz[i]n", "der [I]gel", "der B[i]ber", "das K[i]lo",
+    "die Mus[i]k", "das Vitam[i]n", "w[i]r", "m[i]r", "d[i]r", "die Mediz[i]n", "die Ros[i]ne", "das L[i]neal", "das Kl[i]ma", "die Lokomot[i]ve"];
+  const IH = ["[ih]r", "[ih]m", "[ih]n", "[ih]nen"];
+
+  const teile = (w) => { const m = w.match(/^(.*?)\[(.+?)\](.*)$/); return { vor: m[1], k: m[2], nach: m[3] }; };
+  const plain = (w) => w.replace(/[\[\]]/g, "");
+  const ohneArtikel = (w) => plain(w).replace(/^(der|die|das) /, "");
+
+  function aufgabe(w, art, mitIh) {
+    const { vor, k, nach } = teile(w);
+    const zeig = (x) => {
+      const parts = (vor + "\u0000" + nach).split(" ");
+      const head = /^(der|die|das)$/.test(parts[0]) && parts.length > 1 ? parts.shift() : null;
+      const body = parts.join(" ").replace("\u0000", x);
+      return `<div class="word">${head ? `<span class="art">${head}</span>` : ""}${body}</div>`;
+    };
+    const opts = mitIh ? ["i", "ie", "ih"] : ["i", "ie"];
+    const up = /^[A-ZÄÖÜ]?$/.test(vor.replace(/^(der|die|das) /, "")) && vor.replace(/^(der|die|das) /, "") === "" && /[A-Z]/.test(k[0]);
+    const fmt = (o) => up ? o[0].toUpperCase() + o.slice(1) : o;
+    const r = ohneArtikel(w);
+    const tip = art === "ie" ? `<b>${r}</b>: Das i ist <b>lang</b> → <b>ie</b>.<br><span class="regel">Langes i schreibt man fast immer ie.</span>`
+      : art === "i" ? `<b>${r}</b>: Das i ist <b>kurz</b> → nur <b>i</b>. Danach kommen meist zwei Mitlaute.<br><span class="regel">Kurzes i: nur i.</span>`
+      : art === "ih" ? `<b>${r}</b> ist ein Merkwort: <b>ihr, ihm, ihn, ihnen</b> schreibt man mit <b>ih</b>.`
+      : `<b>${r}</b> ist ein <b>Merkwort</b>: Das i ist lang, aber man schreibt nur <b>i</b> (wie Tiger, Kino, wir, mir, dir). Das musst du dir merken.`;
+    return {
+      key: plain(w), style: "letters", keepOrder: true, say: r,
+      prompt: (mitIh ? "i, ie oder ih?" : "i oder ie?") + " Hör genau hin: Ist das i kurz oder lang?",
+      show: zeig(`<span class="gap">?</span>`), solved: zeig(`<span class="m">${k}</span>`),
+      choices: opts.map(o => ({ v: o, html: fmt(o) })), answer: k.toLowerCase(),
+      tip, recap: plain(w)
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    if (level === "ie") return Quiz.draw([IE, I], n).map(w => aufgabe(w, /\[ie\]/.test(w) ? "ie" : "i"));
+    if (level === "merk") return Quiz.draw([MERK, IH, IE], n).map(w => aufgabe(w, /\[ih\]/i.test(w) ? "ih" : /\[ie\]/.test(w) ? "ie" : "merk", true));
+    return Quiz.draw([IE, I, MERK, IH], n).map(w => aufgabe(w, /\[ih\]/i.test(w) ? "ih" : /\[ie\]/.test(w) ? "ie" : MERK.includes(w) ? "merk" : "i", true));
+  }
+
+  Quiz.create({
+    game: "iie", back: "k4-lrs",
+    title: "i oder <span>ie</span>?",
+    heading: "i, ie oder ih?",
+    intro: "Hör auf das i: Klingt es <b>lang</b> (Biene, Brief), schreibst du fast immer <b>ie</b>. Klingt es <b>kurz</b> (Kind, Fisch), nur <b>i</b>. Mit 🔊 hörst du das Wort. Ein paar Merkwörter tanzen aus der Reihe.",
+    levels: [
+      { id: "ie", name: "i oder ie?", desc: "Biene oder Bine? Kind oder Kiend?" },
+      { id: "merk", name: "Merkwörter", desc: "Tiger, Kino, wir, mir – und ihr, ihm, ihn" },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander." }
+    ],
+    merk: `<h4>1. Langes i → ie</h4><p>Die Biene, der Brief, spielen, viel, sieben, hier. Sprich langsam: Bieeene.</p>
+      <h4>2. Kurzes i → i</h4><p>Das Kind, der Fisch, trinken, mit. Nach dem kurzen i kommen meist zwei Mitlaute: Ki<b>nd</b>, Fi<b>sch</b>, Hi<b>mm</b>el.</p>
+      <h4>3. Merkwörter: langes i, aber nur i</h4><p>Tiger, Kino, Igel, Krokodil, Maschine, Musik, Vitamin, Kilo, Klima, Biber, Rosine – und <b>wir, mir, dir</b>.</p>
+      <h4>4. Merkwörter mit ih</h4><p><b>ihr, ihm, ihn, ihnen</b> – nur diese paar Wörter!</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "ie-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

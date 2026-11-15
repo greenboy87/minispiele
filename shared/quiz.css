@@ -147,3 +147,21 @@ header h1 span { color: var(--accent); }
 .calc .gap.filled { color: var(--ink); }
 .calc .gap.right { color: var(--good); border-color: var(--good); }
 .calc .gap.wrong { color: var(--bad); border-color: var(--bad); animation: shake .35s; }
+
+/* Vorlesen und Schreiben (LRS-Spiele) */
+.sprich { margin-top: 6px; font-size: 18px; }
+.choices.schreiben { align-items: center; }
+.choices.schreiben input { font: inherit; font-size: clamp(28px, 6vw, 44px); font-weight: 600; text-align: center; width: min(460px, 100%);
+  padding: 10px 16px; border-radius: 18px; border: 3px solid var(--line); background: var(--card); color: var(--ink);
+  -webkit-user-select: text; user-select: text; letter-spacing: 1px; }
+.choices.schreiben input:focus { outline: none; border-color: var(--accent); }
+.choices.schreiben input.right { border-color: var(--good); color: var(--good); }
+.choices.schreiben input.wrong { border-color: var(--bad); animation: shake .35s; }
+.choices.schreiben .choice { min-width: 0; font-size: 22px; padding: 12px 22px; }
+.dein { font-size: 1.25em; font-weight: 700; color: var(--ink); letter-spacing: 1px; }
+.dein .falsch { color: var(--bad); text-decoration: line-through; }
+.dein .fehlt { color: var(--bad); }
+.satz { font-size: clamp(24px, 4.6vw, 38px); font-weight: 600; line-height: 1.5; background: var(--bg2); border-radius: 20px; padding: 10px 22px; max-width: 860px; }
+.satz .gap { min-width: .7em; }
+.satz .m { text-underline-offset: 5px; }
+.regel { display: inline-block; margin-top: 4px; font-size: 15px; color: var(--accent); font-weight: 600; }

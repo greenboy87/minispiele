@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>s, ss oder ß?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  const SS = ["das Wa[ss]er", "die Ka[ss]e", "die Ta[ss]e", "die Kla[ss]e", "e[ss]en", "der Schlü[ss]el", "das Ki[ss]en", "be[ss]er",
+    "wi[ss]en", "mü[ss]en", "die Nü[ss]e", "der Flu[ss]", "na[ss]", "der Ku[ss]", "das Schlo[ss]", "la[ss]en", "das Me[ss]er",
+    "kü[ss]en", "die Flü[ss]e", "der Ri[ss]", "pa[ss]en"];
+  const SZ = ["die Stra[ß]e", "der Fu[ß]", "gro[ß]", "der Spa[ß]", "sü[ß]", "hei[ß]", "wei[ß]", "flei[ß]ig", "die Grü[ß]e", "die So[ß]e",
+    "die Fü[ß]e", "der Strau[ß]", "bei[ß]en", "der Gru[ß]", "drau[ß]en", "gie[ß]en", "schlie[ß]en", "blo[ß]", "au[ß]en", "der Klo[ß]", "flie[ß]en"];
+  // Wortende: verlängern | verlängerte Form
+  const ENDE = ["das Gra[s]|die Gräser", "das Gla[s]|die Gläser", "das Hau[s]|die Häuser", "die Mau[s]|die Mäuse", "der Prei[s]|die Preise",
+    "die Gan[s]|die Gänse", "der Hal[s]|die Hälse", "das Lo[s]|die Lose", "der Fu[ß]|die Füße", "der Gru[ß]|die Grüße", "gro[ß]|größer",
+    "sü[ß]|süßer", "hei[ß]|heißer", "der Klo[ß]|die Klöße", "der Strau[ß]|die Sträuße", "der Flu[ss]|die Flüsse", "der Ku[ss]|die Küsse",
+    "na[ss]|nasser", "das Schlo[ss]|die Schlösser", "die Nu[ss]|die Nüsse", "das Fa[ss]|die Fässer", "er i[ss]t|essen", "sie lie[s]t|lesen",
+    "er rei[s]t|reisen"];
+  const MITTE_S = ["die Ro[s]e", "die Na[s]e", "le[s]en", "der Ha[s]e", "die Ho[s]e", "die Wie[s]e", "der Be[s]en", "die Rei[s]e", "die Amei[s]e", "sau[s]en"];
+  const DASS = [
+    "Ich hoffe, [dass] du kommst.", "[Das] Auto ist rot.", "Das Buch, [das] ich lese, ist spannend.", "Ich weiß, [dass] es regnet.",
+    "Mama sagt, [dass] wir gleich essen.", "Siehst du [das] Haus dort?", "Er freut sich, [dass] Ferien sind.", "Das Kind, [das] dort spielt, ist mein Bruder.",
+    "Ich glaube, [dass] er recht hat.", "Wo ist [das] Heft?", "Das Bild, [das] an der Wand hängt, ist von mir.", "Es ist schön, [dass] du da bist.",
+    "Ich finde [das] lustig.", "Weißt du, [dass] Wale Säugetiere sind?", "[Das] Pferd galoppiert.", "Das Lied, [das] wir singen, ist neu.",
+    "Pass auf, [dass] du nicht fällst!", "Ich wünsche mir, [dass] es schneit."
+  ];
+
+  const teile = (w) => { const m = w.match(/^(.*?)\[(.+?)\](.*)$/); return { vor: m[1], k: m[2], nach: m[3] }; };
+  const plain = (w) => w.replace(/[\[\]]/g, "");
+  const ohneArtikel = (w) => plain(w).replace(/^(der|die|das) /, "");
+  const vokal = (vor) => (vor.match(/(au|ei|eu|ie|äu|[aeiouäöü])$/i) || [, ""])[1];
+
+  function wort(w, sub) {
+    const { vor, k, nach } = teile(w);
+    const parts = (vor + "\u0000" + nach).split(" ");
+    const head = /^(der|die|das|er|sie)$/.test(parts[0]) && parts.length > 1 ? parts.shift() : null;
+    const body = parts.join(" ");
+    return (x) => `<div class="word">${head ? `<span class="art">${head}</span>` : ""}${body.replace("\u0000", x)}</div>${sub ? `<div class="sub-line">${sub}</div>` : ""}`;
+  }
+  function grund(w, k) {
+    const v = vokal(teile(w).vor);
+    if (k === "ss") return `Das <b>${v}</b> davor ist <b>kurz</b> → <b>ss</b>.`;
+    if (k === "ß") return /^(au|ei|eu|äu)$/i.test(v) ? `Davor steht der Doppellaut <b>${v}</b> → <b>ß</b>.` : `Das <b>${v}</b> davor ist <b>lang</b> → <b>ß</b>.`;
+    return `Man hört ein <b>summendes s</b> (wie eine Biene) → einfaches <b>s</b>.`;
+  }
+  function aufgabe(w, opts, verl) {
+    const { k } = teile(w), z = wort(w, verl ? `Tipp: verlängere das Wort` : "");
+    const r = ohneArtikel(w);
+    const tip = (verl ? `Verlängere: <b>${verl}</b>. ` : "") + grund(verl ? verlForm(w, verl) : w, k) +
+      `<br><span class="regel">kurz → ss · lang oder au, ei, eu → ß · summend → s</span>`;
+    return {
+      key: plain(w), style: "letters", keepOrder: true, say: r,
+      prompt: `s, ss oder ß?`.replace("s, ss oder ß", opts.length === 2 ? "ss oder ß" : "s, ss oder ß"),
+      show: z(`<span class="gap">?</span>`), solved: z(`<span class="m">${k}</span>`),
+      choices: opts.map(o => ({ v: o, html: o })), answer: k, tip, recap: plain(w) + (verl ? ` <span class="muted">← ${verl}</span>` : "")
+    };
+  }
+  // Für die Begründung den Selbstlaut aus der langen Form nehmen (Füße → ü lang, Flüsse → ü kurz)
+  function verlForm(w, verl) {
+    const v = verl.replace(/^(die|der|das) /, ""), k = teile(w).k;
+    const i = v.indexOf(k === "s" ? "s" : k);
+    return v.slice(0, i) + "[" + k + "]" + v.slice(i + k.length);
+  }
+  function dassAufgabe(s) {
+    const m = s.match(/^(.*?)\[(.+?)\](.*)$/), r = m[2].toLowerCase(), gross = /^D/.test(m[2]);
+    const satz = (x) => `<div class="satz">${m[1]}${x}${m[3]}</div>`;
+    const ersatz = /^[A-Z]/.test(m[2]) || !/,\s*$/.test(m[1]) ? "dieses" : "welches";
+    return {
+      key: s, style: "words", keepOrder: true,
+      prompt: "das oder dass? Mach die Ersatzprobe: Passt <b>dieses</b> oder <b>welches</b>?",
+      show: satz(`<span class="gap" style="min-width:2.5em">?</span>`), solved: satz(`<span class="m">${m[2]}</span>`),
+      choices: ["das", "dass"].map(o => ({ v: o, html: gross ? o[0].toUpperCase() + o.slice(1) : o })), answer: r,
+      tip: r === "das" ? `Ersatzprobe: <b>${gross ? "Dieses" : ersatz}</b> passt → <b>das</b> mit einem s.`
+        : `Weder dieses noch welches passt → <b>dass</b> mit ss. Vor dass steht fast immer ein Komma.`,
+      recap: `${m[1]}<span class="m">${m[2]}</span>${m[3]}`
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    if (level === "ssz") return Quiz.draw([SS, SZ], n).map(w => aufgabe(w, ["ss", "ß"]));
+    if (level === "ende") return Quiz.draw([ENDE.filter(x => /\[s\]/.test(x)), ENDE.filter(x => /\[ß\]/.test(x)), ENDE.filter(x => /\[ss\]/.test(x)), MITTE_S], n)
+      .map(x => x.includes("|") ? aufgabe(x.split("|")[0], ["s", "ss", "ß"], x.split("|")[1]) : aufgabe(x, ["s", "ss", "ß"]));
+    if (level === "dass") return Quiz.draw([DASS.filter(x => x.includes("[dass]")), DASS.filter(x => !x.includes("[dass]"))], n).map(dassAufgabe);
+    return Quiz.draw([SS, SZ, ENDE, MITTE_S, DASS], n).map(x => x.includes("|") ? aufgabe(x.split("|")[0], ["s", "ss", "ß"], x.split("|")[1])
+      : /[.?!]$/.test(x) ? dassAufgabe(x) : aufgabe(x, ["s", "ss", "ß"]));
+  }
+
+  Quiz.create({
+    game: "sss", back: "k4-lrs",
+    title: "s, ss oder <span>ß</span>?",
+    heading: "s, ss oder ß – und das oder dass?",
+    intro: "Hör auf den Selbstlaut davor: <b>kurz</b> → ss (Wasser), <b>lang</b> oder au/ei/eu → ß (Straße, heiß). Summt das s wie eine Biene → s (Rose). Am Wortende: <b>verlängern</b>!",
+    levels: [
+      { id: "ssz", name: "ss oder ß?", desc: "Wasser, Kasse – aber Straße, Fuß, heiß" },
+      { id: "ende", name: "s, ss oder ß?", desc: "Gras ← Gräser, Fuß ← Füße, Fluss ← Flüsse" },
+      { id: "dass", name: "das oder dass?", desc: "Ersatzprobe mit dieses oder welches" },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander." }
+    ],
+    merk: `<h4>1. ss oder ß?</h4><ul><li>Nach <b>kurzem</b> Selbstlaut: <b>ss</b> – Wasser, Klasse, essen, nass.</li>
+      <li>Nach <b>langem</b> Selbstlaut: <b>ß</b> – Straße, Fuß, groß, süß.</li>
+      <li>Nach <b>au, ei, eu</b>: <b>ß</b> – draußen, heiß, weiß, Strauß.</li></ul>
+      <h4>2. Einfaches s</h4><p>Summt das s wie eine Biene (Rose, Nase, lesen), schreibt man ein <b>s</b>.</p>
+      <h4>3. Am Wortende: verlängern</h4><p>das Gras → die Grä<b>s</b>er (summt → s) · der Fuß → die Fü<b>ß</b>e (lang → ß) · der Fluss → die Flü<b>ss</b>e (kurz → ss)</p>
+      <h4>4. das oder dass?</h4><p>Setz <b>dieses</b> oder <b>welches</b> ein. Passt es → <b>das</b>. Passt es nicht → <b>dass</b>.</p>
+      <p>Das Auto (dieses Auto) ist rot. · Das Buch, das (welches) ich lese … · Ich hoffe, dass du kommst.</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "s-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

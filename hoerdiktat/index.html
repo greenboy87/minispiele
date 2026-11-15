@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wörter-Werkstatt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+<style>
+  .merkwort { animation: wegblenden .5s 4s forwards; }
+  @keyframes wegblenden { to { opacity: 0; visibility: hidden; } }
+  .satz { font-size: clamp(20px, 3.8vw, 30px); }
+</style>
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // Wort | Satz, in dem es vorkommt
+  const WOERTER = {
+    gk: ["Angst|Ich habe Angst vor Spinnen.", "Freude|Die Freude ist groß.", "Mut|Lisa hat viel Mut.", "laufen|Wir laufen zur Schule.",
+      "kalt|Das Wasser ist kalt.", "Glück|Wir hatten Glück.", "morgen|Ich komme morgen zu dir.", "Abend|Am Abend lese ich.",
+      "Zeit|Ich habe keine Zeit.", "Schwimmen|Beim Schwimmen friere ich.", "spielen|Die Kinder spielen im Hof.", "Wahrheit|Er sagt die Wahrheit."],
+    dop: ["Sommer|Im Sommer ist es heiß.", "Katze|Die Katze schläft.", "Zimmer|Mein Zimmer ist groß.", "Zucker|Ich mag keinen Zucker im Tee.",
+      "Teller|Der Teller ist leer.", "kommen|Wir kommen gleich.", "Mütze|Ich trage eine Mütze.", "schwimmen|Wir schwimmen im See.",
+      "Brücke|Wir gehen über die Brücke.", "Löffel|Ich esse mit dem Löffel.", "Schaukel|Die Schaukel quietscht.", "Kerze|Die Kerze brennt.",
+      "Name|Mein Name ist Max.", "Blume|Die Blume blüht."],
+    ie: ["Biene|Die Biene summt.", "Brief|Ich schreibe einen Brief.", "spielen|Wir spielen Fußball.", "Kind|Das Kind lacht.", "Tiger|Der Tiger brüllt.",
+      "Fisch|Der Fisch schwimmt.", "Ziege|Die Ziege meckert.", "Spiegel|Ich schaue in den Spiegel.", "Wiese|Die Kühe stehen auf der Wiese.",
+      "Himmel|Der Himmel ist blau.", "Kino|Wir gehen ins Kino.", "ihr|Kommt ihr mit?", "Tier|Mein Lieblingstier ist der Hund.", "wir|Morgen gehen wir schwimmen."],
+    fv: ["vergessen|Ich habe mein Heft vergessen.", "Vogel|Der Vogel singt.", "Vater|Mein Vater kocht.", "vier|Ich habe vier Stifte.",
+      "fertig|Ich bin fertig.", "Ferien|In den Ferien fahren wir weg.", "vorsichtig|Fahr vorsichtig!", "voll|Das Glas ist voll.",
+      "Fenster|Mach bitte das Fenster zu.", "Klavier|Sie spielt Klavier.", "Vase|Die Blumen stehen in der Vase.", "vielleicht|Ich komme vielleicht später."],
+    s: ["Straße|Wir laufen über die Straße.", "Wasser|Ich trinke Wasser.", "Fuß|Mein Fuß tut weh.", "nass|Die Wiese ist nass.", "heiß|Der Tee ist heiß.",
+      "Glas|Im Glas ist Saft.", "Rose|Die Rose duftet.", "Spaß|Das macht Spaß.", "essen|Wir essen Nudeln.", "groß|Der Elefant ist groß.",
+      "Schlüssel|Wo ist mein Schlüssel?", "draußen|Wir spielen draußen.", "dass|Ich hoffe, dass du kommst."]
+  };
+  const TIPP = {
+    gk: (w) => /^[A-ZÄÖÜ]/.test(w) ? `<b>${w}</b> ist hier ein Nomen (Artikelprobe oder Signalwort) → groß.` : `<b>${w}</b> ist hier kein Nomen → klein.`,
+    dop: (w) => /(ck|tz|([bdfglmnprt])\2)/.test(w) ? `Kurzer Selbstlaut → <b>${w.match(/(ck|tz|([bdfglmnprt])\2)/)[1]}</b>.` : `Langer Selbstlaut, Doppellaut oder Mitlaut davor → nur ein Mitlaut.`,
+    ie: (w) => /ie/.test(w) ? `Langes i → <b>ie</b>.` : /ih/.test(w) ? `Merkwort mit <b>ih</b>.` : /^(Tiger|Kino|wir)$/.test(w) ? `Merkwort: langes i, aber nur <b>i</b>.` : `Kurzes i → nur <b>i</b>.`,
+    fv: (w) => /^[Vv](er|or)/.test(w) ? `Vorsilbe ver-/vor- → immer <b>v</b>.` : /^[Vv]/.test(w) && !/Vase|Klavier/.test(w) ? `v-Merkwort.` : /Vase|Klavier/.test(w) ? `Hier klingt v wie w.` : `Meistens <b>f</b>.`,
+    s: (w) => w === "dass" ? `Ersatzprobe: dieses/welches passt nicht → <b>dass</b>.` : /ß/.test(w) ? `Langer Selbstlaut oder au/ei/eu → <b>ß</b>.` : /ss/.test(w) ? `Kurzer Selbstlaut → <b>ss</b>.` : `Summendes s → <b>s</b>.`
+  };
+  const NAMEN = { gk: "Groß/klein", dop: "Doppelt, ck, tz", ie: "i oder ie", fv: "f oder v", s: "s, ss, ß" };
+
+  function aufgabe({ e, k }, level) {
+    const [w, satz] = e.split("|");
+    const markiert = satz.replace(new RegExp(`(^|[^A-Za-zäöüÄÖÜß])(${w})(?=[^A-Za-zäöüÄÖÜß]|$)`, "i"), `$1<span class="m">$2</span>`);
+    const luecke = satz.replace(new RegExp(`(^|[^A-Za-zäöüÄÖÜß])(${w})(?=[^A-Za-zäöüÄÖÜß]|$)`, "i"), `$1<span class="gap" style="min-width:3em">?</span>`);
+    const hoeren = level === "hoeren";
+    return {
+      key: level + ":" + w, text: true, answer: w,
+      say: `${w}. ${satz}`, autoSay: hoeren,
+      prompt: hoeren ? "Hör zu (🔊) und schreib das Wort. Der Satz hilft dir bei groß oder klein."
+        : "Schau dir das Wort genau an und merk es dir – gleich verschwindet es. Dann schreib es aus dem Kopf!",
+      show: hoeren ? `<div class="satz">${luecke}</div>`
+        : `<div class="merkwort word">${w}</div><div class="satz">${luecke}</div>`,
+      solved: `<div class="satz">${markiert}</div>`,
+      wrongWhy: () => `Thema: ${NAMEN[k]}.`,
+      tip: TIPP[k](w), recap: w
+    };
+  }
+
+  function makeTasks(level, topics, n) {
+    const pools = topics.map(k => WOERTER[k].map(e => ({ e, k })));
+    return Quiz.draw(pools, n).map(x => aufgabe(x, level));
+  }
+
+  Quiz.create({
+    game: "hoerdiktat", back: "k4-lrs",
+    title: "Wörter-<span>Werkstatt</span> ✍️",
+    heading: "Hören, merken, schreiben",
+    intro: "Hier schreibst du selbst! <b>Hören:</b> Das Wort wird vorgelesen (🔊 so oft du willst). <b>Merken:</b> Du siehst das Wort kurz, merkst es dir und schreibst es aus dem Kopf. Groß und klein zählt!",
+    levels: [
+      { id: "hoeren", name: "Hören und schreiben", desc: "Das Wort wird vorgelesen, du schreibst es." },
+      { id: "merken", name: "Anschauen, merken, schreiben", desc: "Wort 4 Sekunden ansehen, dann aus dem Kopf schreiben." }
+    ],
+    topics: [{ id: "gk", name: "Groß/klein" }, { id: "dop", name: "Doppelt, ck, tz" }, { id: "ie", name: "i/ie" }, { id: "fv", name: "f/v" }, { id: "s", name: "s/ss/ß" }],
+    rounds: 10,
+    merk: `<h4>So lernst du ein Wort</h4><ol><li><b>Anschauen:</b> Sprich das Wort in Silben. Wo ist die schwierige Stelle?</li>
+      <li><b>Merken:</b> Schließ die Augen und buchstabiere es im Kopf.</li>
+      <li><b>Schreiben:</b> Schreib es aus dem Gedächtnis.</li>
+      <li><b>Vergleichen:</b> Stimmt jeder Buchstabe? Rot markiert = da stimmt etwas nicht.</li></ol>
+      <h4>Denk an die Regeln</h4><ul><li>Nomen groß (Artikelprobe)</li><li>Kurzer Selbstlaut → doppelt, ck, tz</li><li>Langes i → ie</li><li>ver-/vor- → v</li><li>kurz → ss, lang → ß</li></ul>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut geschrieben!", "Super!", "Schreib-Profi! ✍️"]
+  });
+})();
+</script>
+</body>
+</html>
