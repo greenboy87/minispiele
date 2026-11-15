@@ -19,8 +19,24 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | Rechen-Rakete bis 100 | `rechnen100/` | Plus und Minus bis 100 im Zahlenfeld: Zehner, ohne/mit Übergang, fehlende Zahl (Mathe, 2. Klasse). |
 | Zahlenmauer | `zahlenmauer/` | Fehlenden Stein ausrechnen, bis 50 oder 100; unten fehlende Steine mit Minus (Mathe, 2. Klasse). |
 | Rechen-Waage | `rechenwaage/` | <, > oder =: Aufgabe gegen Zahl oder zwei Aufgaben vergleichen (Mathe, 2. Klasse). |
+| Blitz-Rechnen ⏱️ | `blitzrechnen/` | Zeitspiel: bis 20, Zehner/Einer, über den Zehner, Verdoppeln/Halbieren, Einmaleins mit 2, 5, 10 (Mathe, 2. Klasse). |
+| Einmaleins-Blitz ⏱️ | `einmaleins/` | Zeitspiel: mal, geteilt, mit Zehnern/Hundertern, großes Einmaleins (Mathe-Profi, 4. Klasse). |
+| Kopfrechen-Profi ⏱️ | `kopfrechnen/` | Zeitspiel: bis 1000, ergänzen, große Zahlen bis 1 Million, verdoppeln/halbieren, · und : durch 10/100/1000 (Mathe-Profi, 4. Klasse). |
+| Rechen-Ketten ⏱️ | `rechenkette/` | Zeitspiel: Ketten mit 2–4 Schritten, Punkt vor Strich und Klammern (Mathe-Profi, 4. Klasse). |
 
-Start: `index.html` öffnen. Oben rechts steht ein **QR-Code** zur öffentlichen Seite (immer `greenboy87.github.io/minispiele/`, mit dem gerade gewählten Fach als `#…`): antippen oder „Groß zeigen“ für den Laptop/Beamer, „Drucken“ gibt eine A4-Seite nur mit QR-Code und Adresse aus. Bibliothek: qrcode-generator 1.4.4 von cdnjs. Links wählt eine Leiste das Fach: **Alle**, **Deutsch** oder **Musik** (Zählzeiten, Rhythmus-Diktat). Deutsch hat zwei Unterkategorien: **Verben & Rechtschreibung** (neue Prüfung: Verlängern, Zeitformen, Verbformen, Wortfamilien, ä/äu; `#deutsch-neu`) und **Wortarten & Silben** (frühere Prüfung: Alphabet, Fachbegriffe, Nachsilben, Adjektive, Silben; `#deutsch-alt`). Neue Deutsch-Spiele kommen als Karte in die passende `<div class="gruppe">`. Die Wahl merkt sich das Gerät (`minispiele:fach`); `index.html#musik` bzw. `#deutsch` öffnet direkt ein Fach – dahin führt auch „← Übersicht“ in den Musikspielen. Ein neues Spiel kommt als Karte in die passende `<section class="fach">`.
+Start: `index.html` öffnen. Die Übersicht wird aus **`shared/katalog.js`** gebaut und ist nach Klassen geordnet: **2. Klasse** (`#k2`, Mathe `#k2-mathe`), **4. Klasse** (`#k4` mit Mathe-Profi `#k4-mathe`, Verben & Rechtschreibung `#k4-deutsch`, Wortarten & Silben `#k4-wortarten`) und **Musik** (`#musik`, für alle Klassen, nicht nach Klasse geordnet). Alte Links (`#deutsch`, `#deutsch-neu`, `#deutsch-alt`, `#mathe`) werden umgeleitet. Ein neues Spiel kommt als Eintrag in den Katalog (mit `stufen` in derselben Reihenfolge wie die Level im Spiel). Oben rechts steht ein **QR-Code** zur öffentlichen Seite (immer `greenboy87.github.io/minispiele/`, mit dem gerade gewählten Bereich als `#…`): antippen oder „Groß zeigen“ für den Laptop/Beamer, „Drucken“ gibt eine A4-Seite nur mit QR-Code und Adresse aus. Bibliothek: qrcode-generator 1.4.4 von cdnjs. Die Wahl merkt sich das Gerät (`minispiele:fach`).
+
+## Anmeldung und „Mein Stand“
+
+- Angemeldet wird mit **denselben Konten wie im music-trainer** (Pseudonym + Klassenpasswort, Worker `music-trainer.tomgruenig87.workers.dev`, Code `shared/konto.js`). Die Anmeldung liegt unter dem Schlüssel `musiktrainer-konto` – wer im music-trainer angemeldet ist, ist es auf demselben Gerät auch hier und umgekehrt.
+- Link mit Anmeldung: `https://greenboy87.github.io/minispiele/?u=NAME&p=PASSWORT` (für QR-Kärtchen; die Daten werden danach aus der Adresse entfernt).
+- Nach jeder Runde meldet `Bestenliste.offer()` ein kleines Ergebnis an `/api/ergebnisse`: Spiel `mini-<game ohne Ziffern>` (z. B. `mini-rechnen`), Stufe = Position des Levels, Sterne 0–3, Punkte = Prozent bzw. Anzahl richtig, Dauer. „Fehler üben“ wird nicht gemeldet. Ohne Netz wartet es in `minispiele-offen`. Angemeldet wird die Bestenliste gleich mit dem Kontonamen gefüllt.
+- `stand/` („📊 Mein Stand“) liest nur die eigenen Runden mit `GET /api/meinverlauf?praefix=mini-` (neu im Worker, höchstens 3000 Zeilen) und zeigt: Runden, Tage, Übungszeit, die letzten 7 Tage, je Spiel und Level Runden, Bestwert, letztes Ergebnis, Verlauf, die letzten 20 Runden. Die Karten der Übersicht zeigen „✔ 5× gespielt“.
+- Testen ohne Cloudflare: `music-trainer/test/attrappe.js` und `cloudflare/` vorübergehend nach `Minispiele/_test/` kopieren, dann in der Konsole `await (await import('/_test/test/attrappe.js')).starten(); MiniKonto.API = 'https://attrappe.musiktrainer.test'` (Origin `http://localhost:8765` ist im Worker erlaubt). `_test/` nicht committen.
+
+## Zeitspiele (Mathe-Profi)
+
+`shared/blitz.js` (`Blitz.create({...})`): 3-2-1-Countdown, dann 60 Sekunden (je Level `sekunden`), Eingabe übers Zahlenfeld oder die Tastatur. Stimmt die Zahl, geht es sofort weiter; bei einem Fehler steht kurz die Lösung (mit Rechenweg) da. Gezählt werden die richtigen Antworten, Sterne ab `sterne: [1, 2, 3]` richtigen. Rekord pro Level, Bestenliste mit Einheit „richtig“, am Ende die falschen Aufgaben zum Nachlesen.
 
 ## Bestenliste (alle Spiele)
 
@@ -41,7 +57,7 @@ Die fünf Spiele der neuen Prüfung sind klein: Jede `index.html` enthält nur W
 
 ## Mathe (2. Klasse)
 
-Die drei Mathe-Spiele nutzen dasselbe Quiz-Gerüst. Rakete und Zahlenmauer verwenden dessen Zahlenfeld (`input: true` in der Aufgabe, Ziffern auch über die Tastatur). Aufgaben werden zufällig erzeugt (`shared/rechnen.js`: `make(art, op)` mit art = zehner/ohne/mit, Ergebnis immer 0–100). Nach jeder Aufgabe wird der Rechenweg gezeigt, z. B. 38 + 7 → 38 + 2 = 40 → 40 + 5 = 45. In der Übersicht: Fach **Mathe** (`#mathe`).
+Die drei Mathe-Spiele nutzen dasselbe Quiz-Gerüst. Rakete und Zahlenmauer verwenden dessen Zahlenfeld (`input: true` in der Aufgabe, Ziffern auch über die Tastatur). Aufgaben werden zufällig erzeugt (`shared/rechnen.js`: `make(art, op)` mit art = zehner/ohne/mit, Ergebnis immer 0–100). Nach jeder Aufgabe wird der Rechenweg gezeigt, z. B. 38 + 7 → 38 + 2 = 40 → 40 + 5 = 45. In der Übersicht: **2. Klasse → Mathe** (`#k2-mathe`).
 
 ## Alphabet-Gefühl
 

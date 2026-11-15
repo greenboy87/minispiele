@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blitz-Rechnen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/blitz.js"></script>
+<script src="../shared/rechnen.js"></script>
+<script>
+(() => {
+  const { rnd, pick } = Blitz;
+  const zeichen = (op) => op === "+" ? "+" : "−";
+  const aus = (t) => ({ frage: `${t.a} ${zeichen(t.op)} ${t.b}`, antwort: t.c, weg: t.art === "mit" ? Rechnen.weg(t) : "" });
+  const MAKE = {
+    bis20() {
+      if (Math.random() < .5) { const a = rnd(2, 9), b = rnd(2, 9); return { frage: `${a} + ${b}`, antwort: a + b }; }
+      const c = rnd(11, 18), b = rnd(2, 9); return { frage: `${c} − ${b}`, antwort: c - b };
+    },
+    zehner() { return aus(Rechnen.make(pick(["zehner", "ohne", "ohne"]), pick(["+", "-"]))); },
+    mit() { return aus(Rechnen.make("mit", pick(["+", "-"]))); },
+    doppelt() {
+      if (Math.random() < .5) { const a = pick([rnd(3, 9), rnd(11, 49)]); return { vor: `Das Doppelte von ${a}: `, nach: "", antwort: 2 * a, text: `${a} + ${a} = <b>${2 * a}</b>` }; }
+      const h = rnd(2, 50); return { vor: `Die Hälfte von ${2 * h}: `, nach: "", antwort: h, text: `${h} + ${h} = ${2 * h}, also die Hälfte: <b>${h}</b>` };
+    },
+    einmaleins() {
+      const r = pick([2, 5, 10]), f = rnd(1, 10);
+      return Math.random() < .5 ? { frage: `${f} · ${r}`, antwort: f * r } : { frage: `${r} · ${f}`, antwort: f * r };
+    }
+  };
+  Blitz.create({
+    game: "blitzrechnen", back: "k2-mathe",
+    title: "Blitz-<span>Rechnen</span> ⏱️",
+    heading: "Wie viele schaffst du in einer Minute?",
+    intro: "Rechne so schnell du kannst und tipp das Ergebnis ein. Stimmt die Zahl, geht es <b>sofort weiter</b>. Bei einem Fehler siehst du kurz die Lösung – das kostet Zeit.",
+    levels: [
+      { id: "bis20", name: "Blitz bis 20", desc: "8 + 7, 15 − 9", sterne: [10, 18, 26] },
+      { id: "zehner", name: "Zehner und Einer", desc: "40 + 30, 34 + 5, 68 − 23", sterne: [8, 14, 20] },
+      { id: "mit", name: "Über den Zehner", desc: "38 + 7, 52 − 8, 47 + 28", sterne: [5, 10, 15] },
+      { id: "doppelt", name: "Verdoppeln und Halbieren", desc: "Das Doppelte von 34, die Hälfte von 50", sterne: [6, 11, 16] },
+      { id: "einmaleins", name: "Einmaleins mit 2, 5, 10", desc: "7 · 2, 5 · 6, 10 · 4", sterne: [10, 18, 26] }
+    ],
+    make: (l) => MAKE[l](),
+    merk: `<h4>Schnell rechnen bis 20</h4><p>8 + 7: erst bis 10 (8 + 2), dann den Rest (+ 5) → <b>15</b>.</p>
+      <h4>Erst die Zehner, dann die Einer</h4><p>47 + 28 → 47 + 20 = 67 → 67 + 8 = <b>75</b></p>
+      <h4>Über den Zehner</h4><p>52 − 8 → 52 − 2 = 50 → 50 − 6 = <b>44</b></p>
+      <h4>Verdoppeln und Halbieren</h4><p>Das Doppelte von 34: Zehner und Einer einzeln verdoppeln: 60 + 8 = <b>68</b>. Die Hälfte von 50: 25 + 25 = 50, also <b>25</b>.</p>
+      <h4>Einmaleins</h4><p>Mal 10: einfach eine 0 dran (4 · 10 = 40). Mal 5: die Hälfte von mal 10 (6 · 5 = 30).</p>`
+  });
+})();
+</script>
+</body>
+</html>

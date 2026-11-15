@@ -58,6 +58,33 @@
   #qrVoll .url { font-size: clamp(18px, 2.6vh, 30px); color: #6c4cf1; font-weight: 600; word-break: break-all; text-align: center; }
   #qrVoll small { color: #7a7290; font-size: 15px; }
   .druck { display: none; }
+  /* Konto */
+  .konto { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .konto button, .konto a { border: 0; background: var(--card); color: var(--ink); font: inherit; font-size: 17px; font-weight: 600; padding: 9px 16px;
+       border-radius: 14px; cursor: pointer; text-decoration: none; box-shadow: 0 6px 18px rgba(60, 40, 110, .10); }
+  .konto .haupt { background: var(--accent); color: var(--accent-ink); }
+  .konto .hallo { font-size: 18px; font-weight: 600; margin-right: 4px; }
+  .konto .leise { background: transparent; box-shadow: none; color: var(--muted); font-weight: 500; font-size: 15px; text-decoration: underline; padding: 6px; }
+  dialog#anmeldung { border: 0; border-radius: 24px; padding: 26px; max-width: 420px; width: calc(100% - 32px); background: var(--card); color: var(--ink);
+       box-shadow: 0 20px 60px rgba(0, 0, 0, .3); font-family: inherit; }
+  dialog#anmeldung::backdrop { background: rgba(20, 16, 40, .55); }
+  dialog#anmeldung h2 { margin: 0 0 8px; }
+  dialog#anmeldung .klein { font-size: 15px; margin: 0 0 16px; }
+  dialog#anmeldung label { display: block; font-weight: 600; margin-bottom: 12px; }
+  dialog#anmeldung input { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; font: inherit; font-size: 19px; padding: 10px 12px;
+       border-radius: 12px; border: 2px solid var(--muted); background: var(--bg); color: var(--ink); }
+  dialog#anmeldung .pw { display: flex; gap: 6px; align-items: stretch; }
+  dialog#anmeldung .pw button { margin-top: 4px; border: 2px solid var(--muted); background: transparent; border-radius: 12px; cursor: pointer; font-size: 18px; }
+  dialog#anmeldung .fehler { color: #e2513b; min-height: 22px; font-weight: 600; }
+  dialog#anmeldung .knoepfe { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+  dialog#anmeldung .knoepfe button { border: 0; border-radius: 14px; padding: 10px 20px; font: inherit; font-size: 18px; font-weight: 600; cursor: pointer;
+       background: var(--accent); color: var(--accent-ink); }
+  dialog#anmeldung .knoepfe .leise { background: transparent; color: var(--muted); }
+  .fach h2 .alle { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 8px; }
+  a.game { position: relative; }
+  a.game.neu .ic { padding-right: 46px; }
+  a.game .neu-tag { position: absolute; top: 14px; right: 14px; background: var(--accent); color: var(--accent-ink); border-radius: 999px; font-size: 12px; font-weight: 700; padding: 2px 9px; }
+  a.game .stand { display: block; margin-top: 10px; font-size: 14px; color: var(--accent); font-weight: 600; min-height: 0; }
   @media print {
     @page { margin: 15mm; }
     body { background: #fff !important; color: #000 !important; padding: 0; }
@@ -84,6 +111,7 @@
     <div>
       <h1>Minispiele</h1>
       <p>Kleine Lernspiele für zwischendurch.</p>
+      <div class="konto" id="konto"></div>
     </div>
     <div class="qr-box">
       <div class="qr-klein" id="qrKlein" title="Groß zeigen"></div>
@@ -98,116 +126,20 @@
     </div>
   </div>
   <div class="layout">
-    <nav class="faecher" aria-label="Fach wählen">
-      <button type="button" data-fach="alle">🎒 Alle</button>
-      <button type="button" data-fach="deutsch">📖 Deutsch <span class="zahl"></span></button>
-      <button type="button" class="unter" data-fach="deutsch-neu">✏️ Verben &amp; Rechtschreibung <span class="zahl"></span></button>
-      <button type="button" class="unter" data-fach="deutsch-alt">🔤 Wortarten &amp; Silben <span class="zahl"></span></button>
-      <button type="button" data-fach="mathe">🔢 Mathe <span class="zahl"></span></button>
-      <button type="button" data-fach="musik">🎵 Musik <span class="zahl"></span></button>
-    </nav>
-    <div class="inhalt">
-      <section class="fach" id="deutsch">
-        <h2>📖 Deutsch</h2>
-        <div class="gruppe" id="deutsch-neu">
-        <h3>✏️ Verben &amp; Rechtschreibung <span class="neu">neue Prüfung</span></h3>
-        <div class="grid">
-          <a class="game" href="verlaengern/index.html">
-            <div class="ic">Hun<u>d</u> → Hun<u>d</u>e</div>
-            <b>Verlängern-Detektiv</b>
-            <span>d oder t, g oder k, b oder p? Erst verlängern, dann hörst du es.</span>
-          </a>
-          <a class="game" href="zeitformen/index.html">
-            <div class="ic">ging = ?</div>
-            <b>Zeitformen-Detektiv</b>
-            <span>Grundform, Gegenwart, 1. oder 2. Vergangenheit erkennen – und die Grundform finden.</span>
-          </a>
-          <a class="game" href="verbformen/index.html">
-            <div class="ic">singen → sang</div>
-            <b>Verben-Werkstatt</b>
-            <span>Verbformen bilden: Gegenwart, 1. und 2. Vergangenheit – und hat oder ist?</span>
-          </a>
-          <a class="game" href="wortfamilien/index.html">
-            <div class="ic">SCHIEB 👨‍👩‍👧</div>
-            <b>Wortfamilien-Sortierer</b>
-            <span>Wörter nach dem Wortstamm sortieren und den Stamm finden.</span>
-          </a>
-          <a class="game" href="umlaute/index.html">
-            <div class="ic">ä/e · äu/eu</div>
-            <b>ä oder e? äu oder eu?</b>
-            <span>Wäsche kommt von waschen, träumen von Traum – mit verwandten Wörtern ableiten.</span>
-          </a>
-        </div>
-        </div>
-        <div class="gruppe" id="deutsch-alt">
-        <h3>🔤 Wortarten &amp; Silben <span style="font-weight:400">(frühere Prüfung)</span></h3>
-        <div class="grid">
-          <a class="game" href="alphabet/index.html">
-            <div class="ic">A ··· Z</div>
-            <b>Alphabet-Gefühl</b>
-            <span>Wo steht der Buchstabe im Alphabet? Schätzen auf dem Farbband.</span>
-          </a>
-          <a class="game" href="fachbegriffe/index.html">
-            <div class="ic">Nomen · Verb</div>
-            <b>Deutsch-Fachbegriffe</b>
-            <span>Artikel, Nomen, Verb, Adjektiv, Pronomen, Vokale und Konsonanten im Satz erkennen.</span>
-          </a>
-          <a class="game" href="nachsilben/index.html">
-            <div class="ic">Mut + ig</div>
-            <b>Nachsilben-Werkstatt</b>
-            <span>Aus Nomen werden Adjektive: -ig, -lich oder -bar?</span>
-          </a>
-          <a class="game" href="adjektive/index.html">
-            <div class="ic">groß · größer</div>
-            <b>Die Adjektiv-Treppe</b>
-            <span>Adjektive steigern: Grundstufe, Höherstufe, Höchststufe – und wie, als oder am?</span>
-          </a>
-          <a class="game" href="silben/index.html">
-            <div class="ic">Kä-fer ✂️</div>
-            <b>Silben-Schere</b>
-            <span>Wörter richtig trennen – nach den fünf Trennregeln, auch mit ch, ck, sch und tz.</span>
-          </a>
-        </div>
-        </div>
-      </section>
-      <section class="fach" id="mathe">
-        <h2>🔢 Mathe</h2>
-        <div class="grid">
-          <a class="game" href="rechnen100/index.html">
-            <div class="ic">38 + 7 = ?</div>
-            <b>Rechen-Rakete bis 100</b>
-            <span>Plus und Minus bis 100: Zehner, ohne und mit Übergang, fehlende Zahl (2. Klasse).</span>
-          </a>
-          <a class="game" href="zahlenmauer/index.html">
-            <div class="ic">🧱 12 · 15</div>
-            <b>Zahlenmauer</b>
-            <span>Jeder Stein ist die Summe der zwei darunter – finde den fehlenden Stein (bis 100).</span>
-          </a>
-          <a class="game" href="rechenwaage/index.html">
-            <div class="ic">45 + 8 &gt; 50</div>
-            <b>Rechen-Waage</b>
-            <span>Kleiner, größer oder gleich? Beide Seiten ausrechnen und vergleichen.</span>
-          </a>
-        </div>
-      </section>
-      <section class="fach" id="musik">
-        <h2>🎵 Musik</h2>
-        <div class="grid">
-          <a class="game" href="zaehlzeiten/index.html">
-            <div class="ic">1 e + e 🥁</div>
-            <b>Zählzeiten-Training</b>
-            <span>Zählzeiten über die Noten schreiben – Takte werden aus deinen Bausteinen gewürfelt.</span>
-          </a>
-          <a class="game" href="diktat/index.html">
-            <div class="ic">👂 ♩ ♫ ♬</div>
-            <b>Rhythmus-Diktat</b>
-            <span>Zuhören und den Rhythmus aus Bausteinen nachbauen – so oft anhören, wie du willst.</span>
-          </a>
-        </div>
-      </section>
-    </div>
+    <nav class="faecher" id="nav" aria-label="Klasse wählen"></nav>
+    <div class="inhalt" id="inhalt"></div>
   </div>
 </main>
+<dialog id="anmeldung">
+  <form method="dialog" id="anmeldeForm">
+    <h2>👤 Anmelden</h2>
+    <p class="klein">Mit demselben Benutzernamen und Passwort wie im music-trainer. Dann werden deine Runden gespeichert und du siehst unter „Mein Stand“, was du schon geübt hast.</p>
+    <label>Benutzername<input id="aName" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label>Passwort<span class="pw"><input id="aPw" type="password" autocomplete="current-password" autocapitalize="none" required><button type="button" id="aAuge" title="Passwort zeigen">👁️</button></span></label>
+    <div class="fehler" id="aFehler"></div>
+    <div class="knoepfe"><button type="button" id="aAbbruch" class="leise">Abbrechen</button><button type="submit" id="aLos">Anmelden</button></div>
+  </form>
+</dialog>
 <div id="qrVoll" title="Klicken oder Esc zum Schließen">
   <h2>📱 Scannen und mitspielen!</h2>
   <div class="qr-gross" id="qrGross"></div>
@@ -222,8 +154,27 @@
   <p>QR-Code mit der Kamera scannen – oder die Adresse im Browser eintippen.</p>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="shared/katalog.js"></script>
+<script src="shared/konto.js"></script>
 <script>
-  // Fach wählen: #deutsch / #musik im Link, sonst die letzte Wahl auf diesem Gerät
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // ---------- Übersicht aus dem Katalog bauen ----------
+  const B = KATALOG.bereiche;
+  const karte = (sp) => `<a class="game${sp.neu ? " neu" : ""}" href="${sp.pfad}/index.html">${sp.neu ? '<span class="neu-tag">neu</span>' : ""}
+      <div class="ic">${sp.ic}</div><b>${esc(sp.titel)}</b><span>${esc(sp.text)}</span><span class="stand" data-stand="${sp.id}"></span></a>`;
+  document.getElementById("inhalt").innerHTML = B.map(b => `
+    <section class="fach" id="${b.id}">
+      <h2>${b.icon} ${esc(b.name)}${b.fuerAlle ? '<span class="alle">für alle Klassen</span>' : ""}</h2>
+      ${b.gruppen.map(g => `<div class="gruppe" id="${g.id}">${b.gruppen.length > 1 ? `<h3>${esc(g.name)}</h3>` : ""}
+        <div class="grid">${g.spiele.map(karte).join("")}</div></div>`).join("")}
+    </section>`).join("");
+  document.getElementById("nav").innerHTML = `<button type="button" data-fach="alle">🎒 Alle</button>` +
+    B.map(b => `<button type="button" data-fach="${b.id}">${b.icon} ${esc(b.name)} <span class="zahl"></span></button>` +
+      (b.gruppen.length > 1 ? b.gruppen.map(g => `<button type="button" class="unter" data-fach="${g.id}">${esc(g.kurz)} <span class="zahl"></span></button>`).join("") : "")).join("");
+
+  // Fach wählen: #k4 / #k2-mathe im Link, sonst die letzte Wahl auf diesem Gerät
+  const ALIAS = { deutsch: "k4", "deutsch-neu": "k4-deutsch", "deutsch-alt": "k4-wortarten", mathe: "k2-mathe" };
+  const GUELTIG = ["alle", ...B.flatMap(b => [b.id, ...b.gruppen.map(g => g.id)])];
   const KNOEPFE = document.querySelectorAll("[data-fach]");
   KNOEPFE.forEach(b => {
     const sec = document.getElementById(b.dataset.fach);
@@ -231,10 +182,12 @@
     b.addEventListener("click", () => fachZeigen(b.dataset.fach, true));
   });
   function fachZeigen(fach, merken) {
-    if (!["alle", "deutsch", "deutsch-neu", "deutsch-alt", "mathe", "musik"].includes(fach)) fach = "alle";
+    fach = ALIAS[fach] || fach;
+    if (!GUELTIG.includes(fach)) fach = "alle";
     KNOEPFE.forEach(b => b.classList.toggle("an", b.dataset.fach === fach));
-    const haupt = fach.split("-")[0], unter = fach.includes("-") ? fach : null;
-    document.querySelectorAll("section.fach").forEach(s => s.classList.toggle("weg", fach !== "alle" && s.id !== haupt));
+    const haupt = B.find(b => b.id === fach || b.gruppen.some(g => g.id === fach));
+    const unter = haupt && haupt.id !== fach ? fach : null;
+    document.querySelectorAll("section.fach").forEach(s => s.classList.toggle("weg", fach !== "alle" && s.id !== haupt?.id));
     document.querySelectorAll(".gruppe").forEach(g => g.classList.toggle("weg", !!unter && g.id !== unter));
     if (merken) {
       try { localStorage.setItem("minispiele:fach", fach); } catch (e) { /* egal */ }
@@ -242,9 +195,10 @@
     }
     qrZeichnen(fach);
   }
-  // ---------- QR-Code: zeigt immer auf die öffentliche Seite, mit dem gerade gewählten Fach ----------
+  // ---------- QR-Code: zeigt immer auf die öffentliche Seite, mit dem gerade gewählten Bereich ----------
   const BASIS = "https://greenboy87.github.io/minispiele/";
-  const FACH_NAMEN = { alle: "Alle Spiele", deutsch: "Deutsch", "deutsch-neu": "Deutsch – Verben & Rechtschreibung", "deutsch-alt": "Deutsch – Wortarten & Silben", mathe: "Mathe", musik: "Musik" };
+  const FACH_NAMEN = { alle: "Alle Spiele" };
+  B.forEach(b => { FACH_NAMEN[b.id] = b.name; b.gruppen.forEach(g => FACH_NAMEN[g.id] = b.gruppen.length > 1 ? `${b.name} – ${g.kurz}` : b.name); });
   function qrSvg(text) {
     if (typeof qrcode !== "function") return '<div style="color:#7a7290;font-size:13px;text-align:center;padding-top:30%">QR braucht Internet</div>';
     const q = qrcode(0, "M"); q.addData(text); q.make();
@@ -269,6 +223,53 @@
   if (!start) try { start = localStorage.getItem("minispiele:fach") || "alle"; } catch (e) { start = "alle"; }
   fachZeigen(start, false);
   window.addEventListener("hashchange", () => fachZeigen(location.hash.slice(1), false));
+
+  // ---------- Anmeldung ----------
+  const dlg = document.getElementById("anmeldung");
+  function kontoZeigen() {
+    const k = document.getElementById("konto");
+    if (MiniKonto.angemeldet()) {
+      k.innerHTML = `<span class="hallo">👋 Hallo ${esc(MiniKonto.name())}!</span><a class="haupt" href="stand/index.html">📊 Mein Stand</a><button class="leise" id="abmelden">Abmelden</button>`;
+      document.getElementById("abmelden").onclick = () => { if (confirm("Abmelden? Deine Runden bleiben gespeichert.")) { MiniKonto.abmelden(); kontoZeigen(); } };
+    } else {
+      k.innerHTML = `<button class="haupt" id="anmelden">👤 Anmelden</button><span class="klein" style="color:var(--muted);font-size:15px">damit deine Runden gespeichert werden</span>`;
+      document.getElementById("anmelden").onclick = () => { document.getElementById("aFehler").textContent = ""; dlg.showModal(); document.getElementById("aName").focus(); };
+    }
+    standZeigen();
+  }
+  document.getElementById("aAbbruch").onclick = () => dlg.close();
+  document.getElementById("aAuge").onclick = () => { const i = document.getElementById("aPw"); i.type = i.type === "password" ? "text" : "password"; };
+  document.getElementById("anmeldeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const knopf = document.getElementById("aLos"), f = document.getElementById("aFehler");
+    knopf.disabled = true; f.textContent = "";
+    try {
+      await MiniKonto.anmelden(document.getElementById("aName").value.trim(), document.getElementById("aPw").value);
+      dlg.close(); kontoZeigen();
+    } catch (err) { f.textContent = err.status ? err.message : "Keine Verbindung zum Server. Bist du im Internet?"; }
+    knopf.disabled = false;
+  });
+
+  // Kleiner Stand auf den Karten: wie oft gespielt (nur angemeldet; eine Abfrage beim Öffnen)
+  async function standZeigen() {
+    document.querySelectorAll("[data-stand]").forEach(el => el.textContent = "");
+    if (!MiniKonto.angemeldet()) return;
+    try {
+      const v = await MiniKonto.verlauf();
+      const n = {};
+      v.forEach(r => n[r.spiel] = (n[r.spiel] || 0) + 1);
+      document.querySelectorAll("[data-stand]").forEach(el => {
+        const x = n[MiniKonto.spielId(el.dataset.stand)];
+        el.textContent = x ? `✔ ${x}× gespielt` : "";
+      });
+    } catch (e) { if (e.status === 401) { MiniKonto.abmelden(); kontoZeigen(); } }
+  }
+
+  (async () => {
+    const r = await MiniKonto.ausLink();
+    if (r && r.fehler) { document.getElementById("aFehler").textContent = r.fehler; dlg.showModal(); }
+    kontoZeigen();
+  })();
 </script>
 </body>
 </html>

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Einmaleins-Blitz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/blitz.js"></script>
+<script>
+(() => {
+  const { rnd, pick, zahl } = Blitz;
+  const mal = () => { const a = rnd(2, 10), b = rnd(2, 10); return { frage: `${a} · ${b}`, antwort: a * b }; };
+  const durch = () => { const a = rnd(2, 10), b = rnd(2, 10); return { frage: `${a * b} : ${a}`, antwort: b, weg: `Denk an die Malaufgabe: ${a} · <b>${b}</b> = ${a * b}` }; };
+  const MAKE = {
+    mal, durch,
+    mix: () => (Math.random() < .5 ? mal() : durch()),
+    zehner() {
+      const a = rnd(2, 9), b = rnd(2, 9), z = pick([10, 10, 100]);
+      if (Math.random() < .5) return { frage: `${zahl(a * z)} · ${b}`, antwort: a * b * z, weg: `${a} · ${b} = ${a * b}, also ${zahl(a * z)} · ${b} = <b>${zahl(a * b * z)}</b>` };
+      return { frage: `${zahl(a * b * z)} : ${a}`, antwort: b * z, weg: `${a * b} : ${a} = ${b}, also ${zahl(a * b * z)} : ${a} = <b>${zahl(b * z)}</b>` };
+    },
+    gross() {
+      const a = rnd(11, 20), b = rnd(2, 9);
+      const z = Math.floor(a / 10) * 10, e = a % 10;
+      if (Math.random() < .7) return { frage: `${a} · ${b}`, antwort: a * b, weg: e ? `${z} · ${b} = ${z * b}, ${e} · ${b} = ${e * b}, zusammen <b>${a * b}</b>` : "" };
+      return { frage: `${a * b} : ${b}`, antwort: a, weg: `Denk an ${a} · ${b} = ${a * b}` };
+    }
+  };
+  Blitz.create({
+    game: "einmaleins", back: "k4-mathe",
+    title: "Einmaleins-<span>Blitz</span> ⏱️",
+    heading: "Einmaleins gegen die Uhr",
+    intro: "Wie viele Mal- und Geteiltaufgaben schaffst du in einer Minute? Stimmt die Zahl, geht es <b>sofort weiter</b>. Ein Fehler kostet Zeit, weil du kurz die Lösung siehst.",
+    levels: [
+      { id: "mal", name: "Malaufgaben", desc: "7 · 8, 6 · 9", sterne: [12, 22, 32] },
+      { id: "durch", name: "Geteilt", desc: "56 : 7, 81 : 9", sterne: [10, 18, 26] },
+      { id: "mix", name: "Mal und geteilt", desc: "Alles durcheinander.", sterne: [10, 18, 26] },
+      { id: "zehner", name: "Mit Zehnern und Hundertern", desc: "40 · 7, 3 600 : 9", sterne: [7, 13, 19] },
+      { id: "gross", name: "Großes Einmaleins", desc: "14 · 6, 17 · 3, 96 : 8", sterne: [5, 10, 15] }
+    ],
+    make: (l) => MAKE[l](),
+    merk: `<h4>Kernaufgaben</h4><p>Mit 1 ·, 2 ·, 5 · und 10 · kannst du dir alles herleiten: 9 · 7 = 10 · 7 − 7 = <b>63</b>.</p>
+      <h4>Geteilt ist Mal rückwärts</h4><p>56 : 7 = ? → Was mal 7 gibt 56? 8 · 7 = 56, also <b>8</b>.</p>
+      <h4>Mit Zehnern und Hundertern</h4><p>40 · 7: rechne 4 · 7 = 28, dann eine Null dran → <b>280</b>.<br>3 600 : 9: rechne 36 : 9 = 4, dann die zwei Nullen dran → <b>400</b>.</p>
+      <h4>Großes Einmaleins</h4><p>14 · 6 = 10 · 6 + 4 · 6 = 60 + 24 = <b>84</b>.</p>`
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kopfrechen-Profi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/blitz.js"></script>
+<script>
+(() => {
+  const { rnd, pick, zahl } = Blitz;
+  const MAKE = {
+    bis1000() {
+      for (;;) {
+        const plus = Math.random() < .5;
+        const art = pick(["hz", "hz", "hze"]);
+        let a = art === "hz" ? rnd(11, 89) * 10 : rnd(101, 899), b = art === "hz" ? rnd(2, 59) * 10 : pick([rnd(2, 9), rnd(1, 9) * 10, rnd(1, 4) * 100]);
+        if (!plus && b > a) [a, b] = [b, a];
+        const c = plus ? a + b : a - b;
+        if (c <= 0 || c > 1000 || a === b) continue;
+        return { frage: `${a} ${plus ? "+" : "−"} ${b}`, antwort: c };
+      }
+    },
+    ergaenzen() {
+      if (Math.random() < .5) { const a = rnd(11, 99) * 10; return { vor: `${a} + `, nach: " = 1000", antwort: 1000 - a, text: `${a} + <b>${1000 - a}</b> = 1000` }; }
+      const a = rnd(101, 999), ziel = (Math.floor(a / 100) + 1) * 100;
+      return { vor: `${a} + `, nach: ` = ${ziel}`, antwort: ziel - a, text: `${a} + <b>${ziel - a}</b> = ${ziel}` };
+    },
+    gross() {
+      for (;;) {
+        const plus = Math.random() < .5, t = pick([1000, 1000, 10000]);
+        let a = rnd(2, 99) * t, b = rnd(1, 60) * t;
+        if (!plus && b > a) [a, b] = [b, a];
+        const c = plus ? a + b : a - b;
+        if (c <= 0 || c > 1000000 || a === b) continue;
+        const k = (n) => zahl(n / t);
+        return { frage: `${zahl(a)} ${plus ? "+" : "−"} ${zahl(b)}`, antwort: c,
+          weg: `Rechne mit ${t === 1000 ? "Tausendern" : "Zehntausendern"}: ${k(a)} ${plus ? "+" : "−"} ${k(b)} = ${k(c)} → <b>${zahl(c)}</b>` };
+      }
+    },
+    doppelt() {
+      const r = Math.random();
+      if (r < .35) { const a = rnd(26, 499); return { vor: `Das Doppelte von ${a}: `, nach: "", antwort: 2 * a, text: `Das Doppelte von ${a} ist <b>${2 * a}</b>` }; }
+      if (r < .7) { const h = rnd(13, 499); return { vor: `Die Hälfte von ${2 * h}: `, nach: "", antwort: h, text: `Die Hälfte von ${2 * h} ist <b>${h}</b>` }; }
+      const h = rnd(1, 99) * pick([50, 500]); return { vor: `Die Hälfte von ${zahl(2 * h)}: `, nach: "", antwort: h, text: `Die Hälfte von ${zahl(2 * h)} ist <b>${zahl(h)}</b>` };
+    },
+    stellen() {
+      const f = pick([10, 100, 1000]);
+      if (Math.random() < .5) { const a = rnd(2, 99) * (f === 1000 ? 1 : pick([1, 10])); return { frage: `${zahl(a)} · ${zahl(f)}`, antwort: a * f, weg: `Mal ${zahl(f)}: ${String(f).length - 1} Null${f === 10 ? "" : "en"} anhängen` }; }
+      const c = rnd(2, 99) * pick([1, 10]); return { frage: `${zahl(c * f)} : ${zahl(f)}`, antwort: c, weg: `Geteilt durch ${zahl(f)}: ${String(f).length - 1} Null${f === 10 ? "" : "en"} weg` };
+    }
+  };
+  Blitz.create({
+    game: "kopfrechnen", back: "k4-mathe",
+    title: "Kopfrechen-<span>Profi</span> ⏱️",
+    heading: "Kopfrechnen mit großen Zahlen",
+    intro: "Rechne im Kopf, ohne Zettel! Stimmt die Zahl, geht es <b>sofort weiter</b>. Große Zahlen tippst du ohne Leerzeichen: 45 000 = 4 5 0 0 0.",
+    levels: [
+      { id: "bis1000", name: "Plus und Minus bis 1000", desc: "450 + 380, 724 − 300", sterne: [6, 11, 16] },
+      { id: "ergaenzen", name: "Ergänzen", desc: "370 + ? = 1000, 365 + ? = 400", sterne: [6, 11, 16] },
+      { id: "gross", name: "Große Zahlen", desc: "45 000 + 7 000, 300 000 − 120 000", sterne: [6, 11, 16] },
+      { id: "doppelt", name: "Verdoppeln und Halbieren", desc: "Das Doppelte von 375, die Hälfte von 5 000", sterne: [5, 9, 13] },
+      { id: "stellen", name: "Mal und geteilt durch 10, 100, 1000", desc: "47 · 100, 3 600 : 10", sterne: [8, 14, 20] }
+    ],
+    make: (l) => MAKE[l](),
+    merk: `<h4>Bis 1000</h4><p>450 + 380 → 450 + 300 = 750 → 750 + 80 = <b>830</b>.</p>
+      <h4>Ergänzen</h4><p>370 + ? = 1000 → bis 400 fehlen 30, bis 1000 noch 600 → <b>630</b>.</p>
+      <h4>Große Zahlen</h4><p>45 000 + 7 000 ist wie 45 + 7 = 52, nur mit Tausendern → <b>52 000</b>.</p>
+      <h4>Verdoppeln und Halbieren</h4><p>Doppelt 375 → 600 + 140 + 10 = <b>750</b>. Hälfte von 5 000 → <b>2 500</b>.</p>
+      <h4>Mal und geteilt durch 10, 100, 1000</h4><p>47 · 100 = <b>4 700</b> (zwei Nullen dran). 3 600 : 10 = <b>360</b> (eine Null weg).</p>`
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rechenketten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/blitz.js"></script>
+<script>
+(() => {
+  const { rnd, pick } = Blitz;
+  const pfeil = ' <span style="color:var(--muted)">➜</span> ';
+  // Eine Kette aus Schritten, alle Zwischenergebnisse ganz und nicht negativ
+  function kette(schritte, max) {
+    for (;;) {
+      let x = rnd(2, 10), s = [], ok = true, wege = [];
+      const start = x;
+      for (let i = 0; i < schritte; i++) {
+        const ops = ["+", "−", "·", ":"].filter(o => !(s.length && s[s.length - 1].o === o));
+        const o = pick(ops);
+        let n;
+        if (o === "+") n = rnd(2, max >= 200 ? 50 : 20);
+        else if (o === "−") { if (x < 3) { ok = false; break; } n = rnd(1, Math.min(x - 1, max >= 200 ? 50 : 20)); }
+        else if (o === "·") { if (x > (max >= 200 ? 40 : 12)) { ok = false; break; } n = rnd(2, 9); }
+        else { const t = [2, 3, 4, 5, 6, 7, 8, 9, 10].filter(d => x % d === 0 && x / d >= 1 && x !== d); if (!t.length) { ok = false; break; } n = pick(t); }
+        const vor = s[s.length - 1];
+        if (vor && vor.n === n && ({ "+": "−", "−": "+", "·": ":", ":": "·" })[vor.o] === o) { ok = false; break; }   // nicht gleich wieder rückgängig
+        const y = o === "+" ? x + n : o === "−" ? x - n : o === "·" ? x * n : x / n;
+        if (y > max) { ok = false; break; }
+        wege.push(`${x} ${o} ${n} = ${y}`);
+        s.push({ o, n }); x = y;
+      }
+      if (!ok) continue;
+      return { vor: `${start}${s.map(t => pfeil + t.o + " " + t.n).join("")}${pfeil}`, nach: "", antwort: x, weg: wege.join(" · "),
+        text: `${start}${s.map(t => " " + t.o + " " + t.n).join("")} → <b>${x}</b>` };
+    }
+  }
+  function punkt() {
+    const r = Math.random(), a = rnd(2, 9), b = rnd(2, 9), c = rnd(2, 20);
+    if (r < .35) return { frage: `${c} + ${a} · ${b}`, antwort: c + a * b, weg: `Punkt vor Strich: erst ${a} · ${b} = ${a * b}, dann ${c} + ${a * b} = <b>${c + a * b}</b>` };
+    if (r < .6) { const d = a * b + rnd(0, 30); return { frage: `${d} − ${a} · ${b}`, antwort: d - a * b, weg: `Punkt vor Strich: erst ${a} · ${b} = ${a * b}, dann ${d} − ${a * b} = <b>${d - a * b}</b>` }; }
+    if (r < .8) return { frage: `(${c} + ${a}) · ${b}`, antwort: (c + a) * b, weg: `Klammer zuerst: ${c} + ${a} = ${c + a}, dann ${c + a} · ${b} = <b>${(c + a) * b}</b>` };
+    const x = a * b; return { frage: `${x} : ${a} + ${c}`, antwort: b + c, weg: `Punkt vor Strich: erst ${x} : ${a} = ${b}, dann ${b} + ${c} = <b>${b + c}</b>` };
+  }
+  Blitz.create({
+    game: "rechenkette", back: "k4-mathe",
+    title: "Rechen-<span>Ketten</span> ⏱️",
+    heading: "Rechne die Kette bis zum Ende",
+    intro: "Starte vorne und rechne Schritt für Schritt nach rechts. Merk dir jedes Zwischenergebnis im Kopf! Bei <b>Punkt vor Strich</b> gilt: erst · und :, dann + und −, Klammern zuerst.",
+    levels: [
+      { id: "zwei", name: "2 Schritte", desc: "6 ➜ · 7 ➜ − 12", sterne: [6, 11, 16] },
+      { id: "drei", name: "3 Schritte", desc: "8 ➜ · 6 ➜ : 4 ➜ + 15", sterne: [4, 8, 12], sekunden: 90 },
+      { id: "vier", name: "4 Schritte, größere Zahlen", desc: "9 ➜ · 8 ➜ + 28 ➜ : 5 ➜ · 7", sterne: [3, 6, 9], sekunden: 120 },
+      { id: "punkt", name: "Punkt vor Strich", desc: "4 + 3 · 5, (4 + 3) · 5", sterne: [5, 10, 15] }
+    ],
+    make: (l) => l === "zwei" ? kette(2, 100) : l === "drei" ? kette(3, 100) : l === "vier" ? kette(4, 400) : punkt(),
+    merk: `<h4>Rechenkette</h4><p>6 ➜ · 7 ➜ − 12: 6 · 7 = 42, 42 − 12 = <b>30</b>. Immer mit dem letzten Ergebnis weiterrechnen.</p>
+      <h4>Punkt vor Strich</h4><p>4 + 3 · 5: erst <b>Mal</b> (3 · 5 = 15), dann Plus: 4 + 15 = <b>19</b>.</p>
+      <h4>Klammer zuerst</h4><p>(4 + 3) · 5: erst die Klammer (7), dann 7 · 5 = <b>35</b>.</p>`
+  });
+})();
+</script>
+</body>
+</html>

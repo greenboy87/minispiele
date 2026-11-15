@@ -5,6 +5,11 @@
 //   Bestenliste.offer(mountEl, { level: "leicht", pct: 85, detail: "8,5 von 10 Punkten", practice: false });
 //   Bestenliste.open("leicht");   // Bestenliste als Fenster
 //
+// Zeitspiele zählen statt Prozent: init({ …, einheit: "richtig" }) und pct = Anzahl.
+// Ist ein Kind angemeldet (shared/konto.js), meldet offer() die Runde an den Server
+// (Stufe = Position des Levels in levels) und trägt den Kontonamen gleich ein.
+// Optional in offer(): sterne (0–3), punkte, richtig, von – sonst aus pct gerechnet.
+//
 // Farben kommen aus den CSS-Variablen des Spiels (--accent, --card, --ink, --muted, --line, --good).
 (() => {
   const NAMES_KEY = "minispiele:namen";
@@ -19,6 +24,7 @@
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const clean = (s) => s.replace(/\s+/g, " ").trim().slice(0, 20);
   const same = (a, b) => a.toLocaleLowerCase("de") === b.toLocaleLowerCase("de");
+  const wert = (n) => cfg.einheit && cfg.einheit !== "%" ? `${n} ${cfg.einheit}` : `${n} %`;
 
   let cfg = { game: "spiel", levels: {} };
 
@@ -110,12 +116,18 @@
     if (!l.length) return `<div class="bl-empty">Noch niemand eingetragen.</div>`;
     return `<table class="bl-table">` + l.map((e, i) =>
       `<tr class="${highlight && same(e.name, highlight) ? "me" : ""}"><td class="r">${medal(i + 1)}</td><td>${esc(e.name)}</td>` +
-      `<td class="d">${esc(e.detail || "")}</td><td class="p">${e.pct} %</td></tr>`).join("") + `</table>`;
+      `<td class="d">${esc(e.detail || "")}</td><td class="p">${wert(e.pct)}</td></tr>`).join("") + `</table>`;
   }
 
   // ---------- Eintragen am Ende einer Runde ----------
-  function offer(mount, { level, pct, detail, practice }) {
+  function offer(mount, { level, pct, detail, practice, sterne, punkte, richtig, von }) {
     injectCss();
+    const konto = window.MiniKonto && window.MiniKonto.angemeldet() ? window.MiniKonto : null;
+    if (window.MiniKonto && !practice) {
+      const stufe = Math.max(0, Object.keys(cfg.levels).indexOf(level));
+      window.MiniKonto.melden({ game: cfg.game, stufe, punkte: punkte ?? pct, richtig, von,
+        sterne: sterne ?? (pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 45 ? 1 : 0) });
+    }
     const levelName = cfg.levels[level] || "";
     const where = levelName ? ` – ${esc(levelName)}` : "";
     if (practice) {
@@ -135,8 +147,9 @@
       const res = addEntry(level, name, pct, detail);
       let msg;
       if (res.prev === null) msg = res.rank ? `${esc(name)} ist auf Platz ${res.rank}! ${res.rank <= 3 ? medal(res.rank) : "🎉"}` : `Gespeichert – für die Top ${TOP} hat es diesmal nicht gereicht.`;
-      else if (res.improved) msg = `Neuer Bestwert für ${esc(name)}: ${pct} % (vorher ${res.prev} %)${res.rank ? ` – Platz ${res.rank}!` : ""}`;
-      else msg = `${esc(name)}, dein Bestwert bleibt ${res.prev} %.`;
+      else if (res.improved) msg = `Neuer Bestwert für ${esc(name)}: ${wert(pct)} (vorher ${wert(res.prev)})${res.rank ? ` – Platz ${res.rank}!` : ""}`;
+      else msg = `${esc(name)}, dein Bestwert bleibt ${wert(res.prev)}.`;
+      if (konto) msg += `<div class="bl-sub" style="margin:6px 0 0">☁️ Gespeichert für ${esc(konto.name())} – siehe „Mein Stand“.</div>`;
       root.innerHTML = `<div class="bl-box"><h3>🏆 Bestenliste${where}</h3><div class="bl-msg">${msg}</div>${tableHtml(level, name)}</div>`;
     }
 
@@ -163,7 +176,8 @@
       if (ed) ed.onclick = () => { root.classList.toggle("edit"); draw(); };
       if (!names().length) root.classList.remove("edit");
     }
-    draw();
+    // Angemeldet: gleich unter dem Kontonamen eintragen
+    if (konto) save(konto.name()); else draw();
   }
 
   // ---------- Fenster mit allen Listen ----------

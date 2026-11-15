@@ -155,6 +155,7 @@
         tasks = cfg.makeTasks(level, [...topics], n);
       }
       state = { tasks, rounds: tasks.length, round: 0, score: 0, results: [], locked: false, practice: !!pool };
+      if (window.MiniKonto) MiniKonto.start();
       $("roundMax").textContent = state.rounds;
       $("dots").innerHTML = tasks.map(() => '<div class="dot"></div>').join("");
       show("game");

@@ -65,6 +65,7 @@
   </div>
   <p class="hinweis">Braucht Internet – das Spiel kommt aus der Rhythmus-Werkstatt.</p>
 </div>
+<script src="../shared/konto.js"></script>
 <script src="../shared/bestenliste.js"></script>
 <script>
   const LEVEL_NAMES = { stufe1: "Stufe 1 · sofort", stufe2: "Stufe 2 · je Takt", stufe3: "Stufe 3 · ganze Zeile" };
@@ -83,6 +84,7 @@
       Bestenliste.offer(mount, { level: letzteStufe, pct: Math.max(0, Math.min(100, Math.round(d.pct))), detail: String(d.detail || "").slice(0, 40), practice: false });
       mount.scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (d.typ === "rw-runde-start") {
+      if (window.MiniKonto) MiniKonto.start();
       mount.innerHTML = "";
     }
   });

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Mein Stand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+<style>
+  .kacheln { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .kachel { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 14px 16px; text-align: center; }
+  .kachel b { display: block; font-size: 32px; color: var(--accent); }
+  .kachel span { color: var(--muted); font-size: 15px; }
+  .woche { display: flex; gap: 8px; align-items: flex-end; height: 120px; margin-top: 8px; }
+  .woche .wtag { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; }
+  .woche .saeule { width: 100%; max-width: 46px; background: var(--accent); border-radius: 8px 8px 3px 3px; min-height: 3px; }
+  .woche .saeule.leer { background: var(--line); }
+  .woche small { color: var(--muted); font-size: 13px; }
+  .woche .n { font-size: 13px; font-weight: 600; }
+  h2.bereich { margin: 10px 0 0; font-size: 26px; }
+  .spiele { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr)); gap: 14px; }
+  .spiel h3 { margin: 0 0 2px; font-size: 21px; }
+  .spiel h3 a { color: inherit; text-decoration: none; }
+  .spiel h3 a:hover { color: var(--accent); }
+  .spiel .info { color: var(--muted); font-size: 15px; margin-bottom: 10px; }
+  table.stufen { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.stufen th { text-align: left; color: var(--muted); font-weight: 500; font-size: 13px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+  table.stufen td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.stufen td.z { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.stufen td.best { font-weight: 700; color: var(--accent); }
+  .verlauf { display: inline-flex; gap: 3px; align-items: flex-end; height: 22px; }
+  .verlauf i { display: block; width: 6px; border-radius: 2px; background: var(--accent); opacity: .75; }
+  .noch { color: var(--muted); font-size: 15px; line-height: 1.6; }
+  .noch a { color: var(--accent); }
+  .runden { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .runden td { padding: 7px 6px; border-bottom: 1px solid var(--line); }
+  .runden td.z { text-align: right; white-space: nowrap; font-weight: 600; }
+  .runden .muted { font-size: 13px; }
+  .leer-text { text-align: center; color: var(--muted); font-size: 18px; padding: 20px; }
+  #anmelden-hinweis { display: none; text-align: center; }
+  #anmelden-hinweis a { display: inline-block; margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📊 Mein <span>Stand</span> <span id="wer" style="color:var(--ink)"></span></h1>
+    <div class="tools">
+      <a class="icon-btn" href="../index.html" title="Zurück zur Übersicht">← Übersicht</a>
+      <button class="icon-btn" id="neu" title="Neu laden">🔄</button>
+    </div>
+  </header>
+  <section class="card" id="anmelden-hinweis">
+    <h2>Du bist nicht angemeldet</h2>
+    <p class="muted">Melde dich auf der Übersicht an – dann siehst du hier, was du schon geübt hast.</p>
+    <a class="big-btn" href="../index.html">Zur Anmeldung</a>
+  </section>
+  <div id="inhalt"><div class="leer-text">Lade deinen Stand …</div></div>
+</div>
+<script src="../shared/katalog.js"></script>
+<script src="../shared/konto.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const SPIELE = KATALOG.alle();
+  const NACH_ID = Object.fromEntries(SPIELE.map(s => [MiniKonto.spielId(s.id), s]));
+  const TAG = 86400;
+  const tagVon = (t) => Math.floor((t + 3600) / TAG);          // grob deutsche Zeit, wie im Worker
+  const datum = (t, mitZeit) => new Date(t * 1000).toLocaleString("de-DE", mitZeit
+    ? { weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }
+    : { weekday: "short", day: "2-digit", month: "2-digit" });
+  const ergebnis = (sp, wert) => sp && sp.einheit === "richtig" ? `${wert} richtig` : `${wert} %`;
+  const sterne = (n) => n > 0 ? "⭐".repeat(Math.min(3, n)) : "–";
+  const dauerText = (s) => s >= 3600 ? `${Math.floor(s / 3600)} h ${Math.round(s % 3600 / 60)} min` : `${Math.round(s / 60)} min`;
+
+  let anfrageNr = 0;
+  async function laden() {
+    const nr = ++anfrageNr;
+    $("wer").textContent = MiniKonto.angemeldet() ? "– " + MiniKonto.name() : "";
+    if (!MiniKonto.angemeldet()) { $("anmelden-hinweis").style.display = "block"; $("inhalt").innerHTML = ""; return; }
+    $("anmelden-hinweis").style.display = "none";
+    let runden;
+    try { runden = await MiniKonto.verlauf(); }
+    catch (e) {
+      if (nr !== anfrageNr) return;
+      if (e.status === 401) { MiniKonto.abmelden(); return laden(); }
+      $("inhalt").innerHTML = `<div class="card leer-text">Keine Verbindung zum Server. Bist du im Internet?<br><small>${esc(e.message)}</small></div>`;
+      return;
+    }
+    if (nr === anfrageNr) zeigen(runden);
+  }
+
+  function zeigen(runden) {
+    if (!runden.length) {
+      $("inhalt").innerHTML = `<div class="card leer-text">Noch keine Runde gespielt. Leg los – jede Runde erscheint hier! 🚀<br><br><a class="big-btn" href="../index.html">Zu den Spielen</a></div>`;
+      return;
+    }
+    const jetzt = Math.floor(Date.now() / 1000), heute = tagVon(jetzt);
+    const tage = new Set(runden.map(r => tagVon(r.zeit)));
+    const zeit = runden.reduce((a, r) => a + (r.dauer || 0), 0);
+    const woche = runden.filter(r => tagVon(r.zeit) > heute - 7).length;
+    const proTag = [...Array(7)].map((_, i) => { const t = heute - 6 + i; return { t, n: runden.filter(r => tagVon(r.zeit) === t).length }; });
+    const maxTag = Math.max(1, ...proTag.map(x => x.n));
+
+    // je Spiel und Stufe
+    const nachSpiel = {};
+    runden.forEach(r => (((nachSpiel[r.spiel] ||= {})[r.stufe] ||= []).push(r)));   // neueste zuerst
+
+    let html = `<div class="kacheln">
+        <div class="kachel"><b>${runden.length}</b><span>Runden gesamt</span></div>
+        <div class="kachel"><b>${Object.keys(nachSpiel).length}</b><span>verschiedene Spiele</span></div>
+        <div class="kachel"><b>${tage.size}</b><span>Tage geübt</span></div>
+        <div class="kachel"><b>${dauerText(zeit)}</b><span>Übungszeit</span></div>
+        <div class="kachel"><b>${woche}</b><span>Runden in 7 Tagen</span></div>
+      </div>
+      <section class="card"><h3 style="margin:0">Die letzten 7 Tage</h3>
+        <div class="woche">${proTag.map(x => `<div class="wtag"><span class="n">${x.n || ""}</span>
+          <div class="saeule${x.n ? "" : " leer"}" style="height:${x.n / maxTag * 80}%"></div>
+          <small>${new Date((x.t * TAG - 3600 + 43200) * 1000).toLocaleDateString("de-DE", { weekday: "short" })}</small></div>`).join("")}</div>
+      </section>`;
+
+    KATALOG.bereiche.forEach(b => {
+      const gespielt = b.gruppen.flatMap(g => g.spiele).filter(s => nachSpiel[MiniKonto.spielId(s.id)]);
+      const offen = b.gruppen.flatMap(g => g.spiele).filter(s => !nachSpiel[MiniKonto.spielId(s.id)]);
+      if (!gespielt.length) return;
+      html += `<h2 class="bereich">${b.icon} ${esc(b.name)}</h2><div class="spiele">`;
+      gespielt.forEach(sp => {
+        const st = nachSpiel[MiniKonto.spielId(sp.id)];
+        const alle = Object.values(st).flat();
+        const zuletzt = Math.max(...alle.map(r => r.zeit));
+        html += `<section class="card spiel"><h3><a href="../${sp.pfad}/index.html">${esc(sp.titel)}</a></h3>
+          <div class="info">${alle.length}× gespielt · zuletzt ${datum(zuletzt)}</div>
+          <table class="stufen"><tr><th>Level</th><th>Runden</th><th>Bestwert</th><th>zuletzt</th><th>Verlauf</th></tr>
+          ${Object.keys(st).map(Number).sort((a, c) => a - c).map(i => {
+            const rs = st[i], best = Math.max(...rs.map(r => r.punkte));
+            const bestSterne = Math.max(...rs.map(r => r.sterne));
+            const letzte = rs.slice(0, 12).reverse(), maxP = Math.max(1, ...letzte.map(r => r.punkte));
+            return `<tr><td>${esc(sp.stufen[i] || `Level ${i + 1}`)}</td><td class="z">${rs.length}×</td>
+              <td class="z best" title="${sterne(bestSterne)}">${ergebnis(sp, best)}</td>
+              <td class="z">${ergebnis(sp, rs[0].punkte)}</td>
+              <td><span class="verlauf" title="die letzten ${letzte.length} Runden">${letzte.map(r => `<i style="height:${Math.max(8, r.punkte / maxP * 100)}%"></i>`).join("")}</span></td></tr>`;
+          }).join("")}</table></section>`;
+      });
+      html += `</div>`;
+      if (offen.length) html += `<p class="noch">Noch nicht gespielt: ${offen.map(s => `<a href="../${s.pfad}/index.html">${esc(s.titel)}</a>`).join(" · ")}</p>`;
+    });
+
+    html += `<section class="card"><h3 style="margin:0 0 8px">Die letzten Runden</h3><table class="runden">${runden.slice(0, 20).map(r => {
+      const sp = NACH_ID[r.spiel];
+      return `<tr><td class="muted">${datum(r.zeit, true)}</td><td>${esc(sp ? sp.titel : r.spiel)} <span class="muted">· ${esc(sp?.stufen[r.stufe] || "")}</span></td>
+        <td class="z">${ergebnis(sp, r.punkte)}</td><td>${sterne(r.sterne)}</td></tr>`;
+    }).join("")}</table></section>`;
+    $("inhalt").innerHTML = html;
+  }
+
+  $("neu").onclick = laden;
+  laden();
+})();
+</script>
+</body>
+</html>
