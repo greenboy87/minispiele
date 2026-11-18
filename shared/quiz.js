@@ -176,6 +176,7 @@
       [...$("dots").children].forEach((d, k) => d.classList.toggle("now", k === state.round));
       $("prompt").innerHTML = t.prompt;
       $("bench").innerHTML = t.show;
+      $("bench").classList.remove("geloest");
       [...$("bench").children].forEach(c => c.classList.add("pop"));
       sagKnopf(t);
       if (t.say && t.autoSay) setTimeout(() => sprich(t.say), 300);
@@ -303,6 +304,7 @@
       state.locked = true;
       state.score += pts;
       [...$("choices").children].forEach(b => { b.disabled = true; if (!b.classList.contains("right")) b.classList.add("dim"); });
+      $("bench").classList.add("geloest");   // die richtige Lösung grün zeigen, nicht in der Markierfarbe
       if (t.solved) { $("bench").innerHTML = t.solved; [...$("bench").children].forEach(c => c.classList.add("pop")); sagKnopf(t); }
       const head = cls === "g" ? pick(["Richtig! 🎉", "Super!", "Genau!", "Klasse!", "Stark!"]) : cls === "o" ? "Im zweiten Versuch!" : "So ist es richtig:";
       const color = cls === "g" ? "var(--good)" : cls === "o" ? "var(--ok)" : "var(--bad)";
