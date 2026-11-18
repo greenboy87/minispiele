@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lange Selbstlaute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/quiz.css">
+</head>
+<body>
+<script src="../shared/konto.js"></script>
+<script src="../shared/bestenliste.js"></script>
+<script src="../shared/quiz.js"></script>
+<script>
+(() => {
+  // richtig:falsch
+  const MIT_H = ["die Zahl:die Zal", "das Jahr:das Jar", "fahren:faren", "wohnen:wonen", "der Stuhl:der Stul", "die Bohne:die Bone",
+    "der Sohn:der Son", "kühl:kül", "der Zahn:der Zan", "fröhlich:frölich", "das Fahrrad:das Farrad", "das Huhn:das Hun",
+    "der Lehrer:der Lerer", "das Mehl:das Mel", "ohne:one", "das Ohr:das Or", "wählen:wälen", "zählen:zälen", "die Möhre:die Möre",
+    "die Kohle:die Kole", "die Höhle:die Höle", "die Bühne:die Büne", "sehr:ser", "nehmen:nemen", "der Fehler:der Feler"];
+  const OHNE_H = ["das Tal:das Tahl", "der Name:der Nahme", "der Schal:der Schahl", "das Tor:das Tohr", "der Ton:der Tohn", "schon:schohn",
+    "die Blume:die Bluhme", "die Krone:die Krohne", "die Schule:die Schuhle", "das Kamel:das Kamehl", "die Spur:die Spuhr", "der Kran:der Krahn",
+    "der Plan:der Plahn", "der Bär:der Bähr", "schwer:schwehr", "die Tür:die Tühr", "der Schwan:der Schwahn",
+    "die Gabel:die Gahbel", "die Qual:die Quahl"];
+  const DOPPEL = ["das Boot:das Bot", "das Haar:das Har", "der See:der Se", "der Tee:der Te", "der Zoo:der Zo", "das Moos:das Mos",
+    "die Beere:die Bere", "leer:ler", "der Schnee:der Schne", "der Saal:der Sal", "das Paar:das Par", "die Fee:die Fe", "der Klee:der Kle",
+    "die Idee:die Ide", "der Kaffee:der Kaffe", "der Aal:der Al", "das Meer:das Mer", "der Staat:der Stat", "die Seele:die Sele"];
+  const EINFACH_LANG = ["die Rose:die Roose", "die Hose:die Hoose", "der Ofen:der Oofen", "die Nase:die Naase", "der Esel:der Eesel",
+    "die Tomate:die Tomaate", "der Vogel:der Voogel", "die Nudel:die Nuudel", "der Hase:der Haase", "die Dose:die Doose", "das Leben:das Leeben"];
+  // Silben-h: richtig | verlängert : falsch
+  const SILBEN_H = ["er geht|gehen:er get", "früh|früher:frü", "der Schuh|die Schuhe:der Schu", "sie sieht|sehen:sie siet", "er dreht|drehen:er dret",
+    "nah|näher:na", "das Reh|die Rehe:das Re", "sie näht|nähen:sie nät", "der Floh|die Flöhe:der Flo", "er steht|stehen:er stet",
+    "die Kuh|die Kühe:die Ku", "sie zieht|ziehen:sie ziet", "roh|roher:ro", "der Zeh|die Zehe:der Ze", "er mäht|mähen:er mät", "sie blüht|blühen:sie blüt"];
+  const FAMILIE = { "fröhlich": "froh", "das Fahrrad": "fahren", "der Lehrer": "lehren", "der Fehler": "fehlen", "zählen": "die Zahl", "wählen": "die Wahl",
+    "wohnen": "die Wohnung", "fahren": "die Fahrt" };
+
+  const ohneArtikel = (w) => w.replace(/^(der|die|das|er|sie|es) /, "");
+  const zeig = (w, sub) => {
+    const m = w.match(/^(der|die|das|er|sie|es) (.*)$/);
+    return `<div class="word">${m ? `<span class="art">${m[1]}</span>${m[2]}` : w}</div>${sub ? `<div class="sub-line">${sub}</div>` : ""}`;
+  };
+  const vokal = (w) => (ohneArtikel(w).match(/(aa|ee|oo|ie|ah|eh|ih|oh|uh|äh|öh|üh|[aeiouäöü])/i) || [, ""])[1];
+
+  function aufgabe(paar, art, verl) {
+    const [r, f] = paar.split(":");
+    const R = ohneArtikel(r);
+    const sub = art === "silben" ? "Tipp: verlängere das Wort" : "";
+    const tips = {
+      h: `<b>${R}</b> hat ein <b>Dehnungs-h</b>. Es steht nur vor <b>l, m, n, r</b> – und auch dort nicht immer. Darum: Merkwort!${FAMILIE[r] ? `<br>Verwandt: <b>${FAMILIE[r]}</b> – die Wortfamilie behält das h.` : ""}`,
+      ohne: `<b>${R}</b>: langer Selbstlaut, aber <b>kein h</b>. Die meisten Wörter mit langem Selbstlaut haben gar kein Zeichen dafür.${/^(Sch|Sp|T|Kr|Gr|Qu|schw|sch)/.test(R) ? `<br><span class="regel">Wörter mit Sch, Sp, T, Kr, Gr, Qu am Anfang haben fast nie ein Dehnungs-h.</span>` : ""}`,
+      doppel: `<b>${R}</b> schreibt man mit <b>${vokal(r)}</b> – ein Merkwort. Doppelte Selbstlaute gibt es nur bei a, e und o (nie ii, uu).`,
+      einfach: `<b>${R}</b>: langer Selbstlaut, aber nur <b>ein</b> Buchstabe. Doppelte Selbstlaute (aa, ee, oo) sind selten – nur Merkwörter.`,
+      silben: !verl ? "" : `Verlängere: <b>${verl}</b>. Beim Schwingen hörst du das h am Anfang der zweiten Silbe (${verl.replace(/^(die|der|das) /, "").replace(/([aeiouäöü])h/, "$1-h")}). Also: <b>${R}</b>.`
+    };
+    return {
+      key: r, style: "words", say: R,
+      prompt: art === "silben" ? "Wie schreibt man das Wort? Verlängere es!" : "Welches Wort ist richtig geschrieben?",
+      show: zeig(`<span class="gap" style="min-width:4em">?</span>`, sub), solved: zeig(`<span class="m">${R}</span>`, sub),
+      choices: [{ v: "r", html: r }, { v: "f", html: f }], answer: "r",
+      tip: tips[art] + (art === "h" || art === "ohne" ? `<br><span class="regel">Dehnungs-h nur vor l, m, n, r – meistens gar kein h</span>` : ""),
+      recap: r + (verl ? ` <span class="muted">← ${verl}</span>` : "")
+    };
+  }
+  const silben = (s) => { const [links, f] = s.split(":"), [r, verl] = links.split("|"); return aufgabe(r + ":" + f, "silben", verl); };
+
+  function makeTasks(level, topics, n) {
+    if (level === "h") return Quiz.draw([MIT_H, OHNE_H], n).map(p => aufgabe(p, MIT_H.includes(p) ? "h" : "ohne"));
+    if (level === "doppel") return Quiz.draw([DOPPEL, EINFACH_LANG], n).map(p => aufgabe(p, DOPPEL.includes(p) ? "doppel" : "einfach"));
+    if (level === "silben") return Quiz.draw([SILBEN_H], n).map(silben);
+    return Quiz.draw([MIT_H, OHNE_H, DOPPEL, EINFACH_LANG, SILBEN_H], n).map(p => p.includes("|") ? silben(p)
+      : aufgabe(p, MIT_H.includes(p) ? "h" : OHNE_H.includes(p) ? "ohne" : DOPPEL.includes(p) ? "doppel" : "einfach"));
+  }
+
+  Quiz.create({
+    game: "dehnung", back: "k4-lrs",
+    title: "Lange <span>Selbstlaute</span>",
+    heading: "h, aa, ee, oo – oder gar nichts?",
+    intro: "Ein langer Selbstlaut (Naaame, Zaaahl) wird meistens <b>gar nicht</b> extra gekennzeichnet. Manchmal steht ein <b>h</b> dahinter (Zahl, fröhlich) oder der Selbstlaut kommt <b>doppelt</b> (Boot, Meer). Mit 🔊 hörst du das Wort.",
+    levels: [
+      { id: "h", name: "h oder kein h?", desc: "Zahl, fröhlich, wohnen – aber Tal, Name, Schule" },
+      { id: "doppel", name: "aa, ee, oo", desc: "Boot, Meer, Haar – aber Rose, Hose, Nase" },
+      { id: "silben", name: "Das h beim Verlängern", desc: "er geht ← gehen, früh ← früher, der Schuh ← die Schuhe" },
+      { id: "mix", name: "Gemischt", desc: "Alles durcheinander." }
+    ],
+    merk: `<h4>1. Meistens: gar nichts</h4><p>Die meisten langen Selbstlaute schreibt man ohne Zeichen: Name, Tal, Rose, Blume, Schule.</p>
+      <h4>2. Dehnungs-h</h4><p>Steht nur vor <b>l, m, n, r</b>: Zahl, nehmen, wohnen, Jahr, fröhlich. Weil es auch Tal und Name gibt, sind das <b>Merkwörter</b>.</p>
+      <p>Die Wortfamilie behält das h: froh → fröhlich, fahren → Fahrrad, Fahrt, Fahrer.</p>
+      <p>Wörter mit <b>Sch, Sp, T, Kr, Gr, Qu</b> am Anfang haben fast nie ein Dehnungs-h: Schule, Spur, Tal, Krone, Qual.</p>
+      <h4>3. Doppelte Selbstlaute</h4><p>Nur aa, ee, oo – und nur in Merkwörtern: Haar, Paar, Saal, Meer, See, Tee, Schnee, Boot, Zoo, Moos.</p>
+      <h4>4. Das h, das man hört</h4><p>Verlängere: er geht → <b>ge-hen</b>, früh → <b>frü-her</b>, der Schuh → <b>die Schu-he</b>. Beim Schwingen hörst du das h.</p>`,
+    makeTasks,
+    endTitles: ["Weiter üben!", "Gut gemacht!", "Super!", "Dehnungs-Profi!"]
+  });
+})();
+</script>
+</body>
+</html>

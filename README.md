@@ -27,6 +27,7 @@ Kleine Lernspiele als einzelne HTML-Dateien – ohne Build, einfach im Browser �
 | i oder ie? | `iie/` | LRS: langes i → ie, kurzes i → i, Merkwörter (Tiger, wir) und ih (4. Klasse). |
 | f oder v? | `fv/` | LRS: ver-/vor-, v-Merkwörter, v wie w (4. Klasse). |
 | s, ss oder ß? | `sss/` | LRS: ss/ß, s/ss/ß mit Verlängern, das oder dass (4. Klasse). |
+| Lange Selbstlaute | `dehnung/` | LRS: Dehnungs-h (nur vor l, m, n, r), aa/ee/oo, h beim Verlängern (er geht ← gehen) (4. Klasse). |
 | Fehler-Detektiv | `fehlerdetektiv/` | LRS: Fehler im Satz finden bzw. richtig schreiben, Fehlerarten wählbar (4. Klasse). |
 | Wörter-Werkstatt | `hoerdiktat/` | LRS: Wort hören (Sprachausgabe) oder kurz ansehen, dann selbst schreiben (4. Klasse). |
 | Rechen-Ketten ⏱️ | `rechenkette/` | Zeitspiel: Ketten mit 2–4 Schritten, Punkt vor Strich und Klammern (Mathe-Profi, 4. Klasse). |
@@ -43,7 +44,7 @@ Start: `index.html` öffnen. Die Übersicht wird aus **`shared/katalog.js`** geb
 
 ## LRS-Training (4. Klasse, `#k4-lrs`)
 
-Sieben Rechtschreib-Spiele auf dem Quiz-Gerüst. Ausgerichtet an der Studienlage: Laut-Buchstaben-Zuordnung (kurz/lang hören), ausdrücklich vermittelte Rechtschreibregeln und Strategien (Schwingen in Silben, Verlängern, Artikelprobe, Ersatzprobe) und Wortbausteine wirken bei LRS am besten. Reines Auswendiglernen wirkt in Studien kaum, darum nur kleine Merkwort-Gruppen (Galuschka u. a. 2020, Educational Psychologist 55(1); Galuschka u. a. 2014, PLoS ONE 9(2)). Jede Rückmeldung nennt die Regel. „Fehler üben“ wiederholt die falschen Wörter.
+Acht Rechtschreib-Spiele auf dem Quiz-Gerüst. Ausgerichtet an der Studienlage: Laut-Buchstaben-Zuordnung (kurz/lang hören), ausdrücklich vermittelte Rechtschreibregeln und Strategien (Schwingen in Silben, Verlängern, Artikelprobe, Ersatzprobe) und Wortbausteine wirken bei LRS am besten. Reines Auswendiglernen wirkt in Studien kaum, darum nur kleine Merkwort-Gruppen (Galuschka u. a. 2020, Educational Psychologist 55(1); Galuschka u. a. 2014, PLoS ONE 9(2)). Jede Rückmeldung nennt die Regel. „Fehler üben“ wiederholt die falschen Wörter.
 
 Neu im Gerüst (`shared/quiz.js`): `say` liest das Wort mit der deutschen Stimme des Geräts vor (🔊, `Quiz.sprich`), `autoSay` gleich beim Start. `text: true` zeigt ein Schreibfeld (ohne Autokorrektur und automatische Großschreibung, Groß/klein zählt) und markiert falsche Buchstaben rot. Im Level „Anschauen, merken, schreiben“ blendet CSS das Wort nach 4 Sekunden aus.
 

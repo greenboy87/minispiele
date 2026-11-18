@@ -30,6 +30,8 @@ window.KATALOG = {
           neu: true, stufen: ["ver- und vor-", "v-Merkwörter", "v wie w", "Gemischt"] },
         { id: "sss", pfad: "sss", titel: "s, ss oder ß?", ic: "Wa<u>ss</u>er · Fu<u>ß</u>", text: "Kurz → ss, lang → ß, summend → s. Am Wortende verlängern. Und: das oder dass?",
           neu: true, stufen: ["ss oder ß?", "s, ss oder ß?", "das oder dass?", "Gemischt"] },
+        { id: "dehnung", pfad: "dehnung", titel: "Lange Selbstlaute", ic: "Za<u>h</u>l · B<u>oo</u>t · Na<u>m</u>e", text: "Dehnungs-h nur vor l, m, n, r, doppelte Selbstlaute aa, ee, oo – und meistens gar nichts.",
+          neu: true, stufen: ["h oder kein h?", "aa, ee, oo", "Das h beim Verlängern", "Gemischt"] },
         { id: "fehlerdetektiv", pfad: "fehlerdetektiv", titel: "Fehler-Detektiv 🔍", ic: "Im <s>Somer</s> …", text: "In jedem Satz steckt ein Fehler: finden und richtig schreiben. Fehlerarten wählbar.",
           neu: true, stufen: ["Fehler finden", "Fehler verbessern"] },
         { id: "hoerdiktat", pfad: "hoerdiktat", titel: "Wörter-Werkstatt ✍️", ic: "🔊 → ✍️", text: "Selbst schreiben: Wort hören oder kurz ansehen, dann aus dem Kopf schreiben.",
