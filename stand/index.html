@@ -123,8 +123,8 @@
       </section>`;
 
     KATALOG.bereiche.forEach(b => {
-      const gespielt = b.gruppen.flatMap(g => g.spiele).filter(s => nachSpiel[MiniKonto.spielId(s.id)]);
-      const offen = b.gruppen.flatMap(g => g.spiele).filter(s => !nachSpiel[MiniKonto.spielId(s.id)]);
+      const gespielt = b.gruppen.flatMap(g => g.spiele).filter(s => !s.url).filter(s => nachSpiel[MiniKonto.spielId(s.id)]);
+      const offen = b.gruppen.flatMap(g => g.spiele).filter(s => !s.url).filter(s => !nachSpiel[MiniKonto.spielId(s.id)]);
       if (!gespielt.length) return;
       html += `<h2 class="bereich">${b.icon} ${esc(b.name)}</h2><div class="spiele">`;
       gespielt.forEach(sp => {

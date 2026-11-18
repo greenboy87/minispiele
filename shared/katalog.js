@@ -69,16 +69,28 @@ window.KATALOG = {
       ] }
     ] },
     { id: "musik", name: "Musik", icon: "🎵", fuerAlle: true, gruppen: [
-      { id: "musik-alle", name: "🎵 Musik – für alle Klassen", kurz: "Musik", spiele: [
+      { id: "musik-alle", name: "🎵 Musik-Spiele", kurz: "Spiele", spiele: [
         { id: "zaehlzeiten", pfad: "zaehlzeiten", titel: "Zählzeiten-Training", ic: "1 e + e 🥁", text: "Zählzeiten über die Noten schreiben – Takte werden aus deinen Bausteinen gewürfelt.",
           stufen: ["Stufe 1 · sofort", "Stufe 2 · je Takt", "Stufe 3 · ganze Zeile"] },
         { id: "diktat", pfad: "diktat", titel: "Rhythmus-Diktat", ic: "👂 ♩ ♫ ♬", text: "Zuhören und den Rhythmus aus Bausteinen nachbauen – so oft anhören, wie du willst.",
           stufen: ["1 Takt", "2 Takte", "3 Takte", "4 Takte"] }
+      ] },
+      // Instrumente aus dem music-trainer (eigene Seiten dort, melden keine Runden)
+      { id: "musik-instrumente", name: "🎹 Instrumente zum freien Spielen", kurz: "Instrumente", spiele: [
+        { id: "mt-klavier", url: "https://greenboy87.github.io/music-trainer/#/klavier", titel: "Klavier", ic: "🎹", neu: true,
+          text: "Frei spielen auf dem Klavier, mit Metronom. Aus dem music-trainer.", stufen: [] },
+        { id: "mt-schlagzeug", url: "https://greenboy87.github.io/music-trainer/#/schlagzeug", titel: "Schlagzeug", ic: "🥁", neu: true,
+          text: "Pads, Drumset und Drumcomputer zum Ausprobieren und Beats bauen. Aus dem music-trainer.", stufen: [] },
+        { id: "mt-songbaukasten", url: "https://greenboy87.github.io/music-trainer/#/songbaukasten", titel: "Songbaukasten", ic: "🎼", neu: true,
+          text: "Eigene Songs in Kästchen bauen und abspielen. Aus dem music-trainer.", stufen: [] }
       ] }
     ] }
   ],
-  // alle Spiele als Liste, mit Bereich und Gruppe
+  // alle Spiele als Liste (ohne die Instrumente, die keine Runden melden)
   alle() {
+    return this.alleKarten().filter(s => !s.url);
+  },
+  alleKarten() {
     return this.bereiche.flatMap(b => b.gruppen.flatMap(g => g.spiele.map(s => ({ ...s, bereich: b, gruppe: g }))));
   }
 };

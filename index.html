@@ -160,7 +160,7 @@
   const esc = (t) => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   // ---------- Übersicht aus dem Katalog bauen ----------
   const B = KATALOG.bereiche;
-  const karte = (sp) => `<a class="game${sp.neu ? " neu" : ""}" href="${sp.pfad}/index.html">${sp.neu ? '<span class="neu-tag">neu</span>' : ""}
+  const karte = (sp) => `<a class="game${sp.neu ? " neu" : ""}" href="${sp.url || sp.pfad + "/index.html"}">${sp.neu ? '<span class="neu-tag">neu</span>' : ""}
       <div class="ic">${sp.ic}</div><b>${esc(sp.titel)}</b><span>${esc(sp.text)}</span><span class="stand" data-stand="${sp.id}"></span></a>`;
   document.getElementById("inhalt").innerHTML = B.map(b => `
     <section class="fach" id="${b.id}">
